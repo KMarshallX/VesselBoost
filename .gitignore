@@ -1,0 +1,6 @@
+.pyc
+/__pycache__
+/data
+/utils/__pycache__
+/saved_image
+/saved_models
