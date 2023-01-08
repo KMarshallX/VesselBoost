@@ -1,6 +1,3 @@
-# Vessel Summer Code
-This repo is only for updating and storing source code, not data/saved models/images.
-
 ## Runnable in CLI
 ![cli](./readme_img/1.jpg)
 

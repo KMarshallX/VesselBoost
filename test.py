@@ -19,14 +19,14 @@ if __name__ == "__main__":
 
     # load the pre-trained model
     load_model = Unet(1, 1, 64)
-    trained_model_path = "./saved_models/" + "bce_50_lr_5e3_1img"
+    trained_model_path = "./saved_models/" + "bce_500_batch_10_lr_1e6"
     load_model.load_state_dict(torch.load(trained_model_path))
     load_model.eval()
     
     raw_path = args.tinimg
     seg_path = args.tinlab
-    out_img_name = args.outim
+    out_img_name = "bce_500_batch_10_lr_1e6"
 
     out_img_path = "./saved_image/" + out_img_name + ".nii.gz"
 
-    verification(raw_path, seg_path, 0, load_model, out_img_path, mode='sigmoid')
+    verification(raw_path, seg_path, 1, load_model, out_img_path, mode='sigmoid')

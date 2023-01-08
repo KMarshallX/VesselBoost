@@ -25,6 +25,7 @@ parser.add_argument('--fil', type=int, default=64, help="filter number, default 
 
 # For training
 parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [test_mo, unet3d]")
+parser.add_argument('--bsz', type=int, default=10, help="batch size, dtype: int")
 parser.add_argument('--psz', type=tuple, default=(64,64,52), help="input patch size, dtype: tuple")
 parser.add_argument('--pst', type=int, default=64, help="input patch step, dtype: int, when patch_step >= patch_size, patches will not be overlapped")
 parser.add_argument('--osz', type=tuple, default=(64,64,64), help="output patch size, dtype: tuple")

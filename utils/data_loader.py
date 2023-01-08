@@ -9,19 +9,10 @@ import nibabel as nib
 import numpy as np
 from patchify import patchify
 import torch
+from torch.utils.data import Dataset
 import os
 
 from utils.unet_utils import aug_utils
-
-# def aug(img, msk, thickness):
-#     """
-#     :params img: input 3D image
-#     :params msk: imput 3D mask
-#     :params thickness: expected augmented thickness of the data (in z-direction)
-#     """
-
-#     diff = thickness - img.shape[2]
-#     return np.concatenate((img, img[:,:,0:diff]), axis=2), np.concatenate((msk, msk[:,:,0:diff]), axis=2)
 
 def standardiser(x):
     # only campatible with dtype = numpy array
@@ -59,14 +50,46 @@ def _data_loader(raw_img, seg_img, patch_size, step):
 
     return input_imgs, input_msks 
 
-    
-class data_loader:
+def data_concatenator(raw_path, seg_path, patch_size, step):
     """
     :param raw_path: str, "../data/raw/"
     :param seg_img: str, "../data/seg/"
     :param patch_size: tuple, e.g. (128,128,52)
     :param step: if step >= patch_size then no overlap between patches 
     :param out_size: tuple, e.g. (64,64,64)
+    :param batch_size: int
+
+    """    
+    raw_file_list = os.listdir(raw_path)
+    seg_file_list = os.listdir(seg_path)
+
+    assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
+    file_num = len(raw_file_list)
+    raw_img_0 = raw_path+raw_file_list[0]
+    seg_img_0 = seg_path+seg_file_list[0]
+
+    img_0, msk_0 = _data_loader(raw_img_0, seg_img_0, patch_size, step)
+
+    for idx in range(1, file_num):
+        next_raw_img = raw_path+raw_file_list[idx]
+        next_seg_img = seg_path+seg_file_list[idx]
+
+        next_img, next_msk = _data_loader(next_raw_img, next_seg_img, patch_size, step)
+
+        img_0 = np.concatenate((img_0, next_img), axis=0)
+        msk_0 = np.concatenate((msk_0, next_msk), axis=0)
+    
+    return img_0, msk_0
+
+class data_loader(Dataset):
+    """
+    :param raw_path: str, "../data/raw/"
+    :param seg_img: str, "../data/seg/"
+    :param patch_size: tuple, e.g. (128,128,52)
+    :param step: if step >= patch_size then no overlap between patches 
+    :param out_size: tuple, e.g. (64,64,64)
+    :param batch_size: int
+
     """
     def __init__(self, raw_path, seg_path, patch_size, out_size, step):
 
@@ -76,36 +99,38 @@ class data_loader:
         self.step = step
         self.out_size = out_size
 
-    def __iter__(self):
-
-        raw_file_list = os.listdir(self.raw_path)
-        seg_file_list = os.listdir(self.seg_path)
-
-        assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
-        file_num = len(raw_file_list)
-
-        for idx in range(file_num):
-            raw_img = self.raw_path+raw_file_list[idx]
-            seg_img = self.seg_path+seg_file_list[idx]
-
-            input_imgs, input_msks = _data_loader(raw_img, seg_img, self.patch_size, self.step)
-            patches_num = input_imgs.shape[0]
-
-            for i in range(patches_num):
-                # filter out pure background
-                if len(np.unique(input_imgs[i])) != 1:
-
-                    aug_item = aug_utils(self.out_size)
-                    img, msk = aug_item(input_imgs[i], input_msks[i])
-
-                    img = torch.from_numpy(img.copy()).to(torch.float32)
-                    msk = torch.from_numpy(msk.copy()).to(torch.float32)
-                else:
-                    continue
-
-                yield img.unsqueeze(0), msk.unsqueeze(0)
+        self.con_img, self.con_msk = data_concatenator(self.raw_path, self.seg_path, self.patch_size, self.step)
 
 
+    def __len__(self):
+        assert (self.con_img.shape[0] == self.con_msk.shape[0]), "Image data and label data size not matched!"
+        return self.con_img.shape[0]
+
+    def __getitem__(self, idx):
+
+        img = self.con_img[idx, :, :, :]
+        msk = self.con_msk[idx, :, :, :]
+
+        aug_item = aug_utils(self.out_size)
+
+        if len(img.shape) == 3:
+            aug_img, aug_msk = aug_item(img, msk)
+
+            tensor_img = torch.from_numpy(aug_img.copy()).to(torch.float32)
+            tensor_msk = torch.from_numpy(aug_msk.copy()).to(torch.float32)
+        
+            return tensor_img.unsqueeze(0), tensor_msk.unsqueeze(0)
+
+        elif len(img.shape) == 4:
+            aug_img = np.zeros((img.shape[0], self.out_size[0], self.out_size[1], self.out_size[2]))
+            aug_msk = np.zeros((msk.shape[0], self.out_size[0], self.out_size[1], self.out_size[2]))
+            for i in range(img.shape[0]):
+                aug_img[i, :, :, :], aug_msk[i, :, :, :] = aug_item(img[i, :, :, :], msk[i, :, :, :])
+
+            tensor_img = torch.from_numpy(aug_img[:,None,:,:,:].copy()).to(torch.float32)
+            tensor_msk = torch.from_numpy(aug_msk[:,None,:,:,:].copy()).to(torch.float32)
+            
+            return tensor_img, tensor_msk
 
 
 

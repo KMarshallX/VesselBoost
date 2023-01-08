@@ -2,7 +2,7 @@
 helper functions for 3D-Unet
 
 Editor: Marshall Xu
-Last Edited: 12/31/2022
+Last Edited: 01/07/2022
 """
 
 import torch
@@ -16,17 +16,18 @@ from patchify import patchify, unpatchify
 import os
 
 class DiceLoss(nn.Module):
-    def __init__(self, smooth = 1e-5):
+    def __init__(self, smooth = 1e-4):
         super().__init__()
         self.smooth = smooth
 
     def forward(self, pred, target):
 
-        pred = torch.sigmoid(pred)
+        batch_size = target.size(0)
 
+        pred = torch.sigmoid(pred)
         # flatten pred and target tensors
-        pred = pred.reshape(-1)
-        target = target.reshape(-1)
+        pred = pred.view(batch_size, -1).type(torch.FloatTensor)
+        target = target.view(batch_size, -1).type(torch.FloatTensor)
 
         intersection =  (pred * target).sum(-1)
         dice = (2.*intersection + self.smooth) / ((pred * pred).sum(-1) + (target * target).sum(-1) + self.smooth)
@@ -58,10 +59,11 @@ class BCELoss(nn.Module):
     def __init__(self):
         super().__init__()
     def forward(self, pred, target):
+        batch_size = target.size(0)
 
         # flatten pred and target tensors
-        pred = pred.reshape(-1)
-        target = target.reshape(-1)
+        pred = pred.view(batch_size, -1)
+        target = target.view(batch_size, -1)
         loss = nn.BCEWithLogitsLoss()
         return loss(pred, target)
 
@@ -111,6 +113,10 @@ def aug(img, msk, thickness):
     return np.concatenate((img, img[:,:,0:diff]), axis=2), np.concatenate((msk, msk[:,:,0:diff]), axis=2)
 
 def make_prediction(test_patches, load_model, ori_size):
+
+    # hardware config
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # Predict each 3D patch  
     for i in tqdm(range(test_patches.shape[0])):
         for j in range(test_patches.shape[1]):
@@ -118,7 +124,8 @@ def make_prediction(test_patches, load_model, ori_size):
             #print(i,j,k)
                 single_patch = test_patches[i,j,k, :,:,:]
                 single_patch_input = single_patch[None, :]
-                single_patch_input = torch.from_numpy(single_patch_input).to(torch.float32).unsqueeze(0)
+                single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
+                single_patch_input = single_patch_input
 
                 single_patch_prediction = load_model(single_patch_input)
 

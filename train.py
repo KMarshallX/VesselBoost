@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from utils.unet_utils import *
 from utils.data_loader import data_loader
+from torch.utils.data import DataLoader
 from models.unet_3d import Unet
 from models.test_model import test_mo
 
@@ -50,7 +51,8 @@ if __name__ == "__main__":
     model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
 
     # training configuration
-    d_loader = data_loader(raw_img, seg_img, args.psz, args.osz,args.pst)
+    batch_size = args.bsz
+    d_loader = data_loader(raw_img, seg_img, args.psz, args.osz, args.pst)
 
     # loss
     loss_name = args.loss_m
@@ -58,27 +60,35 @@ if __name__ == "__main__":
 
     # optimizer
     optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    # set optim scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 
     #epoch number
     epoch_num = args.ep
+
+    # step number
+    step_num = len(d_loader) // batch_size
+
 
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
         loss_mean = 0
         tic = 0
 
-        for image, label in d_loader: 
-            
-            image, label = image.to(device), label.to(device)
+        for step in tqdm(range(step_num)): 
+
+            image_batch, label_batch = d_loader[step * batch_size: (step + 1) * batch_size]
+
+            image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
             optimizer.zero_grad()
             
             # Forward pass
-            output = model(image.unsqueeze(0))
+            output = model(image_batch)
             # loss = criterion(output, label)
             # score = metric(output, label)
             # loss += 1 - score
-            loss = metric(output, label)
+            loss = metric(output, label_batch)
 
             # Backward and optimize
             loss.backward()
@@ -87,7 +97,10 @@ if __name__ == "__main__":
             loss_mean = loss_mean + loss.item()
             tic = tic + 1
 
-            print(f'Step: [{tic}], Loss: {loss.item(): .4f}\n')
+            print(f'Step: [{step+1}/{step_num}], Loss: {loss.item(): .4f}\n')
+        
+        # Learning rate shceduler
+        scheduler.step()
 
         print(f' Epoch [{epoch+1}/{epoch_num}], Average Loss of this iteration: {loss_mean/tic:.4f}')
 
@@ -97,6 +110,15 @@ if __name__ == "__main__":
     saved_model_path = args.outmo
     torch.save(model.state_dict(), saved_model_path)
     print("Model successfully saved!")
+
+    # # Make prediction
+    # raw_path = args.tinimg
+    # seg_path = args.tinlab
+    # out_img_name = args.outim
+
+    # out_img_path = "./saved_image/" + out_img_name + ".nii.gz"
+
+    # verification(raw_path, seg_path, 0, model, out_img_path, mode='sigmoid')
     
 
 
