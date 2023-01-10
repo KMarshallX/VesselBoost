@@ -24,6 +24,15 @@ def model_chosen(model_name, in_chan, out_chan, filter_num):
     else:
         print("Insert a valid model name.")
 
+def optim_chosen(optim_name, model_params, lr):
+    if optim_name == 'sgd':
+        return torch.optim.SGD(model_params, lr)
+    elif optim_name == 'adam':
+        return torch.optim.Adam(model_params, lr)
+    else:
+        print("Insert a valid optimizer name.")
+
+
 def loss_metric(metric_name):
     """
     :params metric_name: string, choose from the following: bce->binary cross entropy, dice->dice score 
@@ -59,7 +68,8 @@ if __name__ == "__main__":
     metric = loss_metric(loss_name)
 
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    op_name = args.op
+    optimizer = optim_chosen(op_name, model.parameters(), args.lr)
     # set optim scheduler
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 
