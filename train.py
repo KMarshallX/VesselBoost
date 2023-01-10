@@ -2,7 +2,7 @@
 Training the chosen model 
 
 Editor: Marshall Xu
-Last Edited: 12/21/2022
+Last Edited: 01/10/2023
 """
 
 import config
@@ -14,6 +14,7 @@ from utils.data_loader import data_loader
 from torch.utils.data import DataLoader
 from models.unet_3d import Unet
 from models.test_model import test_mo
+from models.asppcnn import ASPPCNN
 
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
@@ -21,6 +22,8 @@ def model_chosen(model_name, in_chan, out_chan, filter_num):
         return Unet(in_chan, out_chan, filter_num)
     elif model_name == "test_mo":
         return test_mo(in_chan, out_chan, filter_num)
+    elif model_name == "aspp":
+        return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
     else:
         print("Insert a valid model name.")
 

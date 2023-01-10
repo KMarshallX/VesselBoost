@@ -34,6 +34,10 @@ parser.add_argument('--op', type=str, default="adam", help="optimizer, please ch
 parser.add_argument('--ep', type=int, default=50, help="epoch number (times of iteration), dtype: int, default=16")
 # TODO: add loss/score metrics
 parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, fdice]")
+# For optimizer 
+parser.add_argument('--optim_step', type=int, default=200, help="batch size, dtype: int")
+parser.add_argument('--optim_gamma', type=float, default=0.5, help="batch size, dtype: int")
+
 
 # test.py
 parser.add_argument('--tinimg', default = "./data/raw2/", help="input image path for test")

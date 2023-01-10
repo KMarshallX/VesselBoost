@@ -1,3 +1,6 @@
+# Vessel Code
+This repository is only used for storing code, not data/saved images/pretrained models.
+
 ## Runnable in CLI
 ![cli](./readme_img/1.jpg)
 
@@ -18,3 +21,31 @@ However, the output is not best:\
 1. Zooming of single input patch (e.g. 64*64*54 -> 64*64*64)
 2. Optimal epoch number and learning rate
 3. https://drive.google.com/drive/u/0/folders/1Ty5B-qa339aCOvK15aeBKttGOmxtRzII
+
+## Week 4 update:
+(There was a powerpoint slide)
+
+## Week 5 update
+1. New model - Atrous Spatial Pyramid Pooling CNN!
+ASPP network handles objects at multiple scales to capture multiscale information on the basis of parallel atrous-based CNN layers by using multiple atrous rates.\
+It worked surprisingly good. The following output image is from model trained on only one slab.\
+![aspp](./readme_img/asppcnn.jpg)
+2. Now the patches are fed into the model in batches!
+By using batches, the efficiency of the whole training process has been improved - the training time has shortend, much faster! The accuracy hasn't been affected very much. However, this is not the reason why the model worked when it's trained on one or two slabs but failed for large dataset.(The following output image is from model trained on only one slab.)\
+![batch](./readme_img/batch.jpg)
+3. (From this bullet point are the brief working log in week 5)
+4. (Fernanda's suggestion) Increase the slab pool one slab at a time - When the model is trained on 1 slab, it worked; 2 slabs, still worked; 3,4,5.. slabs, failed. The learning rate was tuned lower when the dataset increased.
+5. (Saskia's first suggestion) Check the dataloader - the dataloader worked fine, I rewrote the dataloader to make it feed the data patches in batches, still worked fine, the image and seg matches
+6. (Saskia's second suggestion) Load the data patches in batches - it shortened the training time, but has little effect on loss/accuracy of the output image.
+7. Add a new optimizer - Stochastic Gradient Descent, it changes variables slowly, slower than Adam. No help.
+![adam](./readme_img/adam.jpg)
+![sgd](./readme_img/sgd.jpg)
+8. Implemented a learning rate scheduler - it can changes the learning rate as per number of epochs
+### Confusion
+The loss value dropped quickly when the model is training on 1/2 slab(s), but it plateaued at a large loss value for large dataset, and then decreased very slowly.
+![1img](./readme_img/1img.jpg)
+![4img](./readme_img/4imgs.jpg)
+### One assumption
+
+
+
