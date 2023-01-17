@@ -47,5 +47,9 @@ The loss value dropped quickly when the model is training on 1/2 slab(s), but it
 ![4img](./readme_img/4imgs.jpg)
 ### One assumption
 
+## Week 6 update
+** Myth has been solved! The project can go into the next stage! **
+
+
 
 

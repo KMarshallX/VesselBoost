@@ -68,15 +68,31 @@ class BCELoss(nn.Module):
         return loss(pred, target)
 
 class aug_utils:
-    def __init__(self, size):
+    def __init__(self, size, mode):
         super().__init__()
         # size: expected size for the resampled data, tuple, e.g. (64,64,64)
+        # mode: "off"-> augmentation is off; 
+        #       "test"->test mode, no augmentation, but send one meaningful patch along with 5 other empty blocks;
+        #       "on" -> augmentation is on.
         self.size = size
+        self.mode = mode
     
     def rot(self, inp, k):
         # k: interger, Number of times the array is rotated by 90 degrees.
 
         return np.rot90(inp, k, axes=(0,1))
+
+    def flip_hr(self, inp, k):
+        # Filp horizontally, axis x -> axis z
+        # k: interger, Number of times the array is rotated by 90 degrees.
+
+        return np.rot90(inp, k, axes=(0,2))
+
+    def flip_vt(self, inp, k):
+        # Filp vertically, axis y -> axis z
+        # k: interger, Number of times the array is rotated by 90 degrees.
+
+        return np.rot90(inp, k, axes=(1,2))
 
     def zooming(self, inp):
         
@@ -86,14 +102,29 @@ class aug_utils:
         h = inp.shape[1] # height
         d = inp.shape[2] # depth
 
-        return zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='reflect')
+        return zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='nearest')
 
     def __call__(self, input, segin):
         input = self.zooming(input)
         segin = self.zooming(segin)
-        option = np.random.choice(4, None, p=[0.01,0.01,0.01,0.97])
 
-        return self.rot(input, option), self.rot(segin, option)
+        if self.mode == "on":
+            input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), 
+            self.flip_hr(input, 1), self.flip_vt(input, 1)), axis=0)
+            segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), 
+            self.flip_hr(segin, 1), self.flip_vt(segin, 1)), axis=0)
+        elif self.mode == "off":
+            input_batch = np.stack((input, input, input, input, input, input), axis=0)
+            segin_batch = np.stack((segin, segin, segin, segin, segin, segin), axis=0)
+        elif self.mode == "test":
+            dummy = np.zeros((self.size))
+            input_batch = np.stack((input, dummy, dummy, dummy, dummy, dummy), axis=0)
+            segin_batch = np.stack((segin, dummy, dummy, dummy, dummy, dummy), axis=0)
+        input_batch = input_batch[:,None,:,:,:]
+        segin_batch = segin_batch[:,None,:,:,:]
+
+        return torch.from_numpy(input_batch.copy()).to(torch.float32), torch.from_numpy(segin_batch.copy()).to(torch.float32)
+
 
 def sigmoid(z):
     return 1/(1+np.exp(-z))
@@ -142,7 +173,7 @@ def make_prediction(test_patches, load_model, ori_size):
 
     return test_output, test_output_sigmoid
 
-def verification(traw_path, tseg_path, idx, load_model, sav_img_path, mode):
+def verification(traw_path, idx, load_model, sav_img_path, mode):
     """
     idx: inde of the test img/seg
     mode: str, decide which output to save => ['sigmoid', 'normal']
@@ -150,15 +181,20 @@ def verification(traw_path, tseg_path, idx, load_model, sav_img_path, mode):
 
     # Load data
     raw_file_list = os.listdir(traw_path)
-    seg_file_list = os.listdir(tseg_path)
+    # seg_file_list = os.listdir(tseg_path)
 
     raw_img = traw_path+raw_file_list[idx]
-    seg_img = tseg_path+seg_file_list[idx]
+    # seg_img = tseg_path+seg_file_list[idx]
 
     raw_arr = nib.load(raw_img).get_fdata() # (1080*1280*52)
-    seg_arr = nib.load(seg_img).get_fdata()
+    # seg_arr = nib.load(seg_img).get_fdata()
 
-    new_raw, new_seg = aug(raw_arr[64:1024, 64:1216, :], seg_arr[64:1024, 64:1216, :], 64)
+    raw_arr = raw_arr[64:1024, 64:1216, :]
+    # seg_arr = seg_arr[64:1024, 64:1216, :]
+
+    new_raw = zoom(raw_arr, (1,1,64/raw_arr.shape[2]), order=0, mode='nearest')
+    # new_seg = zoom(seg_arr, (1,1,64/seg_arr.shape[2]), order=0, mode='nearest')
+    
     # Standardization
     new_raw = standardiser(new_raw)
     ori_size = new_raw.shape

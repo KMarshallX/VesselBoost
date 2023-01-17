@@ -132,7 +132,7 @@ if __name__ == "__main__":
     test_input = test_input.unsqueeze(0)
     print(test_input.shape)
 
-    Model = Unet(1,1,64)
+    Model = Unet(1,1,4)
 
     test_output = Model(test_input)
 

@@ -20,7 +20,7 @@ parser.add_argument('--outmo', default = "./saved_models/model", help="output mo
 # model configuration
 parser.add_argument('--ic', type=int, default=1, help="input channel number, e.g. RGB -> 3 channels, grayscale -> 1 channel")
 parser.add_argument('--oc', type=int, default=1, help="output channel number, e.g. binary classification -> 1 channel")
-parser.add_argument('--fil', type=int, default=64, help="filter number, default 64")
+parser.add_argument('--fil', type=int, default=16, help="filter number, default 16")
 
 
 # For training
@@ -35,9 +35,11 @@ parser.add_argument('--ep', type=int, default=50, help="epoch number (times of i
 # TODO: add loss/score metrics
 parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, fdice]")
 # For optimizer 
-parser.add_argument('--optim_step', type=int, default=200, help="batch size, dtype: int")
+parser.add_argument('--optim_step', type=int, default=100, help="batch size, dtype: int")
 parser.add_argument('--optim_gamma', type=float, default=0.5, help="batch size, dtype: int")
 
+# Warning: this part of CLI is only for experimental tests, not for training nor testing (Marshall, 01/16/2023)
+parser.add_argument('--aug_mode', type=str, default="on", help="experimental tests CLI, controls the function of the augmentation method, choose from the following: [on, off, test]")
 
 # test.py
 parser.add_argument('--tinimg', default = "./data/raw2/", help="input image path for test")
