@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     out_img_path = "./saved_image/" + out_img_name + ".nii.gz"
 
-    verification(traw_path,  0, model, out_img_path, mode='sigmoid')
+    verification(traw_path, 0, model, out_img_path, mode='sigmoid')
     
 
 

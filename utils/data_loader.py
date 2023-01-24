@@ -34,8 +34,8 @@ def _data_loader(raw_img, seg_img, patch_size, step):
     raw_arr = raw_arr[64:1024, 64:1216, :]
     seg_arr = seg_arr[64:1024, 64:1216, :]
 
-    # # Standardisation
-    # raw_arr = standardiser(raw_arr)
+    # Standardisation
+    raw_arr = standardiser(raw_arr)
 
     # Patchify the loaded data
     raw_patches = patchify(raw_arr, patch_size, step)
@@ -82,7 +82,7 @@ def data_concatenator(raw_path, seg_path, patch_size, step):
         img_0 = np.concatenate((img_0, next_img), axis=0)
         msk_0 = np.concatenate((msk_0, next_msk), axis=0)
     
-    return standardiser(img_0), msk_0
+    return img_0, msk_0
 
 class data_loader(Dataset):
     """

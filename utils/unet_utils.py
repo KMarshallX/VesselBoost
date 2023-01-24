@@ -185,12 +185,15 @@ def verification(traw_path, idx, load_model, sav_img_path, mode):
 
     raw_img = traw_path+raw_file_list[idx]
     # seg_img = tseg_path+seg_file_list[idx]
+    print(f"Test image file: {raw_img}")
 
     raw_arr = nib.load(raw_img).get_fdata() # (1080*1280*52)
     # seg_arr = nib.load(seg_img).get_fdata()
 
     raw_arr = raw_arr[64:1024, 64:1216, :]
     # seg_arr = seg_arr[64:1024, 64:1216, :]
+
+    ori_thickness = raw_arr.shape[2]
 
     new_raw = zoom(raw_arr, (1,1,64/raw_arr.shape[2]), order=0, mode='nearest')
     # new_seg = zoom(seg_arr, (1,1,64/seg_arr.shape[2]), order=0, mode='nearest')
@@ -206,10 +209,15 @@ def verification(traw_path, idx, load_model, sav_img_path, mode):
 
     # save as nifti image
     if mode == 'sigmoid':
+        # reshape to original thickness
+        test_output_sigmoid = zoom(test_output_sigmoid, (1,1,ori_thickness/64), order=0, mode="nearest")
         nifimg = nib.Nifti1Image(test_output_sigmoid, np.eye(4))
 
     elif mode == 'normal':
+        # reshape to original thickness
+        test_output = zoom(test_output, (1,1,ori_thickness/64), order=0, mode="nearest")
         nifimg = nib.Nifti1Image(test_output, np.eye(4))
+
     
     nib.save(nifimg, sav_img_path)
     print("Output Neuroimage is successfully saved!")
