@@ -51,6 +51,12 @@ The loss value dropped quickly when the model is training on 1/2 slab(s), but it
 **Myth has been solved! The project can go into the next stage!**
 ![out](./readme_img/out.jpg)
 
+## Week 7 update
+some minor changes:
+1. global standardisation has been changed back to standardisation of each slab
+2. make sure the output segmentation slab has the same slices as the input slab
+
+
 
 
 
