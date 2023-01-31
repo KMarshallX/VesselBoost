@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules import padding
-from shared.modules.vector_quantizer import VectorQuantizer1D
+# from shared.modules.vector_quantizer import VectorQuantizer1D
 
 class CustomSegmentationNetwork(nn.Module):
     def __init__(self, channels_in, channels_out, dilation_rates=[1, 2, 3, 5, 7]):

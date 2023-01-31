@@ -56,6 +56,34 @@ some minor changes:
 1. global standardisation has been changed back to standardisation of each slab
 2. make sure the output segmentation slab has the same slices as the input slab
 
+## Week 8 update
+1. Updated some changes to fit the pipeline to the challenge dataset
+(implemented a new feature to check the dataset's folder, etc)
+2. Now the maximum intensity projection will be generated with the .nii segmentation image
+3. A new model : **Single level UNet3D with multipath residual attention block**\
+The referenced literature: [paper](https://reader.elsevier.com/reader/sd/pii/S1319157822001069?token=37835F8506108DE8811590CEACADF29905A54BE637DF08974C425E95FB921EC7648913850A7BC48DD533C4D2945C5D42&originRegion=us-east-1&originCreation=20230131144819)
+4. Tested the generalizability of the new model.\
+
+### Advantages of the new model:
+1. light-weighted
+2. good performance on small objects (**this needs further investigation**)
+3. Below attached the output results of the new model:\
+![mip_4](./readme_img/mip_4.png)
+![new_4](./readme_img/val_AtrousUnet_ep10_lr1e4_1slab.png)\
+![mip_5](./readme_img/mip_5.png)
+![new_5](./readme_img/val_AtrousUnet_ep10_lr1e4_1slab_5.png)\
+![mip_6](./readme_img/mip_6.png)
+![new_6](./readme_img/val_AtrousUnet_ep10_lr1e4_1slab_6.png)\
+![mip_20](./readme_img/mip_20.png)
+![new_20](./readme_img/val_AtrousUnet_ep10_lr1e4_1slab_20.png)\
+
+4. Unet3d does not perform well on the challenge dataset (**this needs further investigation**)
+More details are missing than the new model\
+![mip_4](./readme_img/mip_4.png)
+![unet_4](./readme_img/val_Unet_ep10_lr1e3_1slab.png)\
+
+
+
 
 
 

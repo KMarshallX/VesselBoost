@@ -30,12 +30,12 @@ def _data_loader(raw_img, seg_img, patch_size, step):
     raw_arr = nib.load(raw_img).get_fdata() # (1090*1280*52)
     seg_arr = nib.load(seg_img).get_fdata()
 
-    # Cropping (using Saskia's data as template), make em the same size
-    raw_arr = raw_arr[64:1024, 64:1216, :]
-    seg_arr = seg_arr[64:1024, 64:1216, :]
+    # # Cropping (using Saskia's data as template), make em the same size
+    # raw_arr = raw_arr[64:1024, 64:1216, :]
+    # seg_arr = seg_arr[64:1024, 64:1216, :]
 
-    # Standardisation
-    raw_arr = standardiser(raw_arr)
+    # # Standardisation
+    # raw_arr = standardiser(raw_arr)
 
     # Patchify the loaded data
     raw_patches = patchify(raw_arr, patch_size, step)
@@ -63,8 +63,12 @@ def data_concatenator(raw_path, seg_path, patch_size, step):
     raw_file_list = os.listdir(raw_path)
     seg_file_list = os.listdir(seg_path)
 
-    raw_file_list.sort(key=lambda x:int(x[:-7]))
-    seg_file_list.sort(key=lambda x:int(x[4:-7]))
+    if raw_path == "./data/train/" or raw_path == "./data/train_4/":
+        raw_file_list.sort(key=lambda x:int(x[:-7]))
+        seg_file_list.sort(key=lambda x:int(x[:-4]))
+    else:
+        raw_file_list.sort(key=lambda x:int(x[:-7]))
+        seg_file_list.sort(key=lambda x:int(x[4:-7]))
 
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
     file_num = len(raw_file_list)
@@ -82,7 +86,7 @@ def data_concatenator(raw_path, seg_path, patch_size, step):
         img_0 = np.concatenate((img_0, next_img), axis=0)
         msk_0 = np.concatenate((msk_0, next_msk), axis=0)
     
-    return img_0, msk_0
+    return standardiser(img_0), msk_0
 
 class data_loader(Dataset):
     """

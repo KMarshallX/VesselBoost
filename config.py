@@ -24,7 +24,7 @@ parser.add_argument('--fil', type=int, default=16, help="filter number, default 
 
 
 # For training
-parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [test_mo, unet3d]")
+parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [test_mo, unet3d, aspp, test, atrous]")
 parser.add_argument('--bsz', type=int, default=10, help="batch size, dtype: int")
 parser.add_argument('--psz', type=tuple, default=(64,64,52), help="input patch size, dtype: tuple")
 parser.add_argument('--pst', type=int, default=64, help="input patch step, dtype: int, when patch_step >= patch_size, patches will not be overlapped")
@@ -42,8 +42,8 @@ parser.add_argument('--optim_gamma', type=float, default=0.5, help="batch size, 
 parser.add_argument('--aug_mode', type=str, default="on", help="experimental tests CLI, controls the function of the augmentation method, choose from the following: [on, off, test]")
 
 # test.py
-parser.add_argument('--tinimg', default = "./data/raw2/", help="input image path for test")
-parser.add_argument('--tinlab', default = "./data/seg2/", help="input ground truth path for test")
+parser.add_argument('--tinimg', default = "./data/train/", help="input image path for test")
+parser.add_argument('--tinlab', default = "./data/label/", help="input ground truth path for test")
 parser.add_argument('--tm', type=str, default="test_mo", help="testing model, choose from the following: [test_mo, unet3d]")
 parser.add_argument('--tic', type=int, default=1, help="input channel number, e.g. RGB -> 3 channels, grayscale -> 1 channel")
 parser.add_argument('--toc', type=int, default=1, help="output channel number, e.g. binary classification -> 1 channel")

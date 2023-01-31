@@ -1,8 +1,8 @@
 """
-helper functions for 3D-Unet
+helper functions library
 
 Editor: Marshall Xu
-Last Edited: 01/07/2022
+Last Edited: 01/31/2023
 """
 
 import torch
@@ -14,6 +14,7 @@ import nibabel as nib
 from tqdm import tqdm
 from patchify import patchify, unpatchify
 import os
+import matplotlib.pyplot as plt
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1e-4):
@@ -117,9 +118,10 @@ class aug_utils:
             input_batch = np.stack((input, input, input, input, input, input), axis=0)
             segin_batch = np.stack((segin, segin, segin, segin, segin, segin), axis=0)
         elif self.mode == "test":
-            dummy = np.zeros((self.size))
-            input_batch = np.stack((input, dummy, dummy, dummy, dummy, dummy), axis=0)
-            segin_batch = np.stack((segin, dummy, dummy, dummy, dummy, dummy), axis=0)
+            
+            input_batch = np.expand_dims(input, axis=0)
+            segin_batch = np.expand_dims(segin, axis=0)
+            
         input_batch = input_batch[:,None,:,:,:]
         segin_batch = segin_batch[:,None,:,:,:]
 
@@ -173,7 +175,7 @@ def make_prediction(test_patches, load_model, ori_size):
 
     return test_output, test_output_sigmoid
 
-def verification(traw_path, idx, load_model, sav_img_path, mode):
+def verification(traw_path, idx, load_model, sav_img_name, mode):
     """
     idx: inde of the test img/seg
     mode: str, decide which output to save => ['sigmoid', 'normal']
@@ -185,39 +187,56 @@ def verification(traw_path, idx, load_model, sav_img_path, mode):
 
     raw_img = traw_path+raw_file_list[idx]
     # seg_img = tseg_path+seg_file_list[idx]
-    print(f"Test image file: {raw_img}")
 
-    raw_arr = nib.load(raw_img).get_fdata() # (1080*1280*52)
+    raw_arr = nib.load(raw_img).get_fdata() # (1080*1280*52), (480, 640, 163)
     # seg_arr = nib.load(seg_img).get_fdata()
 
-    raw_arr = raw_arr[64:1024, 64:1216, :]
-    # seg_arr = seg_arr[64:1024, 64:1216, :]
+    ori_size = raw_arr.shape    # log the original size of the input image slab
 
-    ori_thickness = raw_arr.shape[2]
-
-    new_raw = zoom(raw_arr, (1,1,64/raw_arr.shape[2]), order=0, mode='nearest')
-    # new_seg = zoom(seg_arr, (1,1,64/seg_arr.shape[2]), order=0, mode='nearest')
+    # resize the input image
+    if (ori_size[0] // 64 != 0) and (ori_size[0] > 64):
+        w = int(np.ceil(ori_size[0]/64)) * 64 # new width (x)
+    else:
+        w = ori_size[0]
+    if (ori_size[1] // 64 != 0) and (ori_size[1] > 64):
+        h = int(np.ceil(ori_size[1]/64)) * 64 # new height (y)
+    else:
+        h = ori_size[1]
+    if (ori_size[2] // 64 != 0) and (ori_size[2] > 64):
+        t = int(np.ceil(ori_size[2]/64)) * 64 # new thickness (z)
+    elif ori_size[2] < 64:
+        t = 64
+    else:
+        t = ori_size[2]
+    new_raw = zoom(raw_arr, (w/ori_size[0], h/ori_size[1], t/ori_size[2]), order=0, mode='nearest')
     
     # Standardization
     new_raw = standardiser(new_raw)
-    ori_size = new_raw.shape
+    new_size = new_raw.shape       # new size of the reshaped input image
 
     # pachify
     test_patches = patchify(new_raw, (64,64,64), 64)
 
-    test_output, test_output_sigmoid = make_prediction(test_patches, load_model, ori_size)
+    test_output, test_output_sigmoid = make_prediction(test_patches, load_model, new_size)
 
     # save as nifti image
     if mode == 'sigmoid':
-        # reshape to original thickness
-        test_output_sigmoid = zoom(test_output_sigmoid, (1,1,ori_thickness/64), order=0, mode="nearest")
+        # reshape to original shape
+        test_output_sigmoid = zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
+        mip = np.max(test_output_sigmoid, axis=2)
         nifimg = nib.Nifti1Image(test_output_sigmoid, np.eye(4))
 
     elif mode == 'normal':
         # reshape to original thickness
-        test_output = zoom(test_output, (1,1,ori_thickness/64), order=0, mode="nearest")
+        test_output = zoom(test_output, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
+        mip = np.max(test_output, axis=2)
         nifimg = nib.Nifti1Image(test_output, np.eye(4))
 
-    
+    # save the MIP image
+    sav_img_path = "./saved_image/"+sav_img_name+".nii.gz"
+    sav_mip_img_path = "./saved_image/"+sav_img_name+".png"
+    plt.imsave(sav_mip_img_path, mip, cmap='gray')
+    print("Output MIP image is successfully saved!\n")
+    # save the nii image
     nib.save(nifimg, sav_img_path)
-    print("Output Neuroimage is successfully saved!")
+    print("Output Neuroimage is successfully saved!\n")

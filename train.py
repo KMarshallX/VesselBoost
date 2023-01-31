@@ -2,7 +2,7 @@
 Training the chosen model 
 
 Editor: Marshall Xu
-Last Edited: 12/21/2022
+Last Edited: 01/31/2023
 """
 
 import config
@@ -16,6 +16,7 @@ from models.unet_3d import Unet
 from models.test_model import test_mo
 from models.asppcnn import ASPPCNN
 from models.siyu import CustomSegmentationNetwork
+from models.ra_unet import MainArchitecture
 
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
@@ -27,6 +28,8 @@ def model_chosen(model_name, in_chan, out_chan, filter_num):
         return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
     elif model_name == "test":
         return CustomSegmentationNetwork()
+    elif model_name == "atrous":
+        return MainArchitecture()
     else:
         print("Insert a valid model name.")
 
@@ -66,7 +69,7 @@ if __name__ == "__main__":
     model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
 
     # training configuration
-    batch_size = args.bsz
+    # batch_size = args.bsz
     d_loader = data_loader(raw_img, seg_img, args.psz, args.osz, args.pst)
 
     # loss
@@ -135,14 +138,18 @@ if __name__ == "__main__":
     torch.save(model.state_dict(), saved_model_path)
     print("Model successfully saved!")
 
+    # model configuration
+    load_model = model_chosen(args.mo, args.ic, args.oc, args.fil)
+    trained_model_path = saved_model_path
+    load_model.load_state_dict(torch.load(trained_model_path))
+    load_model.eval()
+
     # Make prediction
     traw_path = args.tinimg
     tseg_path = args.tinlab
     out_img_name = args.outim
 
-    out_img_path = "./saved_image/" + out_img_name + ".nii.gz"
-
-    verification(traw_path, 0, model, out_img_path, mode='sigmoid')
+    verification(traw_path, 0, load_model, out_img_name, mode='sigmoid')
     
 
 
