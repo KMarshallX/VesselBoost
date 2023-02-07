@@ -84,10 +84,10 @@ More details are missing than the new model\
 
 
 ## Week 9 update
-**1. Changed the data loading pipeline**
-_Was_ -- The raw image slabs were pathified into fixed-size patches (64,64,64), augmented, then fed into the training pipeline
-_Now_ -- The raw image slabs were resampled for fixed times (epochs), for each time the slab was randomly cropped and resized to a fixed size (64,64,64), augmented, then fed into the training pipeline
-**2. Some parts of the code was re-wrote**
+**1. Changed the data loading pipeline**\
+_Was_ -- The raw image slabs were pathified into fixed-size patches (64,64,64), augmented, then fed into the training pipeline\
+_Now_ -- The raw image slabs were resampled for fixed times (epochs), for each time the slab was randomly cropped and resized to a fixed size (64,64,64), augmented, then fed into the training pipeline\
+**2. Some parts of the code was re-wrote**\
 e.g. The training pipeline:\
 '''
 for single_image_slab in the folder:
@@ -96,12 +96,12 @@ for single_image_slab in the folder:
         input_patch = Augmentation(patch)
         output = Training_Model(input_patch)
 '''
-**3. Global standardisation of slab pool changed back to standardising each slab**
-**4. The attempt to use the pre-trained model failed, as it led to memory overflowing errors**
-**5. Fixing bugs**
+**3. Global standardisation of slab pool changed back to standardising each slab**\
+**4. The attempt to use the pre-trained model failed, as it led to memory overflowing errors**\
+**5. Fixing bugs**\
 
-### Below attached output results of the new pipeline
-**sub004**
+### Below attached output results of the new pipeline\
+**sub004**\
 _Ground Truth_\
 ![mip_4](./readme_img/mip_4.png)\
 _Unet 3D_
@@ -111,7 +111,7 @@ _ASPP_
 _Atrous_
 ![atrs_4](./readme_img/Newtrain_atrous_ep5000_lr1e3_withAUG_4.png)\
 
-**sub005**
+**sub005**\
 _Ground Truth_\
 ![mip_5](./readme_img/mip_5.png)\
 _Unet 3D_
@@ -121,7 +121,7 @@ _ASPP_
 _Atrous_
 ![atrs_5](./readme_img/Newtrain_atrous_ep5000_lr1e3_withAUG_5.png)\
 
-**sub018**
+**sub018**\
 _Ground Truth_\
 ![mip_18](./readme_img/mip_18.png)\
 _Unet 3D_
@@ -131,7 +131,7 @@ _ASPP_
 _Atrous_
 ![atrs_18](./readme_img/Newtrain_atrous_ep5000_lr1e3_withAUG_18.png)\
 
-**sub020**
+**sub020**\
 _Ground Truth_\
 ![mip_20](./readme_img/mip_20.png)\
 _Unet 3D_
@@ -142,9 +142,9 @@ _Atrous_
 ![atrs_20](./readme_img/Newtrain_atrous_ep5000_lr1e3_withAUG_20.png)\
 
 
-### Current problems
-1. How to further improve the performance of the model / quality of the output image
-2. How to check the continuity of the vessels in the output image without medical expertise  (3D?) 
+### Current problems\
+1. How to further improve the performance of the model / quality of the output image\
+2. How to check the continuity of the vessels in the output image without medical expertise  (3D?) \
 
 
 
