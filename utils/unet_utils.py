@@ -103,7 +103,10 @@ class aug_utils:
         h = inp.shape[1] # height
         d = inp.shape[2] # depth
 
-        return zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='nearest')
+        if size[0] == w and size[1] == h and size[2] == d:
+            return inp
+        else:
+            return zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='nearest')
 
     def __call__(self, input, segin):
         input = self.zooming(input)
@@ -240,3 +243,32 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
     # save the nii image
     nib.save(nifimg, sav_img_path)
     print("Output Neuroimage is successfully saved!\n")
+
+class RandomCrop3D():
+    def __init__(self, img_sz, exp_sz):
+        h, w, d = img_sz
+        crop_h = torch.randint(10, h, (1,)).item()
+        crop_w = torch.randint(10, w, (1,)).item()
+        crop_d = torch.randint(10, d, (1,)).item()
+        assert (h, w, d) > (crop_h, crop_w, crop_d)
+        self.img_sz  = tuple((h, w, d))
+        self.crop_sz = tuple((crop_h, crop_w, crop_d))
+        self.exp_sz = exp_sz
+        
+    def __call__(self, img, lab):
+        slice_hwd = [self._get_slice(i, k) for i, k in zip(self.img_sz, self.crop_sz)]
+        return zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
+        # return print(*slice_hwd, *self.crop_sz)
+        
+    @staticmethod
+    def _get_slice(sz, crop_sz):
+        try : 
+            lower_bound = torch.randint(sz-crop_sz, (1,)).item()
+            return lower_bound, lower_bound + crop_sz
+        except: 
+            return (None, None)
+    
+    @staticmethod
+    def _crop(x, slice_h, slice_w, slice_d):
+        return x[slice_h[0]:slice_h[1], slice_w[0]:slice_w[1], slice_d[0]:slice_d[1]]
+    
