@@ -2,14 +2,11 @@
 new data loader functions
 
 Editor: Marshall Xu
-Last Edited: 02/05/2023
+Last Edited: 03/01/2023
 """
 
 import nibabel as nib
-import numpy as np
 import os
-import torch
-from torch.utils.data import Dataset
 
 from utils.data_loader import standardiser
 from utils.unet_utils import RandomCrop3D
@@ -22,7 +19,9 @@ class single_channel_loader:
         :param patch_size: tuple, e.g. (64,64,64)
         :param step: how many (integer) patches will be cropped from the raw input image 
         """
-        self.raw_arr = standardiser(nib.load(raw_img).get_fdata()) # (1090*1280*52), (480, 640, 163)
+        raw_nifti = nib.load(raw_img)
+        raw_numpy = raw_nifti.get_fdata()
+        self.raw_arr = standardiser(raw_numpy) # (1090*1280*52), (480, 640, 163)
         self.seg_arr = nib.load(seg_img).get_fdata()
         
         self.patch_size = patch_size
@@ -42,10 +41,6 @@ class single_channel_loader:
         for i in range(self.step):
             cropper = RandomCrop3D(raw_size, self.patch_size)
             img_crop, seg_crop = cropper(self.raw_arr, self.seg_arr)
-            
-            # img_crop = np.expand_dims(np.expand_dims(img_crop, axis=0), axis=0)
-            # seg_crop = np.expand_dims(np.expand_dims(seg_crop, axis=0), axis=0)
-            # yield torch.from_numpy(img_crop.copy()).to(torch.float32), torch.from_numpy(seg_crop.copy()).to(torch.float32)
 
             yield img_crop, seg_crop
 

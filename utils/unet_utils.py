@@ -2,19 +2,20 @@
 helper functions library
 
 Editor: Marshall Xu
-Last Edited: 01/31/2023
+Last Edited: 03/01/2023
 """
 
 import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
-from scipy.ndimage import zoom
+import scipy.ndimage as scind
 import nibabel as nib
 from tqdm import tqdm
 from patchify import patchify, unpatchify
 import os
 import matplotlib.pyplot as plt
+import ants
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1e-4):
@@ -23,17 +24,16 @@ class DiceLoss(nn.Module):
 
     def forward(self, pred, target):
 
-        batch_size = target.size(0)
 
         pred = torch.sigmoid(pred)
         # flatten pred and target tensors
-        pred = pred.view(batch_size, -1).type(torch.FloatTensor)
-        target = target.view(batch_size, -1).type(torch.FloatTensor)
+        pred = pred.view(-1)
+        target = target.view(-1)
 
         intersection =  (pred * target).sum(-1)
-        dice = (2.*intersection + self.smooth) / ((pred * pred).sum(-1) + (target * target).sum(-1) + self.smooth)
+        dice = (2.*intersection + self.smooth) / (pred.sum(-1) + target.sum(-1) + self.smooth)
 
-        return torch.mean(1-dice)
+        return 1 - dice
     
 class FocalLoss(nn.Module):
     def __init__(self, alpha = 0.8, gamma = 0, smooth = 1e-6):
@@ -106,8 +106,12 @@ class aug_utils:
         if size[0] == w and size[1] == h and size[2] == d:
             return inp
         else:
-            return zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='nearest')
+            return scind.zoom(inp, (size[0]/w, size[1]/h, size[2]/d), order=0, mode='nearest')
 
+    def filter(self, inp, sigma):
+        # apply gaussian filter to the patch
+        return scind.gaussian_filter(inp, sigma)
+    
     def __call__(self, input, segin):
         input = self.zooming(input)
         segin = self.zooming(segin)
@@ -120,6 +124,9 @@ class aug_utils:
         elif self.mode == "off":
             input_batch = np.stack((input, input, input, input, input, input), axis=0)
             segin_batch = np.stack((segin, segin, segin, segin, segin, segin), axis=0)
+        elif self.mode == "mode1":
+            input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), self.filter(input, 2), self.filter(input, 3)), axis=0)
+            segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), segin, segin), axis=0)
         elif self.mode == "test":
             
             input_batch = np.expand_dims(input, axis=0)
@@ -138,26 +145,18 @@ def standardiser(x):
     # only campatible with dtype = numpy array
     return (x - np.mean(x)) / np.std(x)
 
-def aug(img, msk, thickness):
-    """
-    :params img: input 3D image
-    :params msk: imput 3D mask
-    :params thickness: expected augmented thickness of the data (in z-direction)
-    """
-
-    diff = thickness - img.shape[2]
-    return np.concatenate((img, img[:,:,0:diff]), axis=2), np.concatenate((msk, msk[:,:,0:diff]), axis=2)
+def thresholding(arr,thresh):
+    arr[arr<thresh] = 0
+    arr[arr>thresh] = 1
+    return arr
 
 def make_prediction(test_patches, load_model, ori_size):
-
-    # hardware config
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Predict each 3D patch  
     for i in tqdm(range(test_patches.shape[0])):
         for j in range(test_patches.shape[1]):
             for k in range(test_patches.shape[2]):
-            #print(i,j,k)
+
                 single_patch = test_patches[i,j,k, :,:,:]
                 single_patch_input = single_patch[None, :]
                 single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
@@ -165,12 +164,8 @@ def make_prediction(test_patches, load_model, ori_size):
 
                 single_patch_prediction = load_model(single_patch_input)
 
-                # single_patch_prediction_sigmoid = torch.sigmoid(single_patch_prediction)
-                # single_patch_prediction_sigmoid = single_patch_prediction_sigmoid.detach().numpy()[0,0,:,:,:]
-
                 single_patch_prediction_out = single_patch_prediction.detach().numpy()[0,0,:,:,:]
-                
-                # test_patches[i,j,k, :,:,:] = single_patch_prediction_sigmoid
+
                 test_patches[i,j,k, :,:,:] = single_patch_prediction_out
 
     test_output = unpatchify(test_patches, (ori_size[0], ori_size[1], ori_size[2]))
@@ -180,23 +175,27 @@ def make_prediction(test_patches, load_model, ori_size):
 
 def verification(traw_path, idx, load_model, sav_img_name, mode):
     """
-    idx: inde of the test img/seg
+    idx: index of the test image slab in the file list
     mode: str, decide which output to save => ['sigmoid', 'normal']
+    Note: the validate image slab has to be preprocessed (bias_field_correction, denoise_image)
     """
 
     # Load data
     raw_file_list = os.listdir(traw_path)
-    # seg_file_list = os.listdir(tseg_path)
 
-    raw_img = traw_path+raw_file_list[idx]
-    # seg_img = tseg_path+seg_file_list[idx]
+    raw_img_path = traw_path+raw_file_list[idx]
+    print(f"The testing input image is: {raw_img_path}")
 
-    raw_arr = nib.load(raw_img).get_fdata() # (1080*1280*52), (480, 640, 163)
-    # seg_arr = nib.load(seg_img).get_fdata()
+    raw_img = nib.load(raw_img_path)
 
-    ori_size = raw_arr.shape    # log the original size of the input image slab
+    header = raw_img.header
+    affine = raw_img.affine
 
-    # resize the input image
+    raw_arr = raw_img.get_fdata() # (1080*1280*52), (480, 640, 163)
+
+    ori_size = raw_arr.shape    # record the original size of the input image slab
+
+    # resize the input image, to make sure it can be cropped into small patches with size of (64,64,64)
     if (ori_size[0] // 64 != 0) and (ori_size[0] > 64):
         w = int(np.ceil(ori_size[0]/64)) * 64 # new width (x)
     else:
@@ -211,7 +210,7 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
         t = 64
     else:
         t = ori_size[2]
-    new_raw = zoom(raw_arr, (w/ori_size[0], h/ori_size[1], t/ori_size[2]), order=0, mode='nearest')
+    new_raw = scind.zoom(raw_arr, (w/ori_size[0], h/ori_size[1], t/ori_size[2]), order=0, mode='nearest')
     
     # Standardization
     new_raw = standardiser(new_raw)
@@ -225,26 +224,29 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
     # save as nifti image
     if mode == 'sigmoid':
         # reshape to original shape
-        test_output_sigmoid = zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
+        test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
         mip = np.max(test_output_sigmoid, axis=2)
-        nifimg = nib.Nifti1Image(test_output_sigmoid, np.eye(4))
+        nifimg = nib.Nifti1Image(test_output_sigmoid, affine, header)
 
     elif mode == 'normal':
         # reshape to original thickness
-        test_output = zoom(test_output, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
+        test_output = scind.zoom(test_output, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
         mip = np.max(test_output, axis=2)
-        nifimg = nib.Nifti1Image(test_output, np.eye(4))
+        nifimg = nib.Nifti1Image(test_output, affine, header)
 
     # save the MIP image
     sav_img_path = "./saved_image/"+sav_img_name+".nii.gz"
     sav_mip_img_path = "./saved_image/"+sav_img_name+".png"
     plt.imsave(sav_mip_img_path, mip, cmap='gray')
     print("Output MIP image is successfully saved!\n")
-    # save the nii image
+    # save the nifti image
     nib.save(nifimg, sav_img_path)
     print("Output Neuroimage is successfully saved!\n")
 
 class RandomCrop3D():
+    """
+    Resample the input image slab by randomly cropping a 3D volume, and reshape to a fixed size e.g.(64,64,64)
+    """
     def __init__(self, img_sz, exp_sz):
         h, w, d = img_sz
         crop_h = torch.randint(10, h, (1,)).item()
@@ -257,8 +259,7 @@ class RandomCrop3D():
         
     def __call__(self, img, lab):
         slice_hwd = [self._get_slice(i, k) for i, k in zip(self.img_sz, self.crop_sz)]
-        return zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
-        # return print(*slice_hwd, *self.crop_sz)
+        return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
         
     @staticmethod
     def _get_slice(sz, crop_sz):

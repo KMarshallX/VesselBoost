@@ -1,17 +1,17 @@
 """
-Training the chosen model 
+Retrain a pre-trained model (finetuning)
 
 Editor: Marshall Xu
-Last Edited: 01/31/2023
+Last Edited: 03/01/2023
 """
 
 import config
 import torch
 from tqdm import tqdm
+import os
 
 from utils.unet_utils import *
-from utils.data_loader import data_loader
-from torch.utils.data import DataLoader
+from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
 from models.test_model import test_mo
 from models.asppcnn import ASPPCNN
@@ -66,11 +66,11 @@ if __name__ == "__main__":
     seg_img = args.inlab
     
     # model configuration
-    model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
-
-    # training configuration
-    # batch_size = args.bsz
-    d_loader = data_loader(raw_img, seg_img, args.psz, args.osz, args.pst)
+    load_model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
+    trained_model_path = args.tm # this one has to be a full path
+    # trained_model_path = "./saved_models/Unet_ep10_lr1e4_1slab_raw"
+    load_model.load_state_dict(torch.load(trained_model_path))
+    load_model.eval()
 
     # loss
     loss_name = args.loss_m
@@ -78,32 +78,37 @@ if __name__ == "__main__":
 
     # optimizer
     op_name = args.op
-    optimizer = optim_chosen(op_name, model.parameters(), args.lr)
+    optimizer = optim_chosen(op_name, load_model.parameters(), args.lr)
     # set optim scheduler
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
 
     #epoch number
     epoch_num = args.ep
 
-    # step number
-    # step_num = len(d_loader) // batch_size
-    step_num = len(d_loader)
-
     # initialize the augmentation method
     aug_item = aug_utils(args.osz, args.aug_mode)
 
+    raw_file_list = os.listdir(raw_img)
+    seg_file_list = os.listdir(seg_img)
+    assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
+    file_num = len(raw_file_list)
+    
+    # sort the file names
+    raw_file_list.sort(key=lambda x:int(x[:2]))
+    seg_file_list.sort(key=lambda x:int(x[:2]))
 
     # traning loop (this could be separate out )
-    for epoch in tqdm(range(epoch_num)):
+    for idx in tqdm(range(file_num)):
         loss_mean = 0
-        tic = 0
 
-        for step in tqdm(range(step_num)): 
+        raw_arr_name = raw_img + raw_file_list[idx]
+        seg_arr_name = seg_img + seg_file_list[idx]      
+        # initialize single channel data loader
+        single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)
 
-            image, label = d_loader[step]
-            # filter out the background
-            if np.amax(label) == 0:
-                continue
+        for epoch in tqdm(range(epoch_num)):
+            
+            image, label = next(iter(single_chan_loader))
             
             image_batch, label_batch = aug_item(image, label)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
@@ -111,10 +116,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             
             # Forward pass
-            output = model(image_batch)
-            # loss = criterion(output, label)
-            # score = metric(output, label)
-            # loss += 1 - score
+            output = load_model(image_batch)
             loss = metric(output, label_batch)
 
             # Backward and optimize
@@ -122,34 +124,21 @@ if __name__ == "__main__":
             optimizer.step()
 
             loss_mean = loss_mean + loss.item()
-            tic = tic + 1
 
-            print(f'Step: [{step+1}/{step_num}], Tic: [{tic+1}], Loss: {loss.item(): .4f}\n')
+            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}\n')
         
         # Learning rate shceduler
         scheduler.step()
 
-        print(f' Epoch [{epoch+1}/{epoch_num}], Average Loss of this iteration: {loss_mean/tic:.4f}')
+        print(f' File number [{idx+1}/{file_num}], Average Loss of this iteration: {loss_mean/epoch_num:.4f}')
 
-    print("Finished Training, Loss: {loss_mean/tic:.4f}")
+    print("Finished Training!")
 
     # save the model
     saved_model_path = args.outmo
-    torch.save(model.state_dict(), saved_model_path)
-    print("Model successfully saved!")
+    torch.save(load_model.state_dict(), saved_model_path)
+    print("Retrained Model successfully saved!")
 
-    # model configuration
-    load_model = model_chosen(args.mo, args.ic, args.oc, args.fil)
-    trained_model_path = saved_model_path
-    load_model.load_state_dict(torch.load(trained_model_path))
-    load_model.eval()
-
-    # Make prediction
-    traw_path = args.tinimg
-    tseg_path = args.tinlab
-    out_img_name = args.outim
-
-    verification(traw_path, 0, load_model, out_img_name, mode='sigmoid')
     
 
 

@@ -2,7 +2,7 @@
 argparse configuration
 
 Editor: Marshall Xu
-Last Edited: 01/03/2023 MM/DD/YYYY
+Last Edited: 03/01/2023 MM/DD/YYYY
 """
 
 
@@ -16,12 +16,10 @@ parser.add_argument('--inlab', default = "./data/seg/", help="input ground truth
 # The following needs to be changed manually (for now)
 parser.add_argument('--outmo', default = "./saved_models/model", help="output model path, e.g. ./saved_models/xxxxx")
 
-
 # model configuration
 parser.add_argument('--ic', type=int, default=1, help="input channel number, e.g. RGB -> 3 channels, grayscale -> 1 channel")
 parser.add_argument('--oc', type=int, default=1, help="output channel number, e.g. binary classification -> 1 channel")
 parser.add_argument('--fil', type=int, default=16, help="filter number, default 16")
-
 
 # For training
 parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [test_mo, unet3d, aspp, test, atrous]")
@@ -29,27 +27,30 @@ parser.add_argument('--bsz', type=int, default=10, help="batch size, dtype: int"
 parser.add_argument('--psz', type=tuple, default=(64,64,52), help="input patch size, dtype: tuple")
 parser.add_argument('--pst', type=int, default=64, help="input patch step, dtype: int, when patch_step >= patch_size, patches will not be overlapped")
 parser.add_argument('--osz', type=tuple, default=(64,64,64), help="output patch size, dtype: tuple")
-parser.add_argument('--lr', type=float, default=5e-3, help="learning rate, dtype: float, default=1e-4,when training set is small, use higher learning rate, vice versa")
+parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3,when training set is small, use higher learning rate, vice versa")
 parser.add_argument('--op', type=str, default="adam", help="optimizer, please choose from following: [sgd, adam]")
 parser.add_argument('--ep', type=int, default=50, help="epoch number (times of iteration), dtype: int, default=16")
-# TODO: add loss/score metrics
 parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, fdice]")
+
 # For optimizer 
-parser.add_argument('--optim_step', type=int, default=100, help="batch size, dtype: int")
+parser.add_argument('--optim_step', type=int, default=5000, help="batch size, dtype: int")
 parser.add_argument('--optim_gamma', type=float, default=0.5, help="batch size, dtype: int")
 
 # Warning: this part of CLI is only for experimental tests, not for training nor testing (Marshall, 01/16/2023)
-parser.add_argument('--aug_mode', type=str, default="on", help="experimental tests CLI, controls the function of the augmentation method, choose from the following: [on, off, test]")
+parser.add_argument('--aug_mode', type=str, default="mode1", help="experimental tests CLI, controls the function of the augmentation method, choose from the following: [on, off, test, mode1]")
 
 # test.py
 parser.add_argument('--tinimg', default = "./data/train/", help="input image path for test")
 parser.add_argument('--tinlab', default = "./data/label/", help="input ground truth path for test")
-parser.add_argument('--tm', type=str, default="test_mo", help="testing model, choose from the following: [test_mo, unet3d]")
+parser.add_argument('--tm', type=str, help="path to the trained model, e.g. './saved_models/xxxxxxx' ")
 parser.add_argument('--tic', type=int, default=1, help="input channel number, e.g. RGB -> 3 channels, grayscale -> 1 channel")
 parser.add_argument('--toc', type=int, default=1, help="output channel number, e.g. binary classification -> 1 channel")
 parser.add_argument('--tfil', type=int, default=64, help="filter number, default 64")
 parser.add_argument('--outim', default = "test_neuro", help="output neuro image name")
 
+# postprocessing.py
+parser.add_argument('--outim_path', default = "./saved_image/", help="output sigmoid image path for postprocessing")
+parser.add_argument('--img_name', default = "post_processed_image", help="Postprocessed image name")
 
 args = parser.parse_args()
 

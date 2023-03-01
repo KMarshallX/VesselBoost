@@ -2,7 +2,7 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 02/06/2023
+Last Edited: 03/01/2023
 """
 
 import config
@@ -22,11 +22,11 @@ from models.ra_unet import MainArchitecture
 def model_chosen(model_name, in_chan, out_chan, filter_num):
     if model_name == "unet3d":
         return Unet(in_chan, out_chan, filter_num)
-    elif model_name == "test_mo":
+    elif model_name == "test_mo": # discarded
         return test_mo(in_chan, out_chan, filter_num)
     elif model_name == "aspp":
         return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
-    elif model_name == "test":
+    elif model_name == "test": # another aspp
         return CustomSegmentationNetwork()
     elif model_name == "atrous":
         return MainArchitecture()
@@ -68,10 +68,6 @@ if __name__ == "__main__":
     # model configuration
     model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
 
-    # training configuration
-    # batch_size = args.bsz
-    # d_loader = data_loader(raw_img, seg_img, args.psz, args.osz, args.pst)
-
     # loss
     loss_name = args.loss_m
     metric = loss_metric(loss_name)
@@ -93,18 +89,10 @@ if __name__ == "__main__":
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
     file_num = len(raw_file_list)
     # sort the file names
-    if raw_img == "./data/train/" or raw_img == "./data/train_4/":
-        raw_file_list.sort(key=lambda x:int(x[:-7]))
-        seg_file_list.sort(key=lambda x:int(x[:-4]))
-    elif raw_img == "./data/train_bfc/":
-        raw_file_list.sort(key=lambda x:int(x[:-7]))
-        seg_file_list.sort(key=lambda x:int(x[:-4]))
-    else:
-        raw_file_list.sort(key=lambda x:int(x[:-7]))
-        seg_file_list.sort(key=lambda x:int(x[4:-7]))
-
-    # traning loop (this could be separate out )
+    raw_file_list.sort(key=lambda x:int(x[:2]))
+    seg_file_list.sort(key=lambda x:int(x[:2]))
     
+    # traning loop (this could be separate out )
     for idx in tqdm(range(file_num)):
         loss_mean = 0
 
@@ -118,16 +106,12 @@ if __name__ == "__main__":
             image, label = next(iter(single_chan_loader))
             
             image_batch, label_batch = aug_item(image, label)
-            # image_batch, label_batch = aug_item(image, label)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
             optimizer.zero_grad()
             
             # Forward pass
             output = model(image_batch)
-            # loss = criterion(output, label)
-            # score = metric(output, label)
-            # loss += 1 - score
             loss = metric(output, label_batch)
 
             # Backward and optimize

@@ -2,7 +2,7 @@
 Testing the chosen model 
 
 Editor: Marshall Xu
-Last Edited: 01/02/2023 MM/DD/YYYY 
+Last Edited: 03/01/2023 MM/DD/YYYY 
 """
 
 
@@ -34,13 +34,12 @@ if __name__ == "__main__":
 
     # model configuration
     load_model = model_chosen(args.mo, args.ic, args.oc, args.fil)
-    trained_model_path = "./saved_models/new_train/" + args.tm
+    trained_model_path = "./saved_models/" + args.tm
     # trained_model_path = "./saved_models/Unet_ep10_lr1e4_1slab_raw"
     load_model.load_state_dict(torch.load(trained_model_path))
     load_model.eval()
     
     raw_path = args.tinimg
-    # raw_path = "./data/raw2/"
     out_img_name = args.outim
 
     verification(raw_path, 1, load_model, out_img_name, mode='sigmoid')
