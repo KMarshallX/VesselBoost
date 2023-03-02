@@ -22,19 +22,19 @@ parser.add_argument('--oc', type=int, default=1, help="output channel number, e.
 parser.add_argument('--fil', type=int, default=16, help="filter number, default 16")
 
 # For training
-parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [test_mo, unet3d, aspp, test, atrous]")
+parser.add_argument('--mo', type=str, default="unet3d", help="training model, choose from the following: [unet3d, aspp, atrous]")
 parser.add_argument('--bsz', type=int, default=10, help="batch size, dtype: int")
 parser.add_argument('--psz', type=tuple, default=(64,64,52), help="input patch size, dtype: tuple")
 parser.add_argument('--pst', type=int, default=64, help="input patch step, dtype: int, when patch_step >= patch_size, patches will not be overlapped")
 parser.add_argument('--osz', type=tuple, default=(64,64,64), help="output patch size, dtype: tuple")
 parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3,when training set is small, use higher learning rate, vice versa")
 parser.add_argument('--op', type=str, default="adam", help="optimizer, please choose from following: [sgd, adam]")
-parser.add_argument('--ep', type=int, default=50, help="epoch number (times of iteration), dtype: int, default=16")
+parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=16")
 parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, fdice]")
 
 # For optimizer 
-parser.add_argument('--optim_step', type=int, default=5000, help="batch size, dtype: int")
-parser.add_argument('--optim_gamma', type=float, default=0.5, help="batch size, dtype: int")
+parser.add_argument('--optim_step', type=int, default=5000, help="Decays the learning rate of each parameter group every ___ epochs, dtype: int")
+parser.add_argument('--optim_gamma', type=float, default=0.5, help="Decays the learning rate of each parameter group by this ratio, dtype: float")
 
 # Warning: this part of CLI is only for experimental tests, not for training nor testing (Marshall, 01/16/2023)
 parser.add_argument('--aug_mode', type=str, default="mode1", help="experimental tests CLI, controls the function of the augmentation method, choose from the following: [on, off, test, mode1]")

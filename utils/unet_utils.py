@@ -225,20 +225,20 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
     if mode == 'sigmoid':
         # reshape to original shape
         test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
-        mip = np.max(test_output_sigmoid, axis=2)
+        # mip = np.max(test_output_sigmoid, axis=2)
         nifimg = nib.Nifti1Image(test_output_sigmoid, affine, header)
 
     elif mode == 'normal':
         # reshape to original thickness
         test_output = scind.zoom(test_output, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
-        mip = np.max(test_output, axis=2)
+        # mip = np.max(test_output, axis=2)
         nifimg = nib.Nifti1Image(test_output, affine, header)
 
     # save the MIP image
     sav_img_path = "./saved_image/"+sav_img_name+".nii.gz"
-    sav_mip_img_path = "./saved_image/"+sav_img_name+".png"
-    plt.imsave(sav_mip_img_path, mip, cmap='gray')
-    print("Output MIP image is successfully saved!\n")
+    # sav_mip_img_path = "./saved_image/"+sav_img_name+".png"
+    # plt.imsave(sav_mip_img_path, mip, cmap='gray')
+    # print("Output MIP image is successfully saved!\n")
     # save the nifti image
     nib.save(nifimg, sav_img_path)
     print("Output Neuroimage is successfully saved!\n")

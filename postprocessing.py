@@ -18,6 +18,11 @@ def thresholding(arr,thresh):
     return arr
 
 def post_processing_pipeline(arr, thresh, connect_threshold):
+    """
+    thresh: thresholding value converting the probability to 0 and 1, anything below thresh are 0s, above are 1s.
+    connected_threshold
+    connect_threshold: any component smaller than this value (voxel) will be wiped out.
+    """
     # thresholding
     arr = thresholding(arr, thresh)
     # morphologies (currently disabled)
