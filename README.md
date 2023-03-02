@@ -10,6 +10,8 @@
 7. scikit-learn = 1.1.1
 8. scipy = 1.9.3
 9. tqdm = 4.64.1
+10. antspyx = 0.3.7
+11. connected-components-3d = 3.10.5
 
 ## **Before continue reading**
 This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
