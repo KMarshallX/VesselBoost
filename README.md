@@ -1,5 +1,16 @@
 # **Vessel Code**
 **This repository is only used for storing code, not for data/saved images/pretrained models.**
+## **Software requirements**
+1. python 3.9 or later
+2. pytorch = 1.13
+3. matplotlib = 3.6
+4. nibabel = 4.0.2
+5. numpy = 1.23.5
+6. patchify = 0.2.3
+7. scikit-learn = 1.1.1
+8. scipy = 1.9.3
+9. tqdm = 4.64.1
+
 ## **Before continue reading**
 This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
 <p align="center">
