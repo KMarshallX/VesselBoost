@@ -1,6 +1,16 @@
 # **Vessel Code**
 **This readme file is under development**\
 **This repository is only used for storing code, not for data/saved images/pretrained models.**
+## **Before continue reading**
+This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
+<p align="center">
+<img width="400" height="200" src="./readme_img/dir.jpg">
+</p>
+Also, please keep all of the image data named like this (both images and their ground truth labels):
+<p align="center">
+<img width="200" height="400" src="./readme_img/name.jpg">
+</p>
+
 ## **Working pipeline**
 As this python-based software is not fully-developed, it cannot run with 'one click', there are 5 stand-alone parts of this pipeline, below attached a box diagram dipicts the overall procedure.
 ![flowchart](./readme_img/overall_flowchart.png)
@@ -85,3 +95,11 @@ python postprocessing.py --outim_path "./saved_image/" --outim "test_image_name"
 ```
 processed_img = post_processing_pipeline(sig_arr, thresh=0.3, connect_threshold=120)
 ```
+
+### evaluation.py
+**Comparing the segmentation and ground truth by using 5 metrics: dice score, jaccard score, normalized mutual information, volume similarity, balanced average hausdorff distance. Displays the 5 scores in the console (or the output log), and display a radar plot. (As currently we don't have a functional hausdorff fucntion, it is now been replaced by adjusted rand index)**\
+_(This file is currently not CLI, and not recommended for Non-gui linux environment)_\
+Example:
+<p align="center">
+<img src="./readme_img/radar.png">
+</p>
