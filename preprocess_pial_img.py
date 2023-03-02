@@ -37,11 +37,7 @@ if __name__ == "__main__":
         label_header = test_label_nif.header
 
         # Reshape the label file to make sure the label and the image are of smae dimensions
-        if (test_data.shape[0] == test_label.shape[0]) and (test_data.shape[1] == test_label.shape[1]) and (test_data.shape[2] == test_label.shape[2]):
-            continue
-        else:
-            test_label = scind.zoom(test_label, (test_data.shape[0]/test_label.shape[0],test_data.shape[1]/test_label.shape[1],test_data.shape[2]/test_label.shape[2]), order=0, mode='nearest')
-
+        assert (test_data.shape[0] == test_label.shape[0]) and (test_data.shape[1] == test_label.shape[1]) and (test_data.shape[2] == test_label.shape[2]), "Image and label dimensions not mathced!"
 
         ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
         ant_msk = ants.utils.get_mask(ant_img, low_thresh=ant_img.min(), high_thresh=ant_img.max())
