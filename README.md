@@ -21,8 +21,9 @@ The next section will introduce each of the stand-alone part of this working pip
 Input:
 1. path to the raw images to be preprocessed e.g. "./data/train/"
 2. path to save the preprocessed images e.g. "./data/bfc_denoised_data/"
-Output:
-Bias field corrected & denoised images\
+
+Output:\
+Bias field corrected & denoised images
 
 Current problems:\
 This file works good on the challenge dataset, but could encounter memory overflow error on pial artetial vasculature image sets. For the pial arterial vasculature set (From Saskia), please use _preprocess_pial_img.py_ instead. 
