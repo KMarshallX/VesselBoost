@@ -88,10 +88,7 @@ Command example:
 ```
 python test.py --tm "finetuning_model" --tinimg "./data/validate/" --outim "test_image_name" --img_idx 0
 ```
-**Please Note:** This file is not fully CLI, if the folder contains more than 1 image slab for prediction,  please manually tune the second argument (which is 1 shown below) in line 45, the name of the file used for prediction will be printed in the output log. If the folder contains only 1 image, make the second argument 0.
-```
-verification(raw_path, 1, load_model, out_img_name, mode='sigmoid')
-```
+
 
 ### postprocessing.py
 **Taking the 3D probability map, and output the segmentation image to the same folder where the probability map is stored**
