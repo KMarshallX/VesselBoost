@@ -45,7 +45,7 @@ Command line: (_below only attached frequently used hyperparameters, these are s
 <pre>
 command             comment(within square brackets [] are optional arguments)
 --mo                set the model type for training, defualt is "unet3d".["aspp", "atrous"]
---loss_m            loss metrics, default is "bce". ["dice"]
+--loss_m            loss metrics, default is "bce". ["dice", "tver"]
 --op                optimizer, default is "adam".["sgd"]
 --optim_step        default is 5000. For every 5000 epochs, decays the learning rate of each parameter group by optim_gamma
 --optim_gamma       default is 0.5. Decays the learning rate of each parameter group by this ratio
@@ -58,7 +58,7 @@ command             comment(within square brackets [] are optional arguments)
 </pre>
 Normally, the command attached below would be sufficient:
 ```
-python train.py --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --optim_step 2500 --optim_gamma 0.5 --inimg "./data/image/" --inlab "./data/label/"
+python train.py --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --loss_m "dice" --optim_step 2500 --optim_gamma 0.5 --inimg "./data/image/" --inlab "./data/label/"
 ```
 
 ### retrain.py
@@ -81,10 +81,12 @@ command             comment
 --tinimg            relative path to the input image for prediciton, e.g."./data/validate/"
 --tm                relative path to the finetuned model, e.g. "./saved_models/finetuned_model_name" 
 --outim             name of the output probability image, the output image could be found under folder "./saved_image/", e.g. "output_image"
+--img_idx           index of the image file to be used for prediction, default is 0 (the first file in the given directory)
+
 </pre>
 Command example:
 ```
-python test.py --tm "finetuning_model" --tinimg "./data/validate/" --outim "test_image_name"
+python test.py --tm "finetuning_model" --tinimg "./data/validate/" --outim "test_image_name" --img_idx 0
 ```
 **Please Note:** This file is not fully CLI, if the folder contains more than 1 image slab for prediction,  please manually tune the second argument (which is 1 shown below) in line 45, the name of the file used for prediction will be printed in the output log. If the folder contains only 1 image, make the second argument 0.
 ```
