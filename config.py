@@ -30,7 +30,7 @@ parser.add_argument('--osz', type=tuple, default=(64,64,64), help="output patch 
 parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3,when training set is small, use higher learning rate, vice versa")
 parser.add_argument('--op', type=str, default="adam", help="optimizer, please choose from following: [sgd, adam]")
 parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=16")
-parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, fdice]")
+parser.add_argument('--loss_m', type=str, default="bce", help="loss metrics, choose from the following: [bce, dice, tver]")
 
 # For optimizer 
 parser.add_argument('--optim_step', type=int, default=5000, help="Decays the learning rate of each parameter group every ___ epochs, dtype: int")
@@ -47,6 +47,7 @@ parser.add_argument('--tic', type=int, default=1, help="input channel number, e.
 parser.add_argument('--toc', type=int, default=1, help="output channel number, e.g. binary classification -> 1 channel")
 parser.add_argument('--tfil', type=int, default=64, help="filter number, default 64")
 parser.add_argument('--outim', default = "test_neuro", help="output neuro image name")
+parser.add_argument('--img_idx', type=int, default=0, help="index of the image file to be used for prediction, default is 0 (the first file in the given directory)")
 
 # postprocessing.py
 parser.add_argument('--outim_path', default = "./saved_image/", help="output sigmoid image path for postprocessing")
