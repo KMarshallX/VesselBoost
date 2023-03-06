@@ -41,5 +41,6 @@ if __name__ == "__main__":
     
     raw_path = args.tinimg
     out_img_name = args.outim
+    img_idx = args.img_idx
 
-    verification(raw_path, 1, load_model, out_img_name, mode='sigmoid')
+    verification(raw_path, img_idx, load_model, out_img_name, mode='sigmoid')
