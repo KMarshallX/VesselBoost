@@ -14,8 +14,6 @@ import nibabel as nib
 from tqdm import tqdm
 from patchify import patchify, unpatchify
 import os
-import matplotlib.pyplot as plt
-import ants
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1e-4):
@@ -67,6 +65,29 @@ class BCELoss(nn.Module):
         target = target.view(batch_size, -1)
         loss = nn.BCEWithLogitsLoss()
         return loss(pred, target)
+    
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.3, beta=0.7, smooth=1e-3):
+        super().__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
+
+    def forward(self, pred, target):
+        pred = torch.sigmoid(pred)
+        # Flatten
+        pred = pred.reshape(-1)
+        target = target.reshape(-1)
+
+        # cardinalities
+        tp = (pred * target).sum()
+        fp = ((1-target) * pred).sum()
+        fn = (target * (1-pred)).sum()
+
+        tversky_score = (tp + self.smooth) / (tp + self.alpha*fp + self.beta*fn + self.smooth)
+
+        return 1 - tversky_score
+
 
 class aug_utils:
     def __init__(self, size, mode):

@@ -48,9 +48,14 @@ def loss_metric(metric_name):
     """
     # loss metric could be updated later -> split into 2 parts
     if metric_name == "bce":
+        # binary cross entropy
         return BCELoss()
     elif metric_name == "dice":
+        # dice loss
         return DiceLoss()
+    elif metric_name == "tver":
+        # tversky loss
+        return TverskyLoss()
     else:
         print("Enter a valid loss metric.")
 
