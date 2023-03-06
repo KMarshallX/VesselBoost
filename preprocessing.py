@@ -12,8 +12,8 @@ from tqdm import tqdm
 
 if __name__ == "__main__":
     
-    raw_path = "./data/train/"
-    processed_data_path = "./data/bfc_denoised_data/"
+    raw_path = "./data/validate/"
+    processed_data_path = "./data/validate_bfcdn/"
     if os.path.exists(processed_data_path)==False:
         os.mkdir(processed_data_path)
     
