@@ -13,6 +13,11 @@
 10. antspyx = 0.3.7
 11. connected-components-3d = 3.10.5
 
+## **Update**
+### 03/07/2023:
+1. update evaluate metrics, it now can calculate the scores directly between ground truth (0s, 1s) and output probability map (0~1).
+2. postprocessing.py inactivated for further testing.
+
 ## **Before continue reading**
 This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
 <p align="center">
@@ -25,7 +30,7 @@ Also, please keep all of the image data named like this (both images and their g
 
 ## **Working pipeline**
 As this python-based software is not fully-developed, it cannot run with 'one click', there are 5 stand-alone parts of this pipeline, below attached a box diagram dipicts the overall procedure.
-![flowchart](./readme_img/overall_flowchart.png)
+![flowchart](./readme_img/overall_flowchart_2.png)
 The next section will introduce each of the stand-alone part of this working pipeline.
 ## **Stand-alone files**
 ### preprocessing.py
@@ -74,7 +79,7 @@ python retrain.py --tm "./saved_models/pretrained_model_name" --outmo "./saved_m
 ```
 
 ### test.py
-**Use the finetuned model to make prediciton, outputs the 3D probability map**
+**Use the finetuned model to make prediciton, outputs the 3D probability map**\
 Command line:
 <pre>
 command             comment
@@ -90,8 +95,8 @@ python test.py --tm "finetuning_model" --tinimg "./data/validate/" --outim "test
 ```
 
 
-### postprocessing.py
-**Taking the 3D probability map, and output the segmentation image to the same folder where the probability map is stored**
+### postprocessing.py (currently inactivated)
+**Taking the 3D probability map, and output the segmentation image to the same folder where the probability map is stored.**\
 Command line:
 <pre>
 command             comment
