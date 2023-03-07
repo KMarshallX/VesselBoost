@@ -115,3 +115,24 @@ Example:
 <p align="center">
 <img src="./readme_img/radar.png">
 </p>
+
+## **Current Result**
+The current pipeline is a supervised learning model: the initial model is trained on dataset with size of 25 files, the funetuning models are trained on sub007.nii in **_validate_label_**. File sub017.nii in **_validate_label_** is used as the test file for prediciton, as it has similar value distribution as sub007.nii which is used for finetuning.\
+There are 3 loss metrics available at present: binary-cross-entropy, dice and tversky. There are initial models with bce and dice loss metrics (tversky model is under training), the retraining process applied dice, bce and tversky respectively. Below attached images display the results of the current working pipeline:\
+**Note:** 
+1. "bce_dice" means the initial model is trained with bce metric, the retraining process used dice loss, vice versa.
+2. In segmentation images: <p style="color:#F04607;">orange = true positives</p> <p style="color:#F0EC07;">yellow = false positives</p> <p style="color:#C71810;">red = false negatives</p> 
+
+<p align="center">
+<img src="./readme_img/new_radar.jpg">
+</p>
+
+<p align="center">
+<img src="./readme_img/bce_dice.jpg">
+</p>
+<p align="center">
+<img src="./readme_img/dice_bce.jpg">
+</p>
+<p align="center">
+<img src="./readme_img/dice_tver.jpg">
+</p>
