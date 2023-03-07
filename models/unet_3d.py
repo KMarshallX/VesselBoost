@@ -2,15 +2,19 @@
 3D-Unet model
 
 Editor: Marshall Xu
-Last Edited: 12/13/2022 optimized the structure
+Last Edited: 03/07/2023 add outputs of last two upsampling layers for MSS
 
-Ref: https://github.com/Thvnvtos/Lung_Segmentation
+Ref: 
+https://github.com/Thvnvtos/Lung_Segmentation
 https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html
+S. Chatterjee et al., "DS6, Deformation-Aware Semi-Supervised Learning: Application to Small Vessel Segmentation with Noisy Training Data," Journal of Imaging, vol. 8, no. 10, p. 259, 2022, doi: 10.3390/jimaging8100259.
+
 """
 
 import torch
 from torch import nn
 import numpy as np
+import scipy.ndimage as scind
 
 class ConvBlock(nn.Module):
     """
@@ -105,6 +109,8 @@ class Unet(nn.Module):
 
 
         self.out = nn.Conv3d(filter_num, out_chan, kernel_size=1) # out_chan = 1
+        self.out2 = nn.Conv3d(filter_num*2, out_chan, kernel_size=1) # out_chan = 1
+        self.out3 = nn.Conv3d(filter_num*4, out_chan, kernel_size=1) # out_chan = 1
     
     def forward(self, x):
         xx1, p1 = self.EncB1(x)
@@ -119,7 +125,14 @@ class Unet(nn.Module):
         p8 = self.DecB3(p7, xx2)
         p9 = self.DecB4(p8, xx1)
 
-        return self.out(p9)
+        y0 = self.out(p9)
+        y1 = self.out2(p8)
+        y2 = self.out3(p7)
+        # resize and interpolate
+        y1 = scind.zoom(y1.detach().numpy(), (1,1,x.shape[2]/y1.shape[2],x.shape[3]/y1.shape[3],x.shape[4]/y1.shape[4]), order=0, mode='nearest')
+        y2 = scind.zoom(y2.detach().numpy(), (1,1,x.shape[2]/y2.shape[2],x.shape[3]/y2.shape[3],x.shape[4]/y2.shape[4]), order=0, mode='nearest')
+
+        return y0, torch.from_numpy(y1), torch.from_numpy(y2)
 
 
 if __name__ == "__main__":
@@ -132,7 +145,10 @@ if __name__ == "__main__":
     test_input = test_input.unsqueeze(0)
     print(test_input.shape)
 
-    Model = Unet(1,1,4)
+    Model = Unet(1,1,16)
 
-    test_output = Model(test_input)
+    test_output, test_output2, test_output3 = Model(test_input)
+
+    print(test_output.shape, test_output2.shape, test_output3.shape)
+
 
