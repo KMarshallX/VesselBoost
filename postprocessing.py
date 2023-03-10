@@ -39,7 +39,7 @@ def post_processing_pipeline(arr, percent, connect_threshold):
 
 if __name__ == "__main__":
     args = config.args
-    image_path = args.outim_path
+    image_path = args.outim_path # input & output path of the image
     image_name = args.outim
     sav_img_name = args.img_name
     thresh_vector = args.thresh_vector
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     affine = sig_img.affine
 
     sig_arr = sig_img.get_fdata()
-    processed_img = post_processing_pipeline(sig_arr, thresh=0.3, connect_threshold=120)
+    processed_img = post_processing_pipeline(sig_arr, percent=thresh_vector[0], connect_threshold=thresh_vector[1])
     mip = np.max(processed_img, axis=2) # create maximum intensity projection
     nifimg = nib.Nifti1Image(processed_img, affine, header)
     # saved the processed image as nifti file
