@@ -52,6 +52,7 @@ parser.add_argument('--img_idx', type=int, default=0, help="index of the image f
 # postprocessing.py
 parser.add_argument('--outim_path', default = "./saved_image/", help="output sigmoid image path for postprocessing")
 parser.add_argument('--img_name', default = "post_processed_image", help="Postprocessed image name")
+parser.add_argument('--thresh_vector', nargs='+', type=int, help="Pass TWO integers to the postprocessing procedure. The first integer is the threshold percentile for hard thresholding, recommended value is 5 (5%); the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
 
 args = parser.parse_args()
 

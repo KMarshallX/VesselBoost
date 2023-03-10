@@ -17,14 +17,20 @@ def thresholding(arr,thresh):
     arr[arr>thresh] = 1
     return arr
 
-def post_processing_pipeline(arr, thresh, connect_threshold):
+def msk_thresholding(msk, percent):
+    thresh = np.percentile(msk, percent)
+    msk[msk<thresh] = 0
+    msk[msk>thresh] = 1
+    return msk.astype(int)
+
+def post_processing_pipeline(arr, percent, connect_threshold):
     """
     thresh: thresholding value converting the probability to 0 and 1, anything below thresh are 0s, above are 1s.
     connected_threshold
     connect_threshold: any component smaller than this value (voxel) will be wiped out.
     """
     # thresholding
-    arr = thresholding(arr, thresh)
+    arr = msk_thresholding(arr, percent)
     # morphologies (currently disabled)
     # arr = scind.binary_dilation(arr, structure)
     # arr = scind.binary_erosion(arr, structure).astype(np.int8)
@@ -36,8 +42,9 @@ if __name__ == "__main__":
     image_path = args.outim_path
     image_name = args.outim
     sav_img_name = args.img_name
-    path = image_path+image_name
+    thresh_vector = args.thresh_vector
 
+    path = image_path + image_name
     sig_img = nib.load(path)
     header = sig_img.header
     affine = sig_img.affine

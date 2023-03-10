@@ -2,7 +2,7 @@
 3D-Unet model
 
 Editor: Marshall Xu
-Last Edited: 03/07/2023 add outputs of last two upsampling layers for MSS
+Last Edited: 03/10/2023
 
 Ref: 
 https://github.com/Thvnvtos/Lung_Segmentation
@@ -109,8 +109,8 @@ class Unet(nn.Module):
 
 
         self.out = nn.Conv3d(filter_num, out_chan, kernel_size=1) # out_chan = 1
-        self.out2 = nn.Conv3d(filter_num*2, out_chan, kernel_size=1) # out_chan = 1
-        self.out3 = nn.Conv3d(filter_num*4, out_chan, kernel_size=1) # out_chan = 1
+        # self.out2 = nn.Conv3d(filter_num*2, out_chan, kernel_size=1) # out_chan = 1
+        # self.out3 = nn.Conv3d(filter_num*4, out_chan, kernel_size=1) # out_chan = 1
     
     def forward(self, x):
         xx1, p1 = self.EncB1(x)
@@ -126,14 +126,14 @@ class Unet(nn.Module):
         p9 = self.DecB4(p8, xx1)
 
         y0 = self.out(p9)
-        y1 = self.out2(p8)
-        y2 = self.out3(p7)
-        # resize and interpolate
-        y1 = scind.zoom(y1.detach().numpy(), (1,1,x.shape[2]/y1.shape[2],x.shape[3]/y1.shape[3],x.shape[4]/y1.shape[4]), order=0, mode='nearest')
-        y2 = scind.zoom(y2.detach().numpy(), (1,1,x.shape[2]/y2.shape[2],x.shape[3]/y2.shape[3],x.shape[4]/y2.shape[4]), order=0, mode='nearest')
+        # y1 = self.out2(p8)
+        # y2 = self.out3(p7)
+        # # resize and interpolate
+        # y1 = scind.zoom(y1.detach().numpy(), (1,1,x.shape[2]/y1.shape[2],x.shape[3]/y1.shape[3],x.shape[4]/y1.shape[4]), order=0, mode='nearest')
+        # y2 = scind.zoom(y2.detach().numpy(), (1,1,x.shape[2]/y2.shape[2],x.shape[3]/y2.shape[3],x.shape[4]/y2.shape[4]), order=0, mode='nearest')
 
-        return y0, torch.from_numpy(y1), torch.from_numpy(y2)
-
+        # return y0, torch.from_numpy(y1), torch.from_numpy(y2)
+        return y0
 
 if __name__ == "__main__":
 
