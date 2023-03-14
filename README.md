@@ -95,7 +95,7 @@ python test.py --tm "finetuning_model" --tinimg "./data/validate/" --outim "test
 ```
 
 
-### postprocessing.py (currently inactivated)
+### postprocessing.py 
 **Taking the 3D probability map, and output the segmentation image to the same folder where the probability map is stored.**\
 Command line:
 <pre>
@@ -103,14 +103,11 @@ command             comment
 --outim_path        relative path to folder in which you saved the probability map, e.g."./saved_image/"
 --outim             name of the output probability image, the output image could be found under folder "./saved_image/", e.g. "output_image"
 --img_name          name of the output segmentation and its corresponding maximum intensity projection
+--thresh_vector     pass TWO integers to the postprocessing procedure. The first integer is the threshold percentile for hard thresholding, recommended value is 5 (5%); the second one is the minimum size of the components in the final image, any components below this size will be wiped out.
 </pre>
 Command example:
 ```
-python postprocessing.py --outim_path "./saved_image/" --outim "test_image_name" --img_name "result_segmentation"
-```
-**Please Note:** This file is not fully CLI, the thresholding value and the connected component size threshold needs to be manually tuned in line 46:
-```
-processed_img = post_processing_pipeline(sig_arr, thresh=0.3, connect_threshold=120)
+python postprocessing.py --outim_path "./saved_image/" --outim "test_image_name" --img_name "result_segmentation" --thresh_vector 0.05 20
 ```
 
 ### evaluation.py
