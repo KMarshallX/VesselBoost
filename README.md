@@ -35,7 +35,7 @@ Also, please keep all of the image data named like this (both images and their g
 </p>
 
 ## **Working pipeline**
-As this python-based software is not fully-developed, it cannot run with 'one click', there are 5 stand-alone parts of this pipeline, below attached a box diagram dipicts the overall procedure.
+As this python-based software is under development, it cannot run with 'one click', there are 5 stand-alone parts of this pipeline, below attached a box diagram dipicts the overall procedure.
 ![flowchart](./readme_img/overall_flowchart_2.png)
 The next section will introduce each of the stand-alone part of this working pipeline.
 ## **Stand-alone files**
@@ -48,8 +48,6 @@ command             comment(within square brackets [] are optional arguments)
 --output_path       output processed image directory, default = "./insert/a/path/you/wish/to/store/processed/images/"
 </pre>
 
-Output:\
-Bias field corrected & denoised images
 
 Current problems:\
 This file works good on the challenge dataset, but could encounter memory overflow error on pial artetial vasculature image sets. For the pial arterial vasculature set (From Saskia), please use _preprocess_pial_img.py_ instead. 
