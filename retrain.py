@@ -2,7 +2,7 @@
 Retrain a pre-trained model (finetuning)
 
 Editor: Marshall Xu
-Last Edited: 03/01/2023
+Last Edited: 03/14/2023
 """
 
 import config
@@ -69,6 +69,10 @@ if __name__ == "__main__":
     # input images & labels
     raw_img = args.inimg
     seg_img = args.inlab
+
+    # output model path
+    saved_model_path = "./saved_models/"
+    saved_model_name = args.retrain_name
     
     # model configuration
     load_model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
@@ -85,7 +89,8 @@ if __name__ == "__main__":
     op_name = args.op
     optimizer = optim_chosen(op_name, load_model.parameters(), args.lr)
     # set optim scheduler
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
+    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=args.optim_gamma, patience=args.optim_patience)
 
     #epoch number
     epoch_num = args.ep
@@ -96,52 +101,49 @@ if __name__ == "__main__":
     raw_file_list = os.listdir(raw_img)
     seg_file_list = os.listdir(seg_img)
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
-    file_num = len(raw_file_list)
     
-    # sort the file names
-    raw_file_list.sort(key=lambda x:int(x[:2]))
-    seg_file_list.sort(key=lambda x:int(x[:2]))
-
     # traning loop (this could be separate out )
-    for idx in tqdm(range(file_num)):
-        loss_mean = 0
+    loss_mean = 0
 
-        raw_arr_name = raw_img + raw_file_list[idx]
-        seg_arr_name = seg_img + seg_file_list[idx]      
-        # initialize single channel data loader
-        single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)
+    raw_arr_name = raw_img + raw_file_list[0]
+    seg_arr_name = seg_img + seg_file_list[0]      
+    # initialize single channel data loader
+    single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)
 
-        for epoch in tqdm(range(epoch_num)):
-            
-            image, label = next(iter(single_chan_loader))
-            
-            image_batch, label_batch = aug_item(image, label)
-            image_batch, label_batch = image_batch.to(device), label_batch.to(device)
-
-            optimizer.zero_grad()
-            
-            # Forward pass
-            output = load_model(image_batch)
-            loss = metric(output, label_batch)
-
-            # Backward and optimize
-            loss.backward()
-            optimizer.step()
-
-            loss_mean = loss_mean + loss.item()
-
-            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}\n')
+    for epoch in tqdm(range(epoch_num)):
         
+        image, label = next(iter(single_chan_loader))
+        
+        image_batch, label_batch = aug_item(image, label)
+        image_batch, label_batch = image_batch.to(device), label_batch.to(device)
+
+        optimizer.zero_grad()
+        
+        # Forward pass
+        output = load_model(image_batch)
+        loss = metric(output, label_batch)
+
+        # Backward and optimize
+        loss.backward()
+        optimizer.step()
+
+        loss_mean = loss_mean + loss.item()
+        current_lr = optimizer.param_groups[0]['lr']
+
         # Learning rate shceduler
-        scheduler.step()
+        scheduler.step(loss)
 
-        print(f' File number [{idx+1}/{file_num}], Average Loss of this iteration: {loss_mean/epoch_num:.4f}')
+        print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}\n')
+        if (epoch+1)%1000 == 0:
+            checkpoint_name = saved_model_path + saved_model_name + str(epoch+1)
+            torch.save(load_model.state_dict(), checkpoint_name)
+            print(f"Retrained model checkpoint {epoch+1} saved!")
 
-    print("Finished Training!")
+    print(f"Finished Training! Average loss value is: {loss_mean/epoch_num: .4f}")
 
     # save the model
-    saved_model_path = args.outmo
-    torch.save(load_model.state_dict(), saved_model_path)
+    model_name = saved_model_path + saved_model_name + "_endpoint"
+    torch.save(load_model.state_dict(), model_name)
     print("Retrained Model successfully saved!")
 
     

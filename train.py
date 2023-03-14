@@ -2,7 +2,7 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 03/01/2023
+Last Edited: 03/14/2023
 """
 
 import config
@@ -81,7 +81,8 @@ if __name__ == "__main__":
     op_name = args.op
     optimizer = optim_chosen(op_name, model.parameters(), args.lr)
     # set optim scheduler
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
+    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=args.optim_gamma, patience=args.optim_patience)
 
     #epoch number
     epoch_num = args.ep
@@ -102,7 +103,8 @@ if __name__ == "__main__":
         loss_mean = 0
 
         raw_arr_name = raw_img + raw_file_list[idx]
-        seg_arr_name = seg_img + seg_file_list[idx]      
+        seg_arr_name = seg_img + seg_file_list[idx]
+        print(f"Current training image: {raw_arr_name}, current training label: {seg_arr_name}")      
         # initialize single channel data loader
         single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)
 
@@ -124,11 +126,14 @@ if __name__ == "__main__":
             optimizer.step()
 
             loss_mean = loss_mean + loss.item()
+            current_lr = optimizer.param_groups[0]['lr']
 
-            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}\n')
+            # Learning rate shceduler
+            scheduler.step(loss)
+
+            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}\n')
         
-        # Learning rate shceduler
-        scheduler.step()
+        
 
         print(f' File number [{idx+1}/{file_num}], Average Loss of this iteration: {loss_mean/epoch_num:.4f}')
 

@@ -1,7 +1,7 @@
 """
 Preprocess the input image slabs (bias field correction and denoise(noise_model='Rician'))
 
-Marshall @ 03/01/2023
+Marshall @ 03/14/2023
 """
 
 import numpy as np
@@ -9,18 +9,19 @@ import ants
 import nibabel as nib
 import os
 from tqdm import tqdm
+import config
 
 if __name__ == "__main__":
-    
-    raw_path = "./data/validate/"
-    processed_data_path = "./data/validate_bfcdn/"
+    args = config.args
+
+    raw_path = args.input_path
+    processed_data_path = args.output_path
+
     if os.path.exists(processed_data_path)==False:
         os.mkdir(processed_data_path)
     
     raw_file_list = os.listdir(raw_path)
     file_num = len(raw_file_list)
-    raw_file_list.sort(key=lambda x:int(x[:2]))
-
     for i in tqdm(range(file_num)):
 
         test_data_path = raw_path+raw_file_list[i]

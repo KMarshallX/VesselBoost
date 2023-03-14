@@ -2,7 +2,7 @@
 sigmoid image post processing
 
 Editor: Marshall Xu
-Last Edited: 03/01/2023
+Last Edited: 03/14/2023
 """
 
 import numpy as np
@@ -15,7 +15,7 @@ import config
 def thresholding(arr,thresh):
     arr[arr<thresh] = 0
     arr[arr>thresh] = 1
-    return arr
+    return arr.astype(int)
 
 def msk_thresholding(msk, percent):
     thresh = np.percentile(msk, percent)
@@ -30,7 +30,7 @@ def post_processing_pipeline(arr, percent, connect_threshold):
     connect_threshold: any component smaller than this value (voxel) will be wiped out.
     """
     # thresholding
-    arr = msk_thresholding(arr, percent)
+    arr = thresholding(arr, percent)
     # morphologies (currently disabled)
     # arr = scind.binary_dilation(arr, structure)
     # arr = scind.binary_erosion(arr, structure).astype(np.int8)
