@@ -18,6 +18,12 @@
 1. update evaluate metrics, it now can calculate the scores directly between ground truth (0s, 1s) and output probability map (0~1).
 2. postprocessing.py inactivated for further testing.
 
+### 03/14/2023:
+1. Except Evaluation.py, all .py files should be runnable with CLI
+2. Train.py & Retrain.py: deprecated step learning rate scheduler, implemented ReduceLROnPlateau scheduler
+3. Retrain.py: save the checkpoint (dictionary state) every 1000 epoch. Note: if the total epoch number % 1000 == 0, then the last two saved checkpoints would be the same.
+
+
 ## **Before continue reading**
 This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
 <p align="center">
@@ -34,10 +40,13 @@ As this python-based software is not fully-developed, it cannot run with 'one cl
 The next section will introduce each of the stand-alone part of this working pipeline.
 ## **Stand-alone files**
 ### preprocessing.py
-(This file is currently not CLI)\
-Input:
-1. path to the raw images to be preprocessed e.g. "./data/train/"
-2. path to save the preprocessed images e.g. "./data/bfc_denoised_data/"
+**Takes the raw images and conduct bias field correction and denoising proccess**\
+Command line:
+<pre>
+command             comment(within square brackets [] are optional arguments)
+--input_path        input image path, default = "./insert/your/path/to/the/raw/images/like/this/"
+--output_path       output processed image directory, default = "./insert/a/path/you/wish/to/store/processed/images/"
+</pre>
 
 Output:\
 Bias field corrected & denoised images
@@ -52,7 +61,7 @@ command             comment(within square brackets [] are optional arguments)
 --mo                set the model type for training, defualt is "unet3d".["aspp", "atrous"]
 --loss_m            loss metrics, default is "bce". ["dice", "tver"]
 --op                optimizer, default is "adam".["sgd"]
---optim_step        default is 5000. For every 5000 epochs, decays the learning rate of each parameter group by optim_gamma
+--optim_patience    Number of epochs with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 epochs with no improvement, and will only decrease the LR after the 3rd epoch if the loss still hasn’t improved then. Default: 10.
 --optim_gamma       default is 0.5. Decays the learning rate of each parameter group by this ratio
 --ep                number of epochs for training, default is 5000.
 --lr                learning rate for traning, default is 1e-3.
@@ -63,7 +72,7 @@ command             comment(within square brackets [] are optional arguments)
 </pre>
 Normally, the command attached below would be sufficient:
 ```
-python train.py --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --loss_m "dice" --optim_step 2500 --optim_gamma 0.5 --inimg "./data/image/" --inlab "./data/label/"
+python train.py --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --loss_m "dice" --optim_patience 50 --optim_gamma 0.98 --inimg "./data/image/" --inlab "./data/label/"
 ```
 
 ### retrain.py
@@ -71,11 +80,20 @@ python train.py --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep
 Command line: Very similar to _train.py_, the only difference is user has to specify the location of the initialization mode by calling --tm
 <pre>
 command             comment
---tm                relative path to the initialization (pretrained) model, e.g. "./saved_models/pretrained_model_name" 
+--inimg             relative path to the test image, e.g. "./data/image_folder/"
+--inlab             relative path to the proxy of the test image, e.g. "./data/proxy_folder/"
+--tm                relative path to the initialization (pretrained) model, e.g."./saved_models/pretrained_model_name" 
+--retrain_name      Name prefix of retrained checkpoints
+--mo                choose the same model as the initial model
+--lr                initial learning rate
+--ep                number of epochs
+--optim_patience    (same as train.py)
+--optim_gamma       (same as train.py)
+--loss_m            loss metrics
 </pre>
 In consistency with the previous section, below attached the command example for normal use:
 ```
-python retrain.py --tm "./saved_models/pretrained_model_name" --outmo "./saved_models/model_name" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --optim_step 2500 --optim_gamma 0.5 --inimg "./data/booster_image/" --inlab "./data/booster_label/"
+python retrain.py --tm "./saved_models/pretrained_model_name" --retrain_name "finetuning_model_name_prefix" --mo "unet3d" --lr 1e-3 --ep 5000 --aug_mode "mode1" --optim_patience 50 --optim_gamma 0.98 --inimg "./data/test_image_folder/" --inlab "./data/test_proxy_folder/"
 ```
 
 ### test.py
@@ -83,11 +101,10 @@ python retrain.py --tm "./saved_models/pretrained_model_name" --outmo "./saved_m
 Command line:
 <pre>
 command             comment
+--tm                name of the finetuned model, e.g. "finetuned_model_name" 
 --tinimg            relative path to the input image for prediciton, e.g."./data/validate/"
---tm                relative path to the finetuned model, e.g. "./saved_models/finetuned_model_name" 
---outim             name of the output probability image, the output image could be found under folder "./saved_image/", e.g. "output_image"
+--outim             name of the output probability image, the output image could be found under folder "./saved_image/"
 --img_idx           index of the image file to be used for prediction, default is 0 (the first file in the given directory)
-
 </pre>
 Command example:
 ```
