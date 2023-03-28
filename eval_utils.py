@@ -265,7 +265,7 @@ class finetune:
             data_loader = single_channel_loader(test_ds_path, test_px_path, (64,64,64), epoch_num)
 
             # training loop
-            for epoch in range(epoch_num):
+            for epoch in tqdm(range(epoch_num)):
                 image, label = next(iter(data_loader))
                 image_batch, label_batch = self.aug_item(image, label)
                 image_batch, label_batch = image_batch.to(device), label_batch.to(device)
@@ -285,7 +285,7 @@ class finetune:
                 
             out_mo_name = self.out_mo_path + file_name
             torch.save(load_model.state_dict(), out_mo_name)
-            print(f"Training finished! The finetuning model of {file_name} successfully saved!")
+            # print(f"Training finished! The finetuning model of {file_name} successfully saved!")
         print("All finetuned models are saved!")
 
             

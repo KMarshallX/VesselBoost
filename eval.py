@@ -15,8 +15,11 @@ if __name__ == "__main__":
     out_path = args.out_path # final segmentation
 
     prep_bool = args.prep_bool
-    if prep_bool == False:
+    if prep_bool == "no":
         ps_path = args.ds_path
+        prep_bool = False
+    else:
+        prep_bool = True
 
     # model configuration
     model_type = args.mo
@@ -60,8 +63,8 @@ if __name__ == "__main__":
     finetuned_model_list = os.listdir("./saved_models/finetuned/")
     print("Final prediction starts!\n")
     for idx in range(len(finetuned_model_list)):
-        model_name = finetuned_model_list[idx]
-        img_name = model_name + ".nii.gz" #TODO: check this !
+        model_name = "finetuned/" + finetuned_model_list[idx]
+        img_name = finetuned_model_list[idx] + ".nii.gz" #TODO: check this !
         if img_name in os.listdir(ps_path):
             pred_post_object(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)
         else:
