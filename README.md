@@ -23,6 +23,10 @@
 2. Train.py & Retrain.py: deprecated step learning rate scheduler, implemented ReduceLROnPlateau scheduler
 3. Retrain.py: save the checkpoint (dictionary state) every 1000 epoch. Note: if the total epoch number % 1000 == 0, then the last two saved checkpoints would be the same.
 
+### 03/28/2023
+1. new eval.py
+![eval](./readme_img/eval.jpg)
+
 
 ## **Before continue reading**
 This program is quite sensitive to directory sturcture, and the naming convention of input image slabs, as I currently used some dumb but convenient way to match the input image with its corresponding label. Thus when you run this program locally, please keep the directory structure like the one shown below (1. folders within **_data_** can have customized names, apart from that, please keep the naming of other folders; 2. ignore **_archive_**):
