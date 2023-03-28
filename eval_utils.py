@@ -223,10 +223,13 @@ class testAndPostprocess:
         print("Prediction and thresholding procedure end!\n")
 
 class finetune:
+    """
+    takes the preprocessed data path and proxy path, generate all the finetuned models for each test image
+    """
     def __init__(self, data_path, proxy_path, model_type, input_channel, output_channel, filter_number, init_model_name) -> None:
         self.ds_path = data_path # processed data
         self.px_path = proxy_path # proxy seg
-        self.out_mo_path = "./saved_models/"
+        self.out_mo_path = "./saved_models/finetuned/"
 
         self.mo = model_type
         self.ic = input_channel
@@ -255,7 +258,7 @@ class finetune:
         for idx in tqdm(range(file_num)):
             test_ds_path = self.ds_path + processed_img_list[idx]
             # find the corresponding proxy
-            assert (processed_img_list[idx] in self.px_path), "No such proxy file!"
+            assert (processed_img_list[idx] in os.listdir(self.px_path)), "No such proxy file!"
             test_px_path = self.px_path + processed_img_list[idx]
             file_name = processed_img_list[idx].split('.')[0]
             #initialize the data loader
@@ -277,14 +280,9 @@ class finetune:
                 loss.backward()
                 optimizer.step()
 
-                loss_mean = loss_mean + loss.item()
-                # test feature, delete this before submission
-                current_lr = optimizer.param_groups[0]['lr']
-
                 # Learning rate shceduler
                 scheduler.step(loss)
-                print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .6f}\n')
-            
+                
             out_mo_name = self.out_mo_path + file_name
             torch.save(load_model.state_dict(), out_mo_name)
             print(f"Training finished! The finetuning model of {file_name} successfully saved!")
