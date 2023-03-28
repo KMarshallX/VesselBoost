@@ -1,6 +1,6 @@
 """
 eval.py for challenge
-last edited: 03/27/2023
+last edited: 03/28/2023
 """
 from eval_utils import preprocess, testAndPostprocess, finetune
 import config
