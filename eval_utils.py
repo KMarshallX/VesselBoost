@@ -243,14 +243,7 @@ class finetune:
         
     def __call__(self, learning_rate, optim_gamma, optim_patience, epoch_num):
         print("Finetuing process starts!")
-        # initialize pre-trained model
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil).to(device)
-        load_model.load_state_dict(torch.load(self.init_mo_path))
-        load_model = load_model.eval()
-        # initialize optimizer & scheduler
-        optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
+        
         
         processed_img_list = os.listdir(self.ds_path)
         file_num = len(processed_img_list)
@@ -263,6 +256,16 @@ class finetune:
             file_name = processed_img_list[idx].split('.')[0]
             #initialize the data loader
             data_loader = single_channel_loader(test_ds_path, test_px_path, (64,64,64), epoch_num)
+
+            # initialize pre-trained model
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            load_model = model_chosen(self.mo, self.ic, self.oc, self.fil).to(device)
+            load_model.load_state_dict(torch.load(self.init_mo_path))
+            load_model = load_model.eval()
+            # initialize optimizer & scheduler
+            optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
+        
 
             # training loop
             for epoch in tqdm(range(epoch_num)):
@@ -285,7 +288,7 @@ class finetune:
                 
             out_mo_name = self.out_mo_path + file_name
             torch.save(load_model.state_dict(), out_mo_name)
-            # print(f"Training finished! The finetuning model of {file_name} successfully saved!")
+            print(f"Training finished! The finetuning model of {file_name} successfully saved!")
         print("All finetuned models are saved!")
 
             
