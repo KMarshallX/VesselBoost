@@ -31,6 +31,12 @@ if __name__ == "__main__":
     init_thresh_vector = args.init_thresh_vector
     final_thresh_vector = args.final_thresh_vector
 
+    # finetuning hyperparams
+    learning_rate = args.eval_lr
+    optim_gamma = args.eval_gamma
+    optim_patience = args.eval_patience
+    epoch_num = args.eval_ep
+
 
     """
     finetuning pipeline
@@ -48,6 +54,7 @@ if __name__ == "__main__":
     
     # fintuning (generate all finetuned models)
     finetune_object = finetune(ps_path, out_path, model_type, in_chan, ou_chan, fil_num, init_mo)
+    finetune_object(learning_rate, optim_gamma, optim_patience, epoch_num)
 
     # final prediction and thresholding - and override all the proxies in the output path
     finetuned_model_list = os.listdir("./saved_models/finetuned/")
