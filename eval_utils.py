@@ -66,7 +66,7 @@ class preprocess:
     This object takes an input path and an output path to initialize
     """
 
-    def __init__(self, input_path, output_path) -> None:
+    def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
 
@@ -111,7 +111,7 @@ class testAndPostprocess:
     """
     This opbject takes only one image and process only one image
     """
-    def __init__(self, model_name, input_channel, output_channel, filter_number, input_path, output_path) -> None:
+    def __init__(self, model_name, input_channel, output_channel, filter_number, input_path, output_path):
         
         self.mo = model_name
         self.ic = input_channel
@@ -226,7 +226,7 @@ class finetune:
     """
     takes the preprocessed data path and proxy path, generate all the finetuned models for each test image
     """
-    def __init__(self, data_path, proxy_path, model_type, input_channel, output_channel, filter_number, init_model_name) -> None:
+    def __init__(self, data_path, proxy_path, model_type, input_channel, output_channel, filter_number):
         self.ds_path = data_path # processed data
         self.px_path = proxy_path # proxy seg
         self.out_mo_path = "./saved_models/finetuned/"
@@ -235,61 +235,57 @@ class finetune:
         self.ic = input_channel
         self.oc = output_channel
         self.fil = filter_number
-        self.init_mo_path = "./saved_models/" + init_model_name
-        # initialize loss metric & optimizer
-        self.loss_metric = loss_metric("tver")
-        # initialize augmentation object
-        self.aug_item = aug_utils((64,64,64), "mode1")
+        self.init_mo_path = "./saved_models/" + "Init_ep1000_lr1e3_tver_2"
         
-    def __call__(self, learning_rate, optim_gamma, optim_patience, epoch_num):
+        
+    def __call__(self, test_img_name, learning_rate, optim_gamma, optim_patience, epoch_num):
         print("Finetuing process starts!")
+        test_img_path = self.ds_path + test_img_name # test_img_name does include file extension
+        # find the corresponding proxy
+        assert (test_img_name in os.listdir(self.px_path)), "No such proxy file!"
+        test_px_path = self.px_path + test_img_name
         
+        #initialize the data loader
+        data_loader = single_channel_loader(test_img_path, test_px_path, (64,64,64), epoch_num)
+
+        # initialize pre-trained model
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil).to(device)
+        load_model.load_state_dict(torch.load(self.init_mo_path))
+        load_model.eval()
+
+        # initialize optimizer & scheduler
+        optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
+    
+        # initialize loss metric & optimizer
+        metric = loss_metric("tver")
+        # initialize augmentation object
+        aug_item = aug_utils((64,64,64), "mode1")
+
+        # training loop
+        for epoch in tqdm(range(epoch_num)):
+            image, label = next(iter(data_loader))
+            image_batch, label_batch = aug_item(image, label)
+            image_batch, label_batch = image_batch.to(device), label_batch.to(device)
+
+            optimizer.zero_grad()
         
-        processed_img_list = os.listdir(self.ds_path)
-        file_num = len(processed_img_list)
+            # Forward pass
+            output = load_model(image_batch)
+            loss = metric(output, label_batch)
 
-        for idx in tqdm(range(file_num)):
-            test_ds_path = self.ds_path + processed_img_list[idx]
-            # find the corresponding proxy
-            assert (processed_img_list[idx] in os.listdir(self.px_path)), "No such proxy file!"
-            test_px_path = self.px_path + processed_img_list[idx]
-            file_name = processed_img_list[idx].split('.')[0]
-            #initialize the data loader
-            data_loader = single_channel_loader(test_ds_path, test_px_path, (64,64,64), epoch_num)
+            # Backward and optimize
+            loss.backward()
+            optimizer.step()
 
-            # initialize pre-trained model
-            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            load_model = model_chosen(self.mo, self.ic, self.oc, self.fil).to(device)
-            load_model.load_state_dict(torch.load(self.init_mo_path))
-            load_model = load_model.eval()
-            # initialize optimizer & scheduler
-            optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
-        
-
-            # training loop
-            for epoch in tqdm(range(epoch_num)):
-                image, label = next(iter(data_loader))
-                image_batch, label_batch = self.aug_item(image, label)
-                image_batch, label_batch = image_batch.to(device), label_batch.to(device)
-
-                optimizer.zero_grad()
+            # Learning rate shceduler
+            scheduler.step(loss)
             
-                # Forward pass
-                output = load_model(image_batch)
-                loss = self.loss_metric(output, label_batch)
-
-                # Backward and optimize
-                loss.backward()
-                optimizer.step()
-
-                # Learning rate shceduler
-                scheduler.step(loss)
-                
-            out_mo_name = self.out_mo_path + file_name
-            torch.save(load_model.state_dict(), out_mo_name)
-            print(f"Training finished! The finetuning model of {file_name} successfully saved!")
-        print("All finetuned models are saved!")
+        file_name = test_img_name.split('.')[0]
+        out_mo_name = self.out_mo_path + file_name
+        torch.save(load_model.state_dict(), out_mo_name)
+        print(f"Training finished! The finetuning model of {test_img_name} successfully saved!")
 
             
             
