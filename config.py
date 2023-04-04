@@ -63,17 +63,17 @@ parser.add_argument('--img_name', default = "post_processed_image", help="Postpr
 parser.add_argument('--thresh_vector', nargs='+', type=float, help="Pass TWO integers to the postprocessing procedure. The first integer is the threshold percentile for hard thresholding, recommended value is 5 (5%); the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
 
 # eval.py
-parser.add_argument('--ds_path', type=str, default = "/tmp/eval_data/", help="path of the original data")
-parser.add_argument('--ps_path', type=str, default = "/tmp/eval_prep/", help="path of the preprocessed data")
-parser.add_argument('--out_path', type=str, default = "/tmp/eval_out/", help="path of the output segmentation")
+parser.add_argument('--ds_path', type=str, default = "/ds_path/", help="path of the original data")
+parser.add_argument('--ps_path', type=str, default = "./preprocessed_data/", help="path of the preprocessed data")
+parser.add_argument('--out_path', type=str, default = "/out_path/koala/", help="path of the output segmentation")
 parser.add_argument('--prep_bool', type=str, default="yes", help="Whether to proceed the processing procedure?")
 parser.add_argument('--init_tm', type=str, default = "Init_ep1000_lr1e3_tver_2", help="name of the pretrained (initial) model")
 parser.add_argument('--init_thresh_vector', nargs='+', type=float, help="Pass TWO float numbers to the postprocessing procedure. The first number is the threshold value for hard thresholding, recommended value is 0.01~0.02; the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
 parser.add_argument('--final_thresh_vector', nargs='+', type=float, help="Pass TWO float numbers to the postprocessing procedure. The first number is the threshold value for hard thresholding, recommended value is 0.01~0.02; the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
 parser.add_argument('--eval_lr', type=float, default=1e-2, help="learning rate, dtype: float, default=1e-2")
 parser.add_argument('--eval_gamma', type=float, default=0.95, help="Decays the learning rate of each parameter group by this ratio, dtype: float")
-parser.add_argument('--eval_patience', type=int, default=10, help="Number of epochs with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 epochs with no improvement, and will only decrease the LR after the 3rd epoch if the loss still hasn’t improved then. Default: 10.")
-parser.add_argument('--eval_ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=5000")
+parser.add_argument('--eval_patience', type=int, default=100, help="Number of epochs with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 epochs with no improvement, and will only decrease the LR after the 3rd epoch if the loss still hasn’t improved then. Default: 10.")
+parser.add_argument('--eval_ep', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=5000")
 
 args = parser.parse_args()
 

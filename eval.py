@@ -59,6 +59,8 @@ if __name__ == "__main__":
     ds_path = args.ds_path # original data
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
+    if os.path.exists(out_path)==False:
+        os.mkdir(out_path) # make directory "/out_path/koala/"
 
     prep_bool = args.prep_bool
     if prep_bool == "no":
@@ -74,14 +76,16 @@ if __name__ == "__main__":
     fil_num = args.fil
 
     # initial trained model name & path
-    init_mo = "Init_ep1000_lr1e3_tver"
-    init_mo_path = "./saved_models/Init_ep1000_lr1e3_tver"
+    mo_path = "./saved_models/"
+    init_mo = os.listdir(mo_path)[0]
+    init_mo_path = mo_path + os.listdir(mo_path)[0]
     # output fintuned model path
     out_mo_path = "./saved_models/finetuned/"
 
     # thresholding values
-    init_thresh_vector = args.init_thresh_vector
-    final_thresh_vector = args.final_thresh_vector
+    
+    init_thresh_vector = [0.1, 10] # initial thresholding values for predicting proxy
+    final_thresh_vector = [0.1, 10] # final thresholding values for predicting segmentation
 
     # finetuning hyperparams
     learning_rate = args.eval_lr
@@ -113,13 +117,13 @@ if __name__ == "__main__":
         data_loader = single_channel_loader(test_img_path, test_px_path, (64,64,64), epoch_num)
         # initialize pre-trained model
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        load_model = model_chosen("unet3d", 1, 1, 16).to(device)
+        load_model = model_chosen("unet3d", in_chan, ou_chan, fil_num).to(device)
         load_model.load_state_dict(torch.load(init_mo_path))
         load_model.eval()
 
         # initialize optimizer & scheduler
-        optimizer = optim_chosen('adam', load_model.parameters(), 1e-3)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.95, patience=10)
+        optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
 
         # initialize loss metric & optimizer
         metric = loss_metric("tver")
@@ -154,19 +158,6 @@ if __name__ == "__main__":
         print(f"Final thresholding for {file_name} will start shortly!\n")
         pred_post_object(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)
 
-
-
-    # # final prediction and thresholding - and override all the proxies in the output path
-    # finetuned_model_list = os.listdir("./saved_models/finetuned/")
-    # print("Final prediction starts!\n")
-    # for idx in range(len(finetuned_model_list)):
-    #     model_name = "finetuned/" + finetuned_model_list[idx]
-    #     img_name = finetuned_model_list[idx] + ".nii.gz" #TODO: check this !
-    #     if img_name in os.listdir(ps_path):
-    #         pred_post_object(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)
-    #     else:
-    #         print(f"No such image file: {img_name}")
-    #         continue
 
     print("The pipeline is finished!\n")
 
