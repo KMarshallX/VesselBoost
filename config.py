@@ -65,7 +65,7 @@ parser.add_argument('--thresh_vector', nargs='+', type=float, help="Pass TWO int
 # eval.py
 parser.add_argument('--ds_path', type=str, default = "/ds_path/", help="path of the original data")
 parser.add_argument('--ps_path', type=str, default = "./preprocessed_data/", help="path of the preprocessed data")
-parser.add_argument('--out_path', type=str, default = "/out_path/koala/", help="path of the output segmentation")
+parser.add_argument('--out_path', type=str, default = "/out_path/", help="path of the output segmentation")
 parser.add_argument('--prep_bool', type=str, default="yes", help="Whether to proceed the processing procedure?")
 parser.add_argument('--init_tm', type=str, default = "Init_ep1000_lr1e3_tver_2", help="name of the pretrained (initial) model")
 parser.add_argument('--init_thresh_vector', nargs='+', type=float, help="Pass TWO float numbers to the postprocessing procedure. The first number is the threshold value for hard thresholding, recommended value is 0.01~0.02; the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")

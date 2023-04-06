@@ -57,6 +57,7 @@ if __name__ == "__main__":
     args = config.args
 
     ds_path = args.ds_path # original data
+    ds_path = ds_path + "/test"
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
     if os.path.exists(out_path)==False:
@@ -79,6 +80,15 @@ if __name__ == "__main__":
     mo_path = "./saved_models/"
     init_mo = os.listdir(mo_path)[0]
     init_mo_path = mo_path + os.listdir(mo_path)[0]
+    if init_mo == "Init_ep1000_lr1e3_tver":
+        out_path = out_path + "koala_manual/"
+    elif init_mo == "Init_ep1000_lr1e3_tver_OM1":
+        out_path = out_path + "koala_om1/"
+    elif init_mo == "Init_ep1000_lr1e3_tver_OM2":
+        out_path = out_path + "koala_om2/"
+    else:
+        raise Exception("No corrsponding model found!")
+    
     # output fintuned model path
     out_mo_path = "./saved_models/finetuned/"
 
