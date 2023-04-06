@@ -138,7 +138,6 @@ class testAndPostprocess:
                     single_patch = test_patches[i,j,k, :,:,:]
                     single_patch_input = single_patch[None, :]
                     single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
-                    single_patch_input = single_patch_input
 
                     single_patch_prediction = load_model(single_patch_input)
 

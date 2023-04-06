@@ -6,3 +6,7 @@
 /saved_models
 testbed.ipynb
 mip.py
+models/__pycache__/asppcnn.cpython-39.pyc
+models/__pycache__/ra_unet.cpython-39.pyc
+models/__pycache__/siyu.cpython-39.pyc
+models/__pycache__/unet_3d.cpython-39.pyc
