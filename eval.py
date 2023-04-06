@@ -80,6 +80,7 @@ if __name__ == "__main__":
     mo_path = "./saved_models/"
     init_mo = os.listdir(mo_path)[0]
     init_mo_path = mo_path + os.listdir(mo_path)[0]
+    # checking the pretrained weights, make the corresponding output directory
     if init_mo == "Init_ep1000_lr1e3_tver":
         out_path = out_path + "koala_manual/"
     elif init_mo == "Init_ep1000_lr1e3_tver_OM1":

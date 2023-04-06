@@ -222,7 +222,6 @@ class testAndPostprocess:
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh)
         print("Prediction and thresholding procedure end!\n")
 
-@DeprecationWarning("Deprecated")
 class finetune:
     """
     takes the preprocessed data path and proxy path, generate all the finetuned models for each test image
