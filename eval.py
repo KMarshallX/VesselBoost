@@ -60,8 +60,6 @@ if __name__ == "__main__":
     ds_path = ds_path + "test/"
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
-    if os.path.exists(out_path)==False:
-        os.mkdir(out_path) # make directory "/out_path/koala_manual(omelette1/omelette2)/"
 
     prep_bool = args.prep_bool
     if prep_bool == "no":
@@ -90,8 +88,13 @@ if __name__ == "__main__":
     else:
         raise Exception("No corrsponding model found!")
     
+    if os.path.exists(out_path)==False:
+        os.mkdir(out_path) # make directory "/out_path/koala_manual(omelette1/omelette2)/"
+    
     # output fintuned model path
     out_mo_path = "./saved_models/finetuned/"
+    if os.path.exists(out_mo_path)==False:
+        os.mkdir(out_mo_path) # make directory "./saved_models/finetuned/"
 
     # thresholding values
     
