@@ -60,7 +60,7 @@ if __name__ == "__main__":
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
     if os.path.exists(out_path)==False:
-        os.mkdir(out_path) # make directory "/out_path/koala/"
+        os.mkdir(out_path) # make directory "/out_path/koala_manual(omelette1/omelette2)/"
 
     prep_bool = args.prep_bool
     if prep_bool == "no":
