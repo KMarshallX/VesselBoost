@@ -57,7 +57,7 @@ if __name__ == "__main__":
     args = config.args
 
     ds_path = args.ds_path # original data
-    ds_path = ds_path + "/test"
+    ds_path = ds_path + "test/"
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
     if os.path.exists(out_path)==False:
