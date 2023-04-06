@@ -92,9 +92,9 @@ if __name__ == "__main__":
         os.mkdir(out_path) # make directory "/out_path/koala_manual(omelette1/omelette2)/"
     
     # output fintuned model path
-    out_mo_path = "./saved_models/finetuned/"
+    out_mo_path = "./finetuned/"
     if os.path.exists(out_mo_path)==False:
-        os.mkdir(out_mo_path) # make directory "./saved_models/finetuned/"
+        os.mkdir(out_mo_path) # make directory "./finetuned/"
 
     # thresholding values
     
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # generate proxy segmentations by using the initial model - and store'em in the out_path
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
-        pred_post_object(init_thresh_vector[0], init_thresh_vector[1], init_mo, processed_data_list[i])
+        pred_post_object(init_thresh_vector[0], init_thresh_vector[1], init_mo_path, processed_data_list[i])
     
         # fintuning (generate all finetuned models)
         test_img_path = ps_path + processed_data_list[i]
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         torch.save(load_model.state_dict(), out_mo_name)
         print(f"Training finished! The finetuning model of {file_name} successfully saved!\n")
 
-        model_name = "finetuned/" + file_name
+        model_name = "./finetuned/" + file_name
         img_name = file_name + ".nii.gz"
         print(f"Final thresholding for {file_name} will start shortly!\n")
         pred_post_object(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)

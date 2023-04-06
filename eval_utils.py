@@ -215,7 +215,7 @@ class testAndPostprocess:
 
         # model configuration
         load_model = model_chosen(self.mo, self.ic, self.oc, self.fil)
-        model_path = "./saved_models/" + test_model_name
+        model_path = test_model_name # this should be the realative path to the model
         load_model.load_state_dict(torch.load(model_path))
         load_model.eval()
 
