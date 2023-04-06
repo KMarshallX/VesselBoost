@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     prep_bool = args.prep_bool
     if prep_bool == "no":
-        ps_path = args.ds_path
+        ps_path = ds_path
         prep_bool = False
     else:
         prep_bool = True
