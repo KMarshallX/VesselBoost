@@ -17,7 +17,7 @@ parser.add_argument('--prep_bool', type=str, default="yes", help="Whether to pro
 parser.add_argument('--init_tm', type=str, default = "Init_ep1000_lr1e3_tver_2", help="name of the pretrained (initial) model")
 parser.add_argument('--init_thresh_vector', nargs='+', type=float, help="Pass TWO float numbers to the postprocessing procedure. The first number is the threshold value for hard thresholding, recommended value is 0.01~0.02; the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
 parser.add_argument('--final_thresh_vector', nargs='+', type=float, help="Pass TWO float numbers to the postprocessing procedure. The first number is the threshold value for hard thresholding, recommended value is 0.01~0.02; the second one is the minimum size of the components in the final image, any components below this size will be wiped out.")
-parser.add_argument('--eval_lr', type=float, default=1e-2, help="learning rate, dtype: float, default=1e-2")
+parser.add_argument('--eval_lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-2")
 parser.add_argument('--eval_gamma', type=float, default=0.95, help="Decays the learning rate of each parameter group by this ratio, dtype: float")
 parser.add_argument('--eval_patience', type=int, default=100, help="Number of epochs with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 epochs with no improvement, and will only decrease the LR after the 3rd epoch if the loss still hasn’t improved then. Default: 10.")
 parser.add_argument('--eval_ep', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=5000")
