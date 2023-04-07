@@ -177,8 +177,8 @@ if __name__ == "__main__":
 
             # TODO: debug message, delete this
             current_lr = optimizer.param_groups[0]['lr']
-            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}\n')
-            
+            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
+
         file_name = processed_data_list[i].split('.')[0]
         out_mo_name = out_mo_path + file_name
         torch.save(load_model.state_dict(), out_mo_name)
