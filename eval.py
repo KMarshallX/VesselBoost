@@ -121,23 +121,29 @@ if __name__ == "__main__":
     pred_post_object = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path) # initialize the object, takes all images from ps_path, output proxies to px_path
     # generate proxy segmentations by using the initial model - and store'em in the out_path
     processed_data_list = os.listdir(ps_path)
-    for i in range(len(processed_data_list)):
+    for i in range(len(processed_data_list)): # generate finetuned model for each test image
         # generate proxy segmentation for all test data
         pred_post_object(init_thresh_vector[0], init_thresh_vector[1], init_mo_path, processed_data_list[i])
     
         # fintuning (generate all finetuned models)
         test_img_path = ps_path + processed_data_list[i] # path of the preprocessed image
+        
         # find the corresponding proxy
         assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
         test_px_path = px_path + processed_data_list[i] # path of the proxy seg
+        
         #initialize the data loader
         data_loader = single_channel_loader(test_img_path, test_px_path, (64,64,64), epoch_num)
+        
         # initialize pre-trained model
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         load_model = model_chosen("unet3d", in_chan, ou_chan, fil_num).to(device)
+        
         # load the pre-trained model
         load_model.load_state_dict(torch.load(init_mo_path))
         load_model.eval()
+        print(f"The chosen model is: {init_mo_path}")
+        print(load_model.eval())
 
         # initialize optimizer & scheduler
         optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
