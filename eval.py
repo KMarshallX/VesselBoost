@@ -2,55 +2,36 @@
 eval.py for challenge
 last edited: 03/30/2023
 """
-from eval_utils import preprocess, testAndPostprocess, finetune
+from eval_utils import preprocess, testAndPostprocess
 import eval_config
 import os
+import time
 
 from utils.unet_utils import *
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
-from models.siyu import CustomSegmentationNetwork
-from models.asppcnn import ASPPCNN
-from models.ra_unet import MainArchitecture
 
-def model_chosen(model_name, in_chan, out_chan, filter_num):
-    if model_name == "unet3d":
-        return Unet(in_chan, out_chan, filter_num)
-    elif model_name == "aspp":
-        return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
-    elif model_name == "test":
-        return CustomSegmentationNetwork()
-    elif model_name == "atrous":
-        return MainArchitecture()
-    else:
-        print("Insert a valid model name.") 
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.3, beta=0.7, smooth=1e-3):
+        super().__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
 
-def optim_chosen(optim_name, model_params, lr):
-    if optim_name == 'sgd':
-        return torch.optim.SGD(model_params, lr)
-    elif optim_name == 'adam':
-        return torch.optim.Adam(model_params, lr)
-    else:
-        print("Insert a valid optimizer name.")
+    def forward(self, pred, target):
+        pred = torch.sigmoid(pred)
+        # Flatten
+        pred = pred.reshape(-1)
+        target = target.reshape(-1)
 
+        # cardinalities
+        tp = (pred * target).sum()
+        fp = ((1-target) * pred).sum()
+        fn = (target * (1-pred)).sum()
 
-def loss_metric(metric_name):
-    """
-    :params metric_name: string, choose from the following: bce->binary cross entropy, dice->dice score 
-    """
-    # loss metric could be updated later -> split into 2 parts
-    if metric_name == "bce":
-        # binary cross entropy
-        return BCELoss()
-    elif metric_name == "dice":
-        # dice loss
-        return DiceLoss()
-    elif metric_name == "tver":
-        # tversky loss
-        return TverskyLoss()
-    else:
-        print("Enter a valid loss metric.")
+        tversky_score = (tp + self.smooth) / (tp + self.alpha*fp + self.beta*fn + self.smooth)
 
+        return 1 - tversky_score
 
 if __name__ == "__main__":
     # initialize command line
@@ -137,21 +118,22 @@ if __name__ == "__main__":
         
         # initialize pre-trained model
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        load_model = model_chosen("unet3d", in_chan, ou_chan, fil_num).to(device)
+        load_model = Unet(in_chan, ou_chan, fil_num).to(device)
         
         # load the pre-trained model
         load_model.load_state_dict(torch.load(init_mo_path))
         load_model.eval()
+        time.sleep(2) # wait for 2 seconds, make sure the model has been loaded
         # TODO delete this message
         print(f"The chosen model is: {init_mo_path}")
 
         # initialize optimizer & scheduler
         # TODO: check this!!!!
-        optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
+        optimizer = torch.optim.Adam(load_model.parameters(), learning_rate)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
 
         # initialize loss metric & optimizer
-        metric = loss_metric("tver")
+        metric = TverskyLoss()
         # initialize augmentation object
         aug_item = aug_utils((64,64,64), "mode1")
 

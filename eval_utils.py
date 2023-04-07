@@ -16,50 +16,7 @@ from patchify import patchify, unpatchify
 import cc3d
 
 from utils.unet_utils import *
-from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
-from models.siyu import CustomSegmentationNetwork
-from models.asppcnn import ASPPCNN
-from models.ra_unet import MainArchitecture
-
-def model_chosen(model_name, in_chan, out_chan, filter_num):
-    if model_name == "unet3d":
-        return Unet(in_chan, out_chan, filter_num)
-    elif model_name == "aspp":
-        return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
-    elif model_name == "test":
-        return CustomSegmentationNetwork()
-    elif model_name == "atrous":
-        return MainArchitecture()
-    else:
-        print("Insert a valid model name.") 
-
-def optim_chosen(optim_name, model_params, lr):
-    if optim_name == 'sgd':
-        return torch.optim.SGD(model_params, lr)
-    elif optim_name == 'adam':
-        return torch.optim.Adam(model_params, lr)
-    else:
-        print("Insert a valid optimizer name.")
-
-
-def loss_metric(metric_name):
-    """
-    :params metric_name: string, choose from the following: bce->binary cross entropy, dice->dice score 
-    """
-    # loss metric could be updated later -> split into 2 parts
-    if metric_name == "bce":
-        # binary cross entropy
-        return BCELoss()
-    elif metric_name == "dice":
-        # dice loss
-        return DiceLoss()
-    elif metric_name == "tver":
-        # tversky loss
-        return TverskyLoss()
-    else:
-        print("Enter a valid loss metric.")
-
 
 class preprocess:
     """
@@ -214,78 +171,13 @@ class testAndPostprocess:
     def __call__(self, thresh, connect_thresh, test_model_name, test_img_name):
 
         # model configuration
-        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil)
+        load_model = Unet(self.ic, self.oc, self.fil)
         model_path = test_model_name # this should be the realative path to the model
         load_model.load_state_dict(torch.load(model_path))
         load_model.eval()
 
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh)
         print("Prediction and thresholding procedure end!\n")
-
-class finetune:
-    """
-    takes the preprocessed data path and proxy path, generate all the finetuned models for each test image
-    """
-    def __init__(self, data_path, proxy_path, model_type, input_channel, output_channel, filter_number):
-        self.ds_path = data_path # processed data
-        self.px_path = proxy_path # proxy seg
-        self.out_mo_path = "./saved_models/finetuned/"
-
-        self.mo = model_type
-        self.ic = input_channel
-        self.oc = output_channel
-        self.fil = filter_number
-        self.init_mo_path = "./saved_models/" + "Init_ep1000_lr1e3_tver_2"
-        
-        
-    def __call__(self, test_img_name, learning_rate, optim_gamma, optim_patience, epoch_num):
-        print("Finetuing process starts!")
-        test_img_path = self.ds_path + test_img_name # test_img_name does include file extension
-        # find the corresponding proxy
-        assert (test_img_name in os.listdir(self.px_path)), "No such proxy file!"
-        test_px_path = self.px_path + test_img_name
-        
-        #initialize the data loader
-        data_loader = single_channel_loader(test_img_path, test_px_path, (64,64,64), epoch_num)
-
-        # initialize pre-trained model
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil).to(device)
-        load_model.load_state_dict(torch.load(self.init_mo_path))
-        load_model.eval()
-
-        # initialize optimizer & scheduler
-        optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
-    
-        # initialize loss metric & optimizer
-        metric = loss_metric("tver")
-        # initialize augmentation object
-        aug_item = aug_utils((64,64,64), "mode1")
-
-        # training loop
-        for epoch in tqdm(range(epoch_num)):
-            image, label = next(iter(data_loader))
-            image_batch, label_batch = aug_item(image, label)
-            image_batch, label_batch = image_batch.to(device), label_batch.to(device)
-
-            optimizer.zero_grad()
-        
-            # Forward pass
-            output = load_model(image_batch)
-            loss = metric(output, label_batch)
-
-            # Backward and optimize
-            loss.backward()
-            optimizer.step()
-
-            # Learning rate shceduler
-            scheduler.step(loss)
-            
-        file_name = test_img_name.split('.')[0]
-        out_mo_name = self.out_mo_path + file_name
-        torch.save(load_model.state_dict(), out_mo_name)
-        print(f"Training finished! The finetuning model of {test_img_name} successfully saved!")
 
             
             
