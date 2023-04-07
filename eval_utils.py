@@ -203,13 +203,13 @@ class testAndPostprocess:
         # reshape to original shape
         test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
         nifimg_pre = nib.Nifti1Image(test_output_sigmoid, affine, header)
-        save_img_path_pre = self.output_path + img_name + "pre"
+        save_img_path_pre = self.output_path + "pre_" + img_name  
         nib.save(nifimg_pre, save_img_path_pre)
 
         # thresholding
         postprocessed_output = self.post_processing_pipeline(test_output_sigmoid, thresh, connect_thresh)
         nifimg_post = nib.Nifti1Image(postprocessed_output, affine, header)
-        save_img_path_post = self.output_path + img_name + "post"
+        save_img_path_post = self.output_path + "post_" + img_name #img_name with extension
         nib.save(nifimg_post, save_img_path_post)
         
         print(f"Output processed {img_name} is successfully saved!\n")
