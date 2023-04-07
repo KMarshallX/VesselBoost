@@ -142,10 +142,11 @@ if __name__ == "__main__":
         # load the pre-trained model
         load_model.load_state_dict(torch.load(init_mo_path))
         load_model.eval()
+        # TODO delete this message
         print(f"The chosen model is: {init_mo_path}")
-        print(load_model.eval())
 
         # initialize optimizer & scheduler
+        # TODO: check this!!!!
         optimizer = optim_chosen('adam', load_model.parameters(), learning_rate)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=optim_gamma, patience=optim_patience)
 
@@ -173,6 +174,11 @@ if __name__ == "__main__":
 
             # Learning rate shceduler
             scheduler.step(loss)
+
+            # TODO: debug message, delete this
+            current_lr = optimizer.param_groups[0]['lr']
+            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}\n')
+            
         file_name = processed_data_list[i].split('.')[0]
         out_mo_name = out_mo_path + file_name
         torch.save(load_model.state_dict(), out_mo_name)
