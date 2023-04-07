@@ -3,7 +3,7 @@ eval.py for challenge
 last edited: 03/30/2023
 """
 from eval_utils import preprocess, testAndPostprocess, finetune
-import config
+import eval_config
 import os
 
 from utils.unet_utils import *
@@ -54,12 +54,15 @@ def loss_metric(metric_name):
 
 if __name__ == "__main__":
     # initialize command line
-    args = config.args
+    args = eval_config.args
 
     ds_path = args.ds_path # original data
     ds_path = ds_path + "test/"
     ps_path = args.ps_path # preprocessed data
     out_path = args.out_path # final segmentation
+    px_path = "./proxies/"
+    if os.path.exists(px_path) == False:
+        os.mkdir(px_path)
 
     prep_bool = args.prep_bool
     if prep_bool == "no":
@@ -97,7 +100,6 @@ if __name__ == "__main__":
         os.mkdir(out_mo_path) # make directory "./finetuned/"
 
     # thresholding values
-    
     init_thresh_vector = [0.1, 10] # initial thresholding values for predicting proxy
     final_thresh_vector = [0.1, 10] # final thresholding values for predicting segmentation
 
@@ -116,7 +118,7 @@ if __name__ == "__main__":
     prep_object(prep_bool)
     
     # prediction and postprocessing
-    pred_post_object = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path) # initialize the object
+    pred_post_object = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path) # initialize the object, takes all images from ps_path, output proxies to px_path
     # generate proxy segmentations by using the initial model - and store'em in the out_path
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
@@ -126,8 +128,8 @@ if __name__ == "__main__":
         # fintuning (generate all finetuned models)
         test_img_path = ps_path + processed_data_list[i] # path of the preprocessed image
         # find the corresponding proxy
-        assert (processed_data_list[i] in os.listdir(out_path)), "No such proxy file!"
-        test_px_path = out_path + processed_data_list[i] # path of the proxy seg
+        assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
+        test_px_path = px_path + processed_data_list[i] # path of the proxy seg
         #initialize the data loader
         data_loader = single_channel_loader(test_img_path, test_px_path, (64,64,64), epoch_num)
         # initialize pre-trained model
@@ -173,7 +175,10 @@ if __name__ == "__main__":
         model_name = "./finetuned/" + file_name
         img_name = file_name + ".nii.gz"
         print(f"Final thresholding for {file_name} will start shortly!\n")
-        pred_post_object(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)
+
+        # thresholding for the final prediction
+        pred_post_object_final = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
+        pred_post_object_final(final_thresh_vector[0], final_thresh_vector[1], model_name, img_name)
 
 
     print("The pipeline is finished!\n")
