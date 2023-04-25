@@ -37,8 +37,8 @@ parser.add_argument('--cc', type=int, default=10, help=argparse.SUPPRESS)
 parser.add_argument('--pretrained', type=str, default = "/pretrained_model_path/", help="path of the prertrained model")
 
 # Training configurations
-parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3,when training set is small, use higher learning rate, vice versa")
-parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=16")
+parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3")
+parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=5000")
 # expected size after zooming
 parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPRESS)
 
@@ -46,7 +46,7 @@ parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPR
 # Decays the learning rate of each parameter group by this ratio, dtype: float
 parser.add_argument('--optim_gamma', type=float, default=0.8, help=argparse.SUPPRESS)
 # Number of steps with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 steps with no improvement, and will only decrease the LR after the 3rd step if the loss still hasn’t improved then. Default: 10.
-parser.add_argument('--optim_patience', type=int, default=10, help=argparse.SUPPRESS)
+parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
 parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)

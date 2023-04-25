@@ -26,9 +26,7 @@ prep_mode = args.prep_mode # preprocessing mode
 # directly take the raw data for inference
 if prep_mode == 4:
     ps_path = ds_path
-px_path = args.px_path # path to proxies
-if ((px_path != None) & (os.path.exists(px_path) == False)):
-    os.mkdir(px_path)
+px_path = args.px_path # path to proxies    
 
 model_type = args.mo # model type
 in_chan = args.ic # input channel
@@ -57,13 +55,18 @@ if __name__ == "__main__":
     preprocessing = preprocess(ds_path, ps_path)
     # start or abort preprocessing 
     preprocessing(prep_mode)
-    # initialize the inference method for generating the proxies
-    inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
     # traverse each image
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
         # if the proxies are not provided, then use the pre-trained model to generate the proxies
         if px_path == None:
+            print("No proxies are provided, strating generating proxies...")
+            # make directory to proxies
+            px_path = "./proxies/"
+            if os.path.exists(px_path) == False:
+                os.mkdir(px_path)
+            # initialize the inference method for generating the proxies
+            inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
             inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
         
         # fintuning (generate all finetuned models)
