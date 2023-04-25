@@ -1,7 +1,7 @@
 """
 Provides all the utilities used in eval.py
 
-Last edited: 03/28/2023
+Last edited: 04/25/2023
 
 """
 
@@ -27,9 +27,9 @@ class preprocess:
         self.input_path = input_path
         self.output_path = output_path
 
-    def __call__(self, prep_bool):
+    def __call__(self, prep_mode):
         
-        if prep_bool == True:
+        if prep_mode != 4:
             print("The preprocessing procedure is starting!\n")
             
             # bias field correction and denoising procedure
@@ -49,10 +49,18 @@ class preprocess:
                 ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
                 ant_msk = ants.utils.get_mask(ant_img, low_thresh=ant_img.min(), high_thresh=ant_img.max())
 
-                ant_img_bfc = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
-                ant_img_denoised = ants.utils.denoise_image(image=ant_img_bfc, mask=ant_msk)
+                if prep_mode == 1:
+                    # bias field correction only
+                    ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
+                elif prep_mode == 2:
+                    # non-local denoising only
+                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk)
+                else:
+                    # bfc + denoising
+                    ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
+                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk)
 
-                bfc_denoised_arr = ant_img_denoised.numpy()
+                bfc_denoised_arr = ant_img.numpy()
                 bfc_denoised_nifti = nib.Nifti1Image(bfc_denoised_arr, affine, header)
 
                 file_name = self.output_path + raw_file_list[i]
@@ -60,7 +68,7 @@ class preprocess:
             
             print("All processed images are successfully saved!")
         
-        elif prep_bool == False:
+        elif prep_mode == 4:
             print("Aborting the preprocessing procedure!\n")
 
 
@@ -172,21 +180,12 @@ class testAndPostprocess:
 
         # model configuration
         load_model = Unet(self.ic, self.oc, self.fil)
-        model_path = test_model_name # this should be the realative path to the model
+        model_path = test_model_name # this should be the path to the model
         load_model.load_state_dict(torch.load(model_path))
         load_model.eval()
 
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh)
         print("Prediction and thresholding procedure end!\n")
 
-            
-            
 
-
-
-
-        
-
-
-        
 

@@ -2,36 +2,16 @@
 eval.py for challenge
 last edited: 03/30/2023
 """
-from eval_utils import preprocess, testAndPostprocess
-import eval_config
+
 import os
 import time
+from module_utils import preprocess, testAndPostprocess
+import eval_config
 
 from utils.unet_utils import *
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
 
-class TverskyLoss(nn.Module):
-    def __init__(self, alpha=0.3, beta=0.7, smooth=1e-3):
-        super().__init__()
-        self.alpha = alpha
-        self.beta = beta
-        self.smooth = smooth
-
-    def forward(self, pred, target):
-        pred = torch.sigmoid(pred)
-        # Flatten
-        pred = pred.reshape(-1)
-        target = target.reshape(-1)
-
-        # cardinalities
-        tp = (pred * target).sum()
-        fp = ((1-target) * pred).sum()
-        fn = (target * (1-pred)).sum()
-
-        tversky_score = (tp + self.smooth) / (tp + self.alpha*fp + self.beta*fn + self.smooth)
-
-        return 1 - tversky_score
 
 if __name__ == "__main__":
     # initialize command line
@@ -45,12 +25,9 @@ if __name__ == "__main__":
     if os.path.exists(px_path) == False:
         os.mkdir(px_path)
 
-    prep_bool = args.prep_bool
-    if prep_bool == "no":
+    prep_mode = args.prep_mode
+    if prep_mode == 4:
         ps_path = ds_path
-        prep_bool = False
-    else:
-        prep_bool = True
 
     # model configuration
     model_type = args.mo
@@ -96,7 +73,7 @@ if __name__ == "__main__":
     """
     # preprocessing - bias field correct and denoise all the raw data and store'em in the ps_path
     prep_object = preprocess(ds_path, ps_path)
-    prep_object(prep_bool)
+    prep_object(prep_mode)
     
     # prediction and postprocessing
     pred_post_object = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path) # initialize the object, takes all images from ps_path, output proxies to px_path
@@ -108,7 +85,6 @@ if __name__ == "__main__":
     
         # fintuning (generate all finetuned models)
         test_img_path = ps_path + processed_data_list[i] # path of the preprocessed image
-        
         # find the corresponding proxy
         assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
         test_px_path = px_path + processed_data_list[i] # path of the proxy seg

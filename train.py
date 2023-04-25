@@ -2,10 +2,10 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 03/14/2023
+Last Edited: 04/25/2023
 """
 
-import config
+import train_config
 import torch
 from tqdm import tqdm
 import os
@@ -13,17 +13,15 @@ import os
 from utils.unet_utils import *
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
-from models.test_model import test_mo
 from models.asppcnn import ASPPCNN
 from models.siyu import CustomSegmentationNetwork
 from models.ra_unet import MainArchitecture
+from module_utils import preprocess
 
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
     if model_name == "unet3d":
         return Unet(in_chan, out_chan, filter_num)
-    elif model_name == "test_mo": # discarded
-        return test_mo(in_chan, out_chan, filter_num)
     elif model_name == "aspp":
         return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
     elif model_name == "test": # another aspp
@@ -40,7 +38,6 @@ def optim_chosen(optim_name, model_params, lr):
         return torch.optim.Adam(model_params, lr)
     else:
         print("Insert a valid optimizer name.")
-
 
 def loss_metric(metric_name):
     """
@@ -59,38 +56,42 @@ def loss_metric(metric_name):
     else:
         print("Enter a valid loss metric.")
 
+args = train_config.args
+# input images & labels
+raw_img = args.inimg
+processed_img = args.ps_path
+seg_img = args.inlab
+prep_mode = args.prep_mode
+# when the preprocess is skipped, 
+# directly take the raw data for inference
+if prep_mode == 4:
+    processed_img = raw_img
+# loss
+loss_name = args.loss_m
+metric = loss_metric(loss_name)
+#epoch number
+epoch_num = args.ep
+# hardware config
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# model configuration
+model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
+# optimizer
+op_name = args.op
+optimizer = optim_chosen(op_name, model.parameters(), args.lr)
+# set optim scheduler
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=args.optim_gamma, patience=args.optim_patience)
+# initialize the augmentation method
+aug_item = aug_utils(args.osz, args.aug_mode)
+
 
 if __name__ == "__main__":
-    args = config.args
 
-    # hardware config
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # initialize the preprocessing method with input/output paths
+    preprocessing = preprocess(raw_img, processed_img)
+    # start or abort preprocessing 
+    preprocessing(prep_mode)
 
-    # input images & labels
-    raw_img = args.inimg
-    seg_img = args.inlab
-    
-    # model configuration
-    model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
-
-    # loss
-    loss_name = args.loss_m
-    metric = loss_metric(loss_name)
-
-    # optimizer
-    op_name = args.op
-    optimizer = optim_chosen(op_name, model.parameters(), args.lr)
-    # set optim scheduler
-    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.optim_step, gamma=args.optim_gamma)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=args.optim_gamma, patience=args.optim_patience)
-
-    #epoch number
-    epoch_num = args.ep
-
-    # initialize the augmentation method
-    aug_item = aug_utils(args.osz, args.aug_mode)
-
-    raw_file_list = os.listdir(raw_img)
+    raw_file_list = os.listdir(processed_img)
     seg_file_list = os.listdir(seg_img)
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
     file_num = len(raw_file_list)
@@ -100,9 +101,8 @@ if __name__ == "__main__":
     
     # traning loop (this could be separate out )
     for idx in tqdm(range(file_num)):
-        loss_mean = 0
 
-        raw_arr_name = raw_img + raw_file_list[idx]
+        raw_arr_name = processed_img + raw_file_list[idx]
         seg_arr_name = seg_img + seg_file_list[idx]
         print(f"Current training image: {raw_arr_name}, current training label: {seg_arr_name}")      
         # initialize single channel data loader
@@ -111,7 +111,6 @@ if __name__ == "__main__":
         for epoch in tqdm(range(epoch_num)):
             
             image, label = next(iter(single_chan_loader))
-            
             image_batch, label_batch = aug_item(image, label)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
@@ -125,24 +124,19 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
 
-            loss_mean = loss_mean + loss.item()
-            current_lr = optimizer.param_groups[0]['lr']
-
             # Learning rate shceduler
             scheduler.step(loss)
 
-            print(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}\n')
-        
-        
+            current_lr = optimizer.param_groups[0]['lr']
+            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
 
-        print(f' File number [{idx+1}/{file_num}], Average Loss of this iteration: {loss_mean/epoch_num:.4f}')
-
-    print("Finished Training!")
+        tqdm.write(f'File number [{idx+1}/{file_num}]')
+    print("Training finished! Please wait for the model to be saved!")
 
     # save the model
     saved_model_path = args.outmo
     torch.save(model.state_dict(), saved_model_path)
-    print("Model successfully saved!")
+    print(f"Model successfully saved! The location of the saved model is: {saved_model_path}")
 
     
 
