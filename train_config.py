@@ -16,7 +16,7 @@ parser.add_argument('--inlab', default = "./data/seg/", help="input ground truth
 parser.add_argument('--ps_path', type=str, default = "/preprocessed_path/", help="path of the preprocessed data")
 
 # preprocessing mode
-parser.add_argument('--prep_mode', type=int, default=3, help="Preprocessing mode options. prep_mode=1 : bias field correction only | prep_mode=2 : denoising only | prep_mode=3 : bfc + denoising | prep_mode=4 : no preprocessing applied")
+parser.add_argument('--prep_mode', type=int, default=4, help="Preprocessing mode options. prep_mode=1 : bias field correction only | prep_mode=2 : denoising only | prep_mode=3 : bfc + denoising | prep_mode=4 : no preprocessing applied")
 
 # The following needs to be changed manually (for now)
 parser.add_argument('--outmo', default = "./saved_models/model", help="output model path, e.g. ./saved_models/xxxxx")

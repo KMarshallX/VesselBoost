@@ -15,7 +15,7 @@ parser.add_argument('--ps_path', type=str, default = "/preprocessed_path/", help
 parser.add_argument('--out_path', type=str, default = "/out_path/", help="path of the output segmentation")
 
 # preprocessing mode
-parser.add_argument('--prep_mode', type=int, default=3, help="Preprocessing mode options. prep_mode=1 : bias field correction only | prep_mode=2 : denoising only | prep_mode=3 : bfc + denoising | prep_mode=4 : no preprocessing applied")
+parser.add_argument('--prep_mode', type=int, default=4, help="Preprocessing mode options. prep_mode=1 : bias field correction only | prep_mode=2 : denoising only | prep_mode=3 : bfc + denoising | prep_mode=4 : no preprocessing applied")
 
 # model configuration
 # model name
