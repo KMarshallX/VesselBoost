@@ -23,9 +23,13 @@
 2. Train.py & Retrain.py: deprecated step learning rate scheduler, implemented ReduceLROnPlateau scheduler
 3. Retrain.py: save the checkpoint (dictionary state) every 1000 epoch. Note: if the total epoch number % 1000 == 0, then the last two saved checkpoints would be the same.
 
-### 03/28/2023
+### 03/28/2023:
 1. new eval.py
 ![eval](./readme_img/eval.jpg)
+
+### 04/25/2023:
+1. remove eval.py and eval_utils.py
+2. updated train.py 
 
 
 ## **Before continue reading**
