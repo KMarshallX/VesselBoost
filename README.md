@@ -26,7 +26,7 @@ This is a Pytorch based project, for successfully running this project on your l
     $ cd ./vessel_code
     $ pip install -r requirements.txt
     ```
-Done. Happy tuning! :innocent:
+Done. Happy tuning!
 
 ## **Purpose**
 ...
