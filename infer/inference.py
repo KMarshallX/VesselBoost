@@ -8,9 +8,12 @@ Last edited: 04/24/2023
 
 import os
 import infer_config
-from module_utils import preprocess, testAndPostprocess
+import sys
+SCRIPT_DIR = os.path.dirname(os.path.abspath("./infer/inference.py/"))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+from utils.module_utils import preprocess, testAndPostprocess
 
-args = infer_config.args
+args = infer_config.infer_parser.parse_args()
 
 ds_path = args.ds_path # path to original data
 ps_path = args.ps_path # path to preprocessed data
@@ -30,6 +33,8 @@ threshold_vector = [args.thresh, args.cc]
 pretrained_model = args.pretrained # path to pretrained model
 
 if __name__ == "__main__":
+
+    print("Inference session will start shortly..")
 
     # initialize the preprocessing method with input/output paths
     preprocessing = preprocess(ds_path, ps_path)

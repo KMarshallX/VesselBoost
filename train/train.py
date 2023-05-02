@@ -9,14 +9,17 @@ import train_config
 import torch
 from tqdm import tqdm
 import os
+import sys
+SCRIPT_DIR = os.path.dirname(os.path.abspath("./train/train.py/"))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from utils.unet_utils import *
+from utils.module_utils import * 
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
 from models.asppcnn import ASPPCNN
 from models.siyu import CustomSegmentationNetwork
 from models.ra_unet import MainArchitecture
-from module_utils import preprocess
+from utils.module_utils import preprocess
 
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
@@ -85,6 +88,7 @@ aug_item = aug_utils(args.osz, args.aug_mode)
 
 
 if __name__ == "__main__":
+    print("Training session will start shortly..")
 
     # initialize the preprocessing method with input/output paths
     preprocessing = preprocess(raw_img, processed_img)
@@ -95,15 +99,16 @@ if __name__ == "__main__":
     seg_file_list = os.listdir(seg_img)
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
     file_num = len(raw_file_list)
-    # sort the file names
-    raw_file_list.sort(key=lambda x:int(x[:2]))
-    seg_file_list.sort(key=lambda x:int(x[:2]))
     
     # traning loop (this could be separate out )
     for idx in tqdm(range(file_num)):
 
         raw_arr_name = processed_img + raw_file_list[idx]
-        seg_arr_name = seg_img + seg_file_list[idx]
+        for i in range(file_num):
+            if seg_file_list[i].find(raw_file_list[idx].split('.')[0]) != -1:
+                seg_arr_name = seg_img + seg_file_list[i]
+                break
+        assert (seg_arr_name != None), f"There is no corresponding label to {raw_file_list[idx]}!"
         print(f"Current training image: {raw_arr_name}, current training label: {seg_arr_name}")      
         # initialize single channel data loader
         single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)

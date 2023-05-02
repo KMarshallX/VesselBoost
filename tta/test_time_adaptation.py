@@ -6,13 +6,16 @@ Last Edited: 04/25/2023
 """
 
 import os
+import shutil
 import adapt_config
+import sys
+SCRIPT_DIR = os.path.dirname(os.path.abspath("./tta/test_time_adaptation.py/"))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from module_utils import preprocess, testAndPostprocess
+from utils.module_utils import preprocess, testAndPostprocess
 from utils.unet_utils import *
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
-from module_utils import preprocess
 
 args = adapt_config.args
 
@@ -49,7 +52,12 @@ out_mo_path = "./finetuned/"
 if os.path.exists(out_mo_path)==False:
     os.mkdir(out_mo_path) # make directory "./finetuned/"
 
+# Resource optimization flag
+resource_opt = args.resource
+
 if __name__ == "__main__":
+
+    print("TTA session will start shortly..")
 
     # initialize the preprocessing method with input/output paths
     preprocessing = preprocess(ds_path, ps_path)
@@ -135,6 +143,16 @@ if __name__ == "__main__":
         inference_postpo_final(threshold_vector[0], threshold_vector[1], model_name, processed_data_list[i])
     
     print("The test-time adaptation is finished!\n")
+
+    # checking the resource optimization flag
+    if resource_opt == 0:
+        print("Resource optimization is disabled, all intermediate files are saved locally!")
+    elif (resource_opt == 1 and px_path == "./proxies/"):
+        shutil.rmtree(px_path) # clear all the proxies
+        shutil.rmtree(out_mo_path) # clear all the finetuned models
+        print("Intermediate files have been cleaned!")
+
+
 
 
 
