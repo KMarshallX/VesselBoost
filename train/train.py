@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
+
 """
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
 Last Edited: 04/25/2023
 """
-
 import train_config
 import torch
 from tqdm import tqdm

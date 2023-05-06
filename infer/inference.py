@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Inference using provided pre-trained model
 
