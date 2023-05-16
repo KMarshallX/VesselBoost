@@ -2,8 +2,9 @@
 argparse configuration for train.py
 
 Editor: Marshall Xu
-Last Edited: 04/25/2023 MM/DD/YYYY
+Last Edited: 05/16/2023 MM/DD/YYYY
 """
+#@TODO: remember change the optim_patience
 
 import argparse
 
