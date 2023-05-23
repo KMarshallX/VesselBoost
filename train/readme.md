@@ -21,14 +21,14 @@ e.g.:\
 ├─readme_img
 ├─saved_image
 ├─saved_models
-│  └─pre-trained models
+│  └─<pre-trained models>
 ├─train
 ├─tta
 └─utils
 ```
 
 ### Then run the script:
-```
+```bash
 # Move from ./vessel_code to ./vessel_code/train
 $ cd train
 
