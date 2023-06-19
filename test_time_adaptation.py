@@ -80,6 +80,7 @@ if __name__ == "__main__":
         test_img_path = ps_path + processed_data_list[i] # path of the preprocessed image
         # find the corresponding proxy
         assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
+        print("Proxies are provided!")
         test_px_path = px_path + processed_data_list[i] # path of the proxy seg
         
         #initialize the data loader
@@ -145,7 +146,9 @@ if __name__ == "__main__":
 
     # checking the resource optimization flag
     if resource_opt == 0:
-        print("Resource optimization is disabled, all intermediate files are saved locally!")
+        print("Resource optimization is disabled, all intermediate files are saved locally!\n")
+        print("Finetuned model -> ./finetuned/\n")
+        print("Intermediate proxy -> ./proxies/\n")
     elif (resource_opt == 1 and px_path == "./proxies/"):
         shutil.rmtree(px_path) # clear all the proxies
         shutil.rmtree(out_mo_path) # clear all the finetuned models
