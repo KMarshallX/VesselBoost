@@ -10,11 +10,6 @@ Last Edited: 06/19/2023
 import os
 import shutil
 import adapt_config
-import sys
-SCRIPT_DIR = os.path.dirname(os.path.abspath("./tta/test_time_adaptation.py/"))
-print(SCRIPT_DIR)
-sys.path.append("..")
-
 
 from utils.module_utils import preprocess, testAndPostprocess
 from utils.unet_utils import *
