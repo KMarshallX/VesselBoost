@@ -31,9 +31,9 @@ Done. Happy tuning!
 ## **Purpose**
 *Vessel Boost* is a UNet3D-based segmentation pipeline utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
 This repository contains 3 major modules: 
-1. [Initial training](https://github.com/KMarshallX/vessel_code/tree/master/train). You can use this module to train your own base model.
-2. [Inference](https://github.com/KMarshallX/vessel_code/tree/master/infer). This module takes one pre-trained model and infer on the MRA data you provide. Can be used to generate intermediate proxy segmentation as well as the final inference.
-3. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/tree/master/tta). This module takes a base model, and you can choose to feed proxies or not. If no proxies are provided, this module will generate proxies automatically.
+1. [Initial training](https://github.com/KMarshallX/vessel_code/blob/master/train_readme.md). You can use this module to train your own base model.
+2. [Inference](https://github.com/KMarshallX/vessel_code/blob/master/infer_readme.md). This module takes one pre-trained model and infer on the MRA data you provide. Can be used to generate intermediate proxy segmentation as well as the final inference.
+3. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/tta_readme.md). This module takes a base model, and you can choose to feed proxies or not. If no proxies are provided, this module will generate proxies automatically.
 
 ## **Feature Overview**
 ### *Pipeline overview*
