@@ -11,9 +11,7 @@ We are currently provide 3 pre-trained models, you can download them to make inf
 # download the pre-trained model
 ~/vessel_code$ cd saved_models/
 ~/vessel_code/saved_models$ osf -p jg7cr fetch /saved_models/Init_ep1000_lr1e3_tver
-
-# wait for the model to be download and enter tta module directory
-~/vessel_code/saved_models$ cd ../tta/
+# now wait for the model to be download and enter tta module directory
 ```
 
 ### **Test-time adpatation without providing proxy segmentation**
