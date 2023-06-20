@@ -19,4 +19,4 @@ dependencies:
     - tqdm==4.64.1
     - antspyx==0.3.7
     - connected-components-3d==3.10.5
-    - osfclient==0.5.0
+    - osfclient==0.0.5
