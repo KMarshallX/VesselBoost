@@ -9,10 +9,6 @@ Last Edited: 06/19/2023
 import train_config
 import torch
 from tqdm import tqdm
-import os
-import sys
-SCRIPT_DIR = os.path.dirname(os.path.abspath("./train/train.py/"))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from utils.module_utils import * 
 from utils.new_data_loader import single_channel_loader
