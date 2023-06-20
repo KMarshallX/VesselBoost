@@ -29,9 +29,6 @@ e.g.:\
 
 ### Then run the script:
 ```bash
-# Move from ./vessel_code to ./vessel_code/train
-$ cd train
-
 # Set the necessary parameters
 # If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images
 $ python train.py --inimg <path_to_input_image> --inlab <path_to_input_label> --prep_mode 4 --ep 5000 --lr 1e-3 --outmo <path_to_output_model>
