@@ -43,9 +43,10 @@ train_parser.add_argument('--loss_m', type=str, default="tver", help=argparse.SU
 
 # Optimizer tuning
 # Decays the learning rate of each parameter group by this ratio, dtype: float
-train_parser.add_argument('--optim_gamma', type=float, default=0.8, help=argparse.SUPPRESS)
+train_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argparse.SUPPRESS)
 # Number of steps with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 steps with no improvement, and will only decrease the LR after the 3rd step if the loss still hasn’t improved then. Default: 10.
-train_parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
+# Discarded feature (06/20/2023)
+# train_parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
 train_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)

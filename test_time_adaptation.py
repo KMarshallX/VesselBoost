@@ -10,6 +10,7 @@ Last Edited: 06/19/2023
 import os
 import shutil
 import adapt_config
+import numpy as np
 
 from utils.module_utils import preprocess, testAndPostprocess
 from utils.unet_utils import *
@@ -41,8 +42,8 @@ pretrained_model = args.pretrained # path to pretrained model
 # finetuning hyperparams
 learning_rate = args.lr
 optim_gamma = args.optim_gamma
-optim_patience = args.optim_patience
 epoch_num = args.ep
+optim_patience = np.int64(np.ceil(epoch_num * 0.2)) 
 patch_size = args.osz
 aug_mode = args.aug_mode
 

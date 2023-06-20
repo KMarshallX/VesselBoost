@@ -83,7 +83,9 @@ model = model_chosen(args.mo, args.ic, args.oc, args.fil).to(device)
 op_name = args.op
 optimizer = optim_chosen(op_name, model.parameters(), args.lr)
 # set optim scheduler
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=args.optim_gamma, patience=args.optim_patience)
+optim_gamma = args.optim_gamma
+optim_patience = np.int64(np.ceil(epoch_num * 0.2)) 
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = optim_gamma, patience = optim_patience)
 # initialize the augmentation method
 aug_item = aug_utils(args.osz, args.aug_mode)
 
