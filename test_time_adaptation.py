@@ -4,7 +4,7 @@
 Test time adpatation module
 
 Editor: Marshall Xu
-Last Edited: 06/19/2023
+Last Edited: 06/27/2023
 """
 
 import os
@@ -48,7 +48,7 @@ patch_size = args.osz
 aug_mode = args.aug_mode
 
 # output fintuned model path
-out_mo_path = "./finetuned/"
+out_mo_path = "/home/jovyan/Desktop/eval_data/finetuned/"
 if os.path.exists(out_mo_path)==False:
     os.mkdir(out_mo_path) # make directory "./finetuned/"
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         if px_path == None:
             print("No proxies are provided, strating generating proxies...")
             # make directory to proxies
-            px_path = "./proxies/"
+            px_path = "/home/jovyan/Desktop/eval_data/proxies/"
             if os.path.exists(px_path) == False:
                 os.mkdir(px_path)
             # initialize the inference method for generating the proxies
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         torch.save(load_model.state_dict(), out_mo_name)
         print(f"Training finished! The finetuning model of {file_name} successfully saved!\n")
 
-        model_name = "./finetuned/" + file_name
+        model_name = "/home/jovyan/Desktop/eval_data/finetuned/" + file_name
         img_name = file_name + ".nii.gz"
         
         # inference by using the finetuned model
@@ -148,9 +148,9 @@ if __name__ == "__main__":
     # checking the resource optimization flag
     if resource_opt == 0:
         print("Resource optimization is disabled, all intermediate files are saved locally!\n")
-        print("Finetuned model -> ./finetuned/\n")
-        print("Intermediate proxy -> ./proxies/\n")
-    elif (resource_opt == 1 and px_path == "./proxies/"):
+        print("Finetuned model -> /home/jovyan/Desktop/eval_data/finetuned/\n")
+        print("Intermediate proxy -> /home/jovyan/Desktop/eval_data/proxies/\n")
+    elif (resource_opt == 1 and px_path == "/home/jovyan/Desktop/eval_data/proxies/"):
         shutil.rmtree(px_path) # clear all the proxies
         shutil.rmtree(out_mo_path) # clear all the finetuned models
         print("Intermediate files have been cleaned!")
