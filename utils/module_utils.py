@@ -181,7 +181,10 @@ class testAndPostprocess:
         # model configuration
         load_model = Unet(self.ic, self.oc, self.fil)
         model_path = test_model_name # this should be the path to the model
-        load_model.load_state_dict(torch.load(model_path))
+        if torch.cuda.is_available() == True:
+            load_model.load_state_dict(torch.load(model_path))
+        else:
+            load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         load_model.eval()
 
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh)

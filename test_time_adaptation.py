@@ -22,8 +22,8 @@ args = adapt_config.args
 ds_path = args.ds_path # path to original data
 ps_path = args.ps_path # path to preprocessed data
 out_path = args.out_path # path to infered data
-if os.path.exists(out_path)==False:
-    os.mkdir(out_path)
+assert os.path.exists(out_path) == True, "Output path doesn't exist, check the command."
+
 prep_mode = args.prep_mode # preprocessing mode
 # when the preprocess is skipped, 
 # directly take the raw data for inference
@@ -48,9 +48,8 @@ patch_size = args.osz
 aug_mode = args.aug_mode
 
 # output fintuned model path
-out_mo_path = "/home/jovyan/Desktop/eval_data/finetuned/"
-if os.path.exists(out_mo_path)==False:
-    os.mkdir(out_mo_path) # make directory "./finetuned/"
+out_mo_path = "./finetuned/"
+assert os.path.exists(out_mo_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 # Resource optimization flag
 resource_opt = args.resource
@@ -70,9 +69,9 @@ if __name__ == "__main__":
         if px_path == None:
             print("No proxies are provided, strating generating proxies...")
             # make directory to proxies
-            px_path = "/home/jovyan/Desktop/eval_data/proxies/"
-            if os.path.exists(px_path) == False:
-                os.mkdir(px_path)
+            px_path = "./proxies/"
+            assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
+
             # initialize the inference method for generating the proxies
             inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
             inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
@@ -148,9 +147,9 @@ if __name__ == "__main__":
     # checking the resource optimization flag
     if resource_opt == 0:
         print("Resource optimization is disabled, all intermediate files are saved locally!\n")
-        print("Finetuned model -> /home/jovyan/Desktop/eval_data/finetuned/\n")
-        print("Intermediate proxy -> /home/jovyan/Desktop/eval_data/proxies/\n")
-    elif (resource_opt == 1 and px_path == "/home/jovyan/Desktop/eval_data/proxies/"):
+        print("Finetuned model -> ./finetuned/\n")
+        print("Intermediate proxy -> ./proxies/\n")
+    elif (resource_opt == 1 and px_path == "./proxies/"):
         shutil.rmtree(px_path) # clear all the proxies
         shutil.rmtree(out_mo_path) # clear all the finetuned models
         print("Intermediate files have been cleaned!")
