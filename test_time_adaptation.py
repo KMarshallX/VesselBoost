@@ -91,7 +91,10 @@ if __name__ == "__main__":
         load_model = Unet(in_chan, ou_chan, fil_num).to(device)
 
         # load the pre-trained model
-        load_model.load_state_dict(torch.load(pretrained_model))
+        if torch.cuda.is_available() == True:
+            load_model.load_state_dict(torch.load(pretrained_model))
+        else:
+            load_model.load_state_dict(torch.load(pretrained_model, map_location=torch.device('cpu')))
         load_model.eval()
         print(f"The chosen model is: {pretrained_model}")
 
