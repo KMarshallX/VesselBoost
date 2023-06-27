@@ -138,7 +138,7 @@ if __name__ == "__main__":
         torch.save(load_model.state_dict(), out_mo_name)
         print(f"Training finished! The finetuning model of {file_name} successfully saved!\n")
 
-        model_name = "/home/jovyan/Desktop/eval_data/finetuned/" + file_name
+        model_name = "./finetuned/" + file_name
         img_name = file_name + ".nii.gz"
         
         # inference by using the finetuned model
