@@ -182,8 +182,10 @@ class testAndPostprocess:
         load_model = Unet(self.ic, self.oc, self.fil)
         model_path = test_model_name # this should be the path to the model
         if torch.cuda.is_available() == True:
+            print("Running with GPU")
             load_model.load_state_dict(torch.load(model_path))
         else:
+            print("Running with CPU")
             load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         load_model.eval()
 

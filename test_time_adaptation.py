@@ -92,8 +92,10 @@ if __name__ == "__main__":
 
         # load the pre-trained model
         if torch.cuda.is_available() == True:
+            print("Running with GPU")
             load_model.load_state_dict(torch.load(pretrained_model))
         else:
+            print("Running with CPU")
             load_model.load_state_dict(torch.load(pretrained_model, map_location=torch.device('cpu')))
         load_model.eval()
         print(f"The chosen model is: {pretrained_model}")
