@@ -4,7 +4,7 @@
 Test time adpatation module
 
 Editor: Marshall Xu
-Last Edited: 06/27/2023
+Last Edited: 06/29/2023
 """
 
 import os
@@ -29,7 +29,11 @@ prep_mode = args.prep_mode # preprocessing mode
 # directly take the raw data for inference
 if prep_mode == 4:
     ps_path = ds_path
-px_path = args.px_path # path to proxies    
+
+# path to proxies
+px_path = out_path + "proxies/"     
+os.mkdir(px_path) # create an intermediate output folder inside the output path
+assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 model_type = args.mo # model type
 in_chan = args.ic # input channel
@@ -48,7 +52,8 @@ patch_size = args.osz
 aug_mode = args.aug_mode
 
 # output fintuned model path
-out_mo_path = "./finetuned/"
+out_mo_path = out_path + "finetuned/"
+os.mkdir(out_mo_path) # create an intermediate output folder inside the output path
 assert os.path.exists(out_mo_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 # Resource optimization flag
@@ -65,13 +70,10 @@ if __name__ == "__main__":
     # traverse each image
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
-        # if the proxies are not provided, then use the pre-trained model to generate the proxies
-        if px_path == None:
+        # if the proxies are not provided, 
+        # then use the pre-trained model to generate the proxies
+        if len(os.listdir(px_path)) != len(os.listdir(ds_path)):
             print("No proxies are provided, strating generating proxies...")
-            # make directory to proxies
-            px_path = "./proxies/"
-            assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
-
             # initialize the inference method for generating the proxies
             inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
             inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
@@ -137,23 +139,20 @@ if __name__ == "__main__":
         out_mo_name = out_mo_path + file_name
         torch.save(load_model.state_dict(), out_mo_name)
         print(f"Training finished! The finetuning model of {file_name} successfully saved!\n")
-
-        model_name = "./finetuned/" + file_name
-        img_name = file_name + ".nii.gz"
         
         # inference by using the finetuned model
         print(f"Final thresholding for {file_name} will start shortly!\n")
         # initialize the inference method for generating the proxies
         inference_postpo_final = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
-        inference_postpo_final(threshold_vector[0], threshold_vector[1], model_name, processed_data_list[i])
+        inference_postpo_final(threshold_vector[0], threshold_vector[1], out_mo_name, processed_data_list[i])
     
     print("The test-time adaptation is finished!\n")
 
     # checking the resource optimization flag
     if resource_opt == 0:
         print("Resource optimization is disabled, all intermediate files are saved locally!\n")
-        print("Finetuned model -> ./finetuned/\n")
-        print("Intermediate proxy -> ./proxies/\n")
+        print(f"Finetuned model -> {out_mo_path}\n")
+        print(f"Intermediate proxy -> {px_path}\n")
     elif (resource_opt == 1 and px_path == "./proxies/"):
         shutil.rmtree(px_path) # clear all the proxies
         shutil.rmtree(out_mo_path) # clear all the finetuned models
