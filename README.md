@@ -29,18 +29,18 @@ This is a Pytorch based project, for successfully running this project on your l
 Done. Happy tuning!
 
 ## **Purpose**
-*Vessel Boost* is a UNet3D-based segmentation pipeline utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
+*Vessel Boost* is a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
 This repository contains 3 major modules: 
 1. [Initial training](https://github.com/KMarshallX/vessel_code/blob/master/train_readme.md). You can use this module to train your own base model.
-2. [Inference](https://github.com/KMarshallX/vessel_code/blob/master/infer_readme.md). This module takes one pre-trained model and infer on the MRA data you provide. Can be used to generate intermediate proxy segmentation as well as the final inference.
-3. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/tta_readme.md). This module takes a base model, and you can choose to feed proxies or not. If no proxies are provided, this module will generate proxies automatically.
+2. [Inference](https://github.com/KMarshallX/vessel_code/blob/master/infer_readme.md). This module takes one pre-trained model for inference on the MRA data you provide. It can be used to generate intermediate proxy segmentations as well as the final ones.
+3. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/tta_readme.md). This module takes a pre-trained model and specified proxies for model adaptation. If no proxies are provided, this module will generate proxies automatically.
 
 ## **Feature Overview**
 ### *Pipeline overview*
 <p align="center">
 <img src="./readme_img/overall_flowchart_2.png">
 </p>
-The complete pipeline will firstly train an intial model on the provided high resolution MRAs, or you can directly use our pretrained models. The pretrained models will be used to infer intermediate segmentations (proxies) of the images you want to process. Lastly, a test-time-adaptation (TTA) process will conduct based on the chosen pretrained model and the proxies it generates.
+The complete pipeline will firstly train an intial model on the provided high resolution MRAs, or you can directly use our pre-trained models. The pre-trained models will be used to infer intermediate segmentations (proxies) of the images you want to process. Lastly, a test-time-adaptation (TTA) process will be conducted based on the chosen pre-trained model and proxies.
 
 
 ## **Citation**
