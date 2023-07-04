@@ -4,7 +4,7 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 06/19/2023
+Last Edited: 07/04/2023
 """
 import train_config
 import torch

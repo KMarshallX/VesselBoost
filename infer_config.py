@@ -2,7 +2,7 @@
 argparse configuration for inference.py
 
 Editor: Marshall Xu
-Last Edited: 04/24/2023 MM/DD/YYYY
+Last Edited: 07/04/2023 MM/DD/YYYY
 """
 
 import argparse
