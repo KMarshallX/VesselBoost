@@ -102,10 +102,10 @@ if __name__ == "__main__":
     # traning loop (this could be separate out )
     for idx in tqdm(range(file_num)):
 
-        raw_arr_name = processed_img + raw_file_list[idx]
+        raw_arr_name = os.path.join(processed_img, raw_file_list[idx])
         for i in range(file_num):
             if seg_file_list[i].find(raw_file_list[idx].split('.')[0]) != -1:
-                seg_arr_name = seg_img + seg_file_list[i]
+                seg_arr_name = os.path.join(seg_img, seg_file_list[i])
                 break
         assert (seg_arr_name != None), f"There is no corresponding label to {raw_file_list[idx]}!"
         print(f"Current training image: {raw_arr_name}, current training label: {seg_arr_name}")      

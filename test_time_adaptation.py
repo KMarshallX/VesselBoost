@@ -83,11 +83,11 @@ if __name__ == "__main__":
             inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
         
         # fintuning (generate all finetuned models)
-        test_img_path = ps_path + processed_data_list[i] # path of the preprocessed image
+        test_img_path = os.path.join(ps_path, processed_data_list[i]) # path of the preprocessed image
         # find the corresponding proxy
         assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
         print("Proxies are provided!")
-        test_px_path = px_path + processed_data_list[i] # path of the proxy seg
+        test_px_path = os.path.join(px_path, processed_data_list[i]) # path of the proxy seg
         
         #initialize the data loader
         data_loader = single_channel_loader(test_img_path, test_px_path, patch_size, epoch_num)
@@ -140,7 +140,7 @@ if __name__ == "__main__":
             tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
 
         file_name = processed_data_list[i].split('.')[0]
-        out_mo_name = out_mo_path + file_name
+        out_mo_name = os.path.join(out_mo_path, file_name)
         torch.save(load_model.state_dict(), out_mo_name)
         print(f"Training finished! The finetuning model of {file_name} successfully saved!\n")
         
