@@ -17,6 +17,11 @@ args = infer_config.infer_parser.parse_args()
 ds_path = args.ds_path # path to original data
 ps_path = args.ps_path # path to preprocessed data
 out_path = args.out_path # path to infered data
+if os.path.exists(out_path) == False:
+    print(f"{out_path} does not exist.")
+    os.mkdir(out_path)
+    print(f"{out_path} has been created!")
+
 prep_mode = args.prep_mode # preprocessing mode
 # when the preprocess is skipped, 
 # directly take the raw data for inference

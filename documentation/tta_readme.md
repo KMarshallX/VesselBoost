@@ -19,19 +19,19 @@ You could apply this module directly on your on data without providing the proxy
 ```bash
 # Set the necessary parameters
 # If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images
-$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --pretrained "../saved_models/Init_ep1000_lr1e3_tver" --prep_mode 4 --ep 5000 --lr 1e-3 
+$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --pretrained <path_to_pretrained_model + model_name> --prep_mode 4 --ep 5000 --lr 1e-3 
 
 # If you set prep_mode to 1,2 or 3, which means both/one of denosing and N4 bias field correction will happen, then you have to set a path to store the preprocessed images
-$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained "../saved_models/Init_ep1000_lr1e3_tver" --prep_mode 4 --ep 5000 --lr 1e-3 
+$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained <path_to_pretrained_model + model_name> --prep_mode 4 --ep 5000 --lr 1e-3 
 
 ```
 ### **Test-time adpatation with provided proxy segmentation**
 ```bash
 # Set the necessary parameters
 # If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images
-$ python test_time_adaptation.py --ds_path <path_to_input_image> --px_path <path_to_proxy_segmentation> --out_path <path_to_output_image> --pretrained "../saved_models/Init_ep1000_lr1e3_tver" --prep_mode 4 --ep 5000 --lr 1e-3 
+$ python test_time_adaptation.py --ds_path <path_to_input_image> --px_path <path_to_proxy_segmentation> --out_path <path_to_output_image> --pretrained <path_to_pretrained_model + model_name> --prep_mode 4 --ep 5000 --lr 1e-3 
 
 # If you set prep_mode to 1,2 or 3, which means both/one of denosing and N4 bias field correction will happen, then you have to set a path to store the preprocessed images
-$ python test_time_adaptation.py --ds_path <path_to_input_image> --px_path <path_to_proxy_segmentation> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained "../saved_models/Init_ep1000_lr1e3_tver" --prep_mode 4 --ep 5000 --lr 1e-3 
+$ python test_time_adaptation.py --ds_path <path_to_input_image> --px_path <path_to_proxy_segmentation> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained <path_to_pretrained_model + model_name> --prep_mode 4 --ep 5000 --lr 1e-3 
 
 ```

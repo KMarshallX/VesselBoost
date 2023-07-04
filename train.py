@@ -58,9 +58,9 @@ def loss_metric(metric_name):
 
 args = train_config.args
 # input images & labels
-raw_img = args.inimg
+raw_img = args.ds_path
 processed_img = args.ps_path
-seg_img = args.inlab
+seg_img = args.lb_path
 prep_mode = args.prep_mode
 # when the preprocess is skipped, 
 # directly take the raw data for inference

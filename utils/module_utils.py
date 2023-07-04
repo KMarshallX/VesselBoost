@@ -40,7 +40,7 @@ class preprocess:
             file_num = len(raw_file_list)
             for i in tqdm(range(file_num)):
 
-                test_data_path = self.input_path + raw_file_list[i]
+                test_data_path = os.path.join(self.input_path, raw_file_list[i])
 
                 test_img = nib.load(test_data_path)
                 header = test_img.header
@@ -63,7 +63,7 @@ class preprocess:
                 bfc_denoised_arr = ant_img.numpy()
                 bfc_denoised_nifti = nib.Nifti1Image(bfc_denoised_arr, affine, header)
 
-                file_name = self.output_path + raw_file_list[i]
+                file_name = os.path.join(self.output_path, raw_file_list[i])
                 nib.save(bfc_denoised_nifti, filename=file_name)
             
             print("All processed images are successfully saved!")
@@ -132,7 +132,7 @@ class testAndPostprocess:
     
     def one_img_process(self, img_name, load_model, thresh, connect_thresh):
         # Load data
-        raw_img_path = self.input_path + img_name # should be full path
+        raw_img_path = os.path.join(self.input_path, img_name) # should be full path
 
         raw_img = nib.load(raw_img_path)
         header = raw_img.header
@@ -171,7 +171,7 @@ class testAndPostprocess:
         # thresholding
         postprocessed_output = self.post_processing_pipeline(test_output_sigmoid, thresh, connect_thresh)
         nifimg_post = nib.Nifti1Image(postprocessed_output, affine, header)
-        save_img_path_post = self.output_path + img_name #img_name with extension
+        save_img_path_post = os.path.join(self.output_path, img_name) #img_name with extension
         nib.save(nifimg_post, save_img_path_post)
         
         print(f"Output processed {img_name} is successfully saved!\n")

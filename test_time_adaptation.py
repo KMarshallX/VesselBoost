@@ -22,7 +22,11 @@ args = adapt_config.args
 ds_path = args.ds_path # path to original data
 ps_path = args.ps_path # path to preprocessed data
 out_path = args.out_path # path to infered data
-assert os.path.exists(out_path) == True, "Output path doesn't exist, check the command."
+if os.path.exists(out_path) == False:
+    print(f"{out_path} does not exist.")
+    os.mkdir(out_path)
+    print(f"{out_path} has been created!")
+
 
 prep_mode = args.prep_mode # preprocessing mode
 # when the preprocess is skipped, 
@@ -31,7 +35,7 @@ if prep_mode == 4:
     ps_path = ds_path
 
 # path to proxies
-px_path = out_path + "proxies/"     
+px_path = os.path.join(out_path, "proxies", "")     
 os.mkdir(px_path) # create an intermediate output folder inside the output path
 assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
@@ -52,7 +56,7 @@ patch_size = args.osz
 aug_mode = args.aug_mode
 
 # output fintuned model path
-out_mo_path = out_path + "finetuned/"
+out_mo_path = os.path.join(out_path, "finetuned", "")
 os.mkdir(out_mo_path) # create an intermediate output folder inside the output path
 assert os.path.exists(out_mo_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
@@ -153,7 +157,7 @@ if __name__ == "__main__":
         print("Resource optimization is disabled, all intermediate files are saved locally!\n")
         print(f"Finetuned model -> {out_mo_path}\n")
         print(f"Intermediate proxy -> {px_path}\n")
-    elif (resource_opt == 1 and px_path == "./proxies/"):
+    elif (resource_opt == 1):
         shutil.rmtree(px_path) # clear all the proxies
         shutil.rmtree(out_mo_path) # clear all the finetuned models
         print("Intermediate files have been cleaned!")
