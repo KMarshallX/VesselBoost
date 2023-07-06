@@ -12,8 +12,8 @@ train_parser = argparse.ArgumentParser(description="VesselBoost training argumen
 
 # Train.py
 # input /output (train.py)
-train_parser.add_argument('--ds_path', default = "./data/raw/", help="input image path")
-train_parser.add_argument('--lb_path', default = "./data/seg/", help="input ground truth path")
+train_parser.add_argument('--ds_path', default = "/ds_path/", help="input image path")
+train_parser.add_argument('--lb_path', default = "/lb_path/", help="input label path")
 train_parser.add_argument('--ps_path', type=str, default = "/preprocessed_path/", help="path of the preprocessed data")
 
 # preprocessing mode
