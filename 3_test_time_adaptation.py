@@ -34,8 +34,11 @@ if prep_mode == 4:
     ps_path = ds_path
 
 # path to proxies
-px_path = os.path.join(out_path, "proxies", "")     
-os.mkdir(px_path) # create an intermediate output folder inside the output path
+px_path = os.path.join(out_path, "proxies", "")
+if os.path.exists(px_path) == False:
+    print(f"{px_path} does not exist.")     
+    os.mkdir(px_path) # create an intermediate output folder inside the output path
+    print(f"{px_path} has been created!")
 assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 model_type = args.mo # model type
@@ -56,7 +59,10 @@ aug_mode = args.aug_mode
 
 # output fintuned model path
 out_mo_path = os.path.join(out_path, "finetuned", "")
-os.mkdir(out_mo_path) # create an intermediate output folder inside the output path
+if os.path.exists(out_mo_path) == False:
+    print(f"{out_mo_path} does not exist.")     
+    os.mkdir(out_mo_path) # create an intermediate output folder inside the output path
+    print(f"{out_mo_path} has been created!")
 assert os.path.exists(out_mo_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 # Resource optimization flag
