@@ -29,7 +29,7 @@ If you set prep_mode to 4, which means no preprocessing will happen, then you do
 
 If you set prep_mode to 1,2 or 3, which means both(1), denosing(2) or N4 bias field correction(3) will be applied to the input images, then you have to set a path to store the preprocessed images.
 ```bash
-$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained <path_to_pretrained_model + model_name> --prep_mode 4 --ep 5000 --lr 1e-3 
+$ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <path_to_output_image> --ps_path <path_to_preprocessed_image> --pretrained <path_to_pretrained_model> --prep_mode 4 --ep 5000 --lr 1e-3 
 
 ```
 ### **Test-time adpatation with provided proxy segmentation**
