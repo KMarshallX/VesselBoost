@@ -26,6 +26,9 @@ This is a Pytorch based project, for successfully running this project on your l
     $ conda env create -f environment.yml
     $ source activate vessel_boost
     ```
+
+**Note:** If you don't have an up-to-date miniconda version, which might lead to bugs when forging an environment from an yml file, you can install it by running *miniconda-setup.sh*
+
 Done. Happy tuning!
 
 ## **Purpose**
