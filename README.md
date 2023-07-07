@@ -41,7 +41,7 @@ This repository contains 3 major modules:
 ## **Feature Overview**
 ### *Pipeline overview*
 <p align="center">
-<img src="./readme_img/overall_flowchart_2.png">
+<img src="./readme_img/methods.png">
 </p>
 The complete pipeline will firstly train an intial model on the provided high resolution MRAs, or you can directly use our pre-trained models. The pre-trained models will be used to infer intermediate segmentations (proxies) of the images you want to process. Lastly, a test-time-adaptation (TTA) process will be conducted based on the chosen pre-trained model and proxies.
 
