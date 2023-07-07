@@ -1,0 +1,38 @@
+name: train module test
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - README.md
+      - 1_train.py
+      - train_config.py
+      - environment.yml
+      - utils/module_utils.py
+      - utils/new_data_loader.py
+      - utils/unet_utils.py
+
+  pull_request:
+    branches: [ master ]
+    paths:
+      - README.md
+      - 1_train.py
+      - train_config.py
+      - environment.yml
+      - utils/module_utils.py
+      - utils/new_data_loader.py
+      - utils/unet_utils.py
+
+jobs:
+  test_train_module_pipeline:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.9.5
+    - name: test train module
+      run: |
+        /bin/bash tests/test_train_module.sh
