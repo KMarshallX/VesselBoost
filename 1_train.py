@@ -4,7 +4,7 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 07/04/2023
+Last Edited: 07/07/2023
 """
 import torch
 import config.train_config as train_config
@@ -97,23 +97,27 @@ if __name__ == "__main__":
     seg_file_list = os.listdir(seg_img)
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
     file_num = len(raw_file_list)
+
+    # initialize single_channel_loaders for each image
+    # and store the initialized loaders in a linked hashmaps
+    loaders_dict = dict()
+    for i in range(file_num):
+        # joined path to the current image file 
+        raw_img_name = os.path.join(processed_img, raw_file_list[i])
+        # find the corresponding seg file in the seg_folder
+        seg_img_name = None
+        for j in range(file_num):
+            if seg_file_list[j].find(raw_file_list[i].split('.')[0]) != -1:
+                seg_img_name = os.path.join(seg_img, seg_file_list[j])
+                break
+        assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
+        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, args.osz, args.ep))
     
     # traning loop (this could be separate out )
-    for idx in tqdm(range(file_num)):
+    for epoch in tqdm(range(epoch_num)):
+        for file_idx in loaders_dict:
 
-        raw_arr_name = os.path.join(processed_img, raw_file_list[idx])
-        for i in range(file_num):
-            if seg_file_list[i].find(raw_file_list[idx].split('.')[0]) != -1:
-                seg_arr_name = os.path.join(seg_img, seg_file_list[i])
-                break
-        assert (seg_arr_name != None), f"There is no corresponding label to {raw_file_list[idx]}!"
-        print(f"Current training image: {raw_arr_name}, current training label: {seg_arr_name}")      
-        # initialize single channel data loader
-        single_chan_loader = single_channel_loader(raw_arr_name, seg_arr_name, args.osz, args.ep)
-
-        for epoch in tqdm(range(epoch_num)):
-            
-            image, label = next(iter(single_chan_loader))
+            image, label = next(iter(loaders_dict[file_idx]))
             image_batch, label_batch = aug_item(image, label)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
@@ -133,7 +137,7 @@ if __name__ == "__main__":
             current_lr = optimizer.param_groups[0]['lr']
             tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
 
-        tqdm.write(f'File number [{idx+1}/{file_num}]')
+
     print("Training finished! Please wait for the model to be saved!")
 
     # save the model
