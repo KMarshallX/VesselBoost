@@ -33,7 +33,7 @@ $ python test_time_adaptation.py --ds_path <path_to_input_image> --out_path <pat
 
 ```
 ### **Test-time adpatation with provided proxy segmentation**
-You can provide a proxy segmentation which will be used for the test-time-adaption instead of the automatically generated proxies. This segmentation can be created using any methods, for example manual labelling or other, non-deep-learning methods. If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images. 
+You can provide a proxy segmentation which will be used for the test-time-adaption instead of the automatically generated proxies. This segmentation can be created using any methods, for example manual labelling or other, non-deep-learning methods. We will use the filenames to match the raw images and proxy segmentations. If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images. 
 ```bash
 ~/vessel_code$ python test_time_adaptation.py --ds_path <path_to_input_image_folder> --px_path <path_to_proxy_segmentation_folder> --out_path <path_to_output_image_folder> --pretrained <path_to_pretrained_model> --prep_mode 4 --ep 5000 --lr 1e-3
 ```
