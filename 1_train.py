@@ -7,8 +7,8 @@ Editor: Marshall Xu
 Last Edited: 07/04/2023
 """
 import torch
+import config.train_config as train_config
 from tqdm import tqdm
-from config.train_config import *
 from utils.module_utils import * 
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet
