@@ -14,10 +14,6 @@ This is a Pytorch based project, for successfully running this project on your l
 1. Make sure your local machine has Nvidia GPU(s) and CUDA installed 
 2. Clone this repository to your local machine
     ```
-    $ git clone git@github.com:KMarshallX/vessel_code.git
-    ```
-    or 
-    ```
     $ git clone https://github.com/KMarshallX/vessel_code.git
     ```
 3. Then set your current working directory as the cloned repository, and install the remaining required packages
