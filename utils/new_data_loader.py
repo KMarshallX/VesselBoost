@@ -22,13 +22,16 @@ class single_channel_loader:
         raw_numpy = raw_nifti.get_fdata()
         self.raw_arr = standardiser(raw_numpy) # (1090*1280*52), (480, 640, 163)
         self.seg_arr = nib.load(seg_img).get_fdata()
+
+        self.raw_img = raw_img
+        self.seg_img = seg_img
         
         self.patch_size = patch_size
         self.step = step
 
     def __len__(self):
         return self.step
-
+        
     def __iter__(self):
         # Save the raw image size
         raw_size = self.raw_arr.shape
@@ -42,6 +45,21 @@ class single_channel_loader:
             img_crop, seg_crop = cropper(self.raw_arr, self.seg_arr)
 
             yield img_crop, seg_crop
+
+class all_channel_loader:
+    def __init__(self, raw_folder, seg_folder, patch_size, step) -> None:
+        """
+        :param raw_folder: str, path of the folder contains raw files
+        :param seg_folder: str, path of the folder contains label files
+        :param patch_size: tuple, e.g. (64,64,64)
+        :param step: how many (integer) patches will be cropped from the raw input image
+        """
+        raw_folder_list = os.listdir(raw_folder)
+        seg_folder_list = os.listdir(seg_folder)
+        assert (len(raw_folder_list) == len(seg_folder_list)), "Number of images \
+            and correspinding segs not matched!"
+        file_num = len(raw_folder_list)
+        
 
 class new_data_loader:
     def __init__(self, raw_path, seg_path, patch_size, step):
