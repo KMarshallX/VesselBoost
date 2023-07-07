@@ -59,7 +59,20 @@ class all_channel_loader:
         assert (len(raw_folder_list) == len(seg_folder_list)), "Number of images \
             and correspinding segs not matched!"
         file_num = len(raw_folder_list)
-        
+
+        # initialize single_channel_loaders for each image
+        for i in range(file_num):
+            # joined path to the current image file 
+            raw_img_name = os.path.join(raw_folder, raw_folder_list[i])
+            # find the corresponding seg file in the seg_folder
+            seg_img_name = None
+            for j in range(file_num):
+                if seg_folder_list[j].find(raw_folder_list[i].split('.')[0]) != -1:
+                    seg_img_name = os.path.join(seg_folder, seg_folder_list[j])
+                    break
+            assert (seg_img_name != None), f"There is no corresponding label to {raw_folder_list[i]}!"
+
+
 
 class new_data_loader:
     def __init__(self, raw_path, seg_path, patch_size, step):
