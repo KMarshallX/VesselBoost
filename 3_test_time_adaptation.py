@@ -9,9 +9,8 @@ Last Edited: 07/04/2023
 
 import os
 import shutil
-import adapt_config
 import numpy as np
-
+from config.adapt_config import *
 from utils.module_utils import preprocess, testAndPostprocess
 from utils.unet_utils import *
 from utils.new_data_loader import single_channel_loader

@@ -6,10 +6,9 @@ Training the chosen model (new pipeline)
 Editor: Marshall Xu
 Last Edited: 07/04/2023
 """
-import train_config
 import torch
 from tqdm import tqdm
-
+from config.train_config import *
 from utils.module_utils import * 
 from utils.new_data_loader import single_channel_loader
 from models.unet_3d import Unet

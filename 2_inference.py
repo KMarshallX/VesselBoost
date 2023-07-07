@@ -9,7 +9,7 @@ Last edited: 07/04/2023
 """
 
 import os
-import infer_config
+from config.infer_config import *
 from utils.module_utils import preprocess, testAndPostprocess
 
 args = infer_config.infer_parser.parse_args()
