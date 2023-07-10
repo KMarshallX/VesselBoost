@@ -12,7 +12,7 @@ $clone_command
 echo "[DEBUG]: testing the miniconda installation from the README:"
 get_command=`cat /tmp/vessel_code/README.md | grep miniconda-setup.sh`
 echo $get_command
-$get_command > /dev/null 2>&1
+$get_command 
 
 echo "[DEBUG]: testing the conda env build from the README:"
 cd vessel_code
