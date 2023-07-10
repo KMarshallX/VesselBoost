@@ -21,6 +21,6 @@ echo $condaenv_command
 $condaenv_command
 
 echo "[DEBUG]: testing conda activate command from the README:"
-condaenv_command=`cat ./README.md | grep environment.yml`
-echo $condaenv_command
-$condaenv_command
+condact_command=`cat ./README.md | grep conda activate`
+echo $condact_command
+$condact_command
