@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+mkdir -p ./tmp
 cp -r . ./tmp/vessel_code
 
 # test readme
