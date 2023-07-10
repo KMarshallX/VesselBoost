@@ -4,7 +4,7 @@
 Training the chosen model (new pipeline)
 
 Editor: Marshall Xu
-Last Edited: 07/07/2023
+Last Edited: 10/07/2023
 """
 import torch
 import config.train_config as train_config
@@ -112,7 +112,9 @@ if __name__ == "__main__":
                 break
         assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
         loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, args.osz, args.ep))
-    
+    print("All images have been loaded, the training process will start soon!")
+
+
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
         for file_idx in loaders_dict:
