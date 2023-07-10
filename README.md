@@ -27,13 +27,17 @@ This is a Pytorch based project, for successfully running this project on your l
 1. Make sure your local machine has Nvidia GPU(s) and CUDA installed 
 2. Clone this repository to your local machine
     ```
-    $ git clone https://github.com/KMarshallX/vessel_code.git
+    git clone https://github.com/KMarshallX/vessel_code.git
     ```
-3. Then set your current working directory as the cloned repository, and install the remaining required packages
+3. Install miniconda:
     ```
-    $ cd vessel_code
-    $ conda env create -f environment.yml
-    $ source activate vessel_boost
+    cd vessel_code
+    bash miniconda-setup.sh
+    ```
+4. Then set your current working directory as the cloned repository, and install the remaining required packages
+    ```
+    conda env create -f environment.yml
+    conda activate vessel_boost
     ```
 
 **Note:** If you don't have an up-to-date miniconda version, which might lead to bugs when forging an environment from an yml file, you can install it by running *miniconda-setup.sh*
