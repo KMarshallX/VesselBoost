@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-mkdir -p ./tmp
-cp -r . ./tmp/vessel_code
+cp -r . /tmp/vessel_code
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
