@@ -12,6 +12,7 @@ import torch
 import nibabel as nib
 from tqdm import tqdm
 import scipy.ndimage as scind
+import matplotlib.pyplot as plt
 from patchify import patchify, unpatchify
 import cc3d
 
@@ -172,9 +173,16 @@ class testAndPostprocess:
         postprocessed_output = self.post_processing_pipeline(test_output_sigmoid, thresh, connect_thresh)
         nifimg_post = nib.Nifti1Image(postprocessed_output, affine, header)
         save_img_path_post = os.path.join(self.output_path, img_name) #img_name with extension
+
+        # save the nifti file
         nib.save(nifimg_post, save_img_path_post)
-        
         print(f"Output processed {img_name} is successfully saved!\n")
+
+        # save the maximum intensity projection as jpg file
+        mip = np.max(postprocessed_output, axis=2)
+        save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0], ".jpg")
+        plt.imsave(save_mip_path_post, mip, cmap='gray')
+        print(f"Output MIP image {img_name} is successfully saved!\n")
     
     def __call__(self, thresh, connect_thresh, test_model_name, test_img_name):
 
