@@ -1,13 +1,13 @@
 """
-5 Evaluation metrics used to evaluate the resulting segmentation
+helper functions library for evaluation
 
-Marshall @ 03/07/2023
+Editor: Marshall Xu
+Last Edited: 07/07/2023
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, normalized_mutual_info_score
 import nibabel as nib
+
 
 class eval_scores:
     def __init__(self, seg, gt) -> None:
@@ -50,11 +50,7 @@ class eval_scores:
         Hsgst = -((self.tp/self.n)*np.log(self.tp/self.n) + (self.fn/self.n)*np.log(self.fn/self.n) + (self.fp/self.n)*np.log(self.fp/self.n) + (self.tn/self.n)*np.log(self.tn/self.n))
         MI = Hsg + Hst - Hsgst
 
-        return 2*MI / (Hsg + Hst)
-    
-    def _norm_mi(self):
-        # normalized mutual information
-        return normalized_mutual_info_score(self.gt.squeeze(1), self.seg.squeeze(1))
+        return 2 * MI / (Hsg + Hst)
     
     def _adjusted_ri(self):
         # adjusted rand index (replacement for Balanced Average Hausdorff Distance)
@@ -75,46 +71,3 @@ class eval_scores:
         e = self._adjusted_ri()
         
         return [a,b,c,d,e]
-
-if __name__ == "__main__":
-
-    ground_truth_path = "./data/validate_label/sub017.nii"
-    ground_truth_img = nib.load(ground_truth_path)
-    ground_truth = ground_truth_img.get_fdata()
-
-    saved_img_path = "./saved_image/"
-    eval_img_list = [saved_img_path+"week13/val_re_unet_ep5000_bce_dice_17.nii.gz", saved_img_path+"week13/val_re_unet_ep5000_dice_bce_17.nii.gz", saved_img_path+"week13/val_re_unet_ep5000_dice_tver_17.nii.gz"]
-
-    vals_list = []
-    for i in range(len(eval_img_list)):
-        out_img = nib.load(eval_img_list[i]).get_fdata()
-        scores_itm = eval_scores(out_img, ground_truth.round())
-        vals = scores_itm()
-        print(vals)
-        vals += vals[:1]
-        vals_list.append(vals)
-
-    categories = ['Dice', 'Jaccard', 'Vol_Sim', 'Norm_MI', 'ARI']
-    angles = [n / float(5) * 2 * np.pi for n in range(5)]
-    angles += angles[:1]
-    label_list = ["bce_dice", "dice_bce", "dice_tver"]
-    # Initialise the spider plot
-    plt.figure()
-    ax = plt.subplot(111, polar=True)
-    # Draw one axe per variable + add labels
-    plt.xticks(angles[:-1], categories, color='black', size=8)
-    # Draw ylabels
-    ax.set_rlabel_position(0)
-    plt.yticks([0.2,0.4,0.6,0.8], ["0.2","0.4","0.6","0.8"], color="grey", size=7)
-    plt.ylim(0,1)
-    
-    # Plot data
-    for j in range(len(eval_img_list)):
-        ax.plot(angles, vals_list[j], color=f"C{j}", linewidth=1, linestyle='solid', label=label_list[j])
-        # Fill area
-        ax.fill(angles, vals_list[j], color=f"C{j}", alpha=0.1)
-    
-    # Show the graph
-    plt.legend()
-    plt.show()
-
