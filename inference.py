@@ -51,7 +51,7 @@ if __name__ == "__main__":
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
         # generate inferred segmentation fot the current image
-        inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
+        inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i], mip_flag=True)
 
 
 

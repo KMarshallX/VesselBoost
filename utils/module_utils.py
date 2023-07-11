@@ -131,7 +131,7 @@ class testAndPostprocess:
         # connected components
         return cc3d.dust(arr, connect_threshold, connectivity=26, in_place=False)
     
-    def one_img_process(self, img_name, load_model, thresh, connect_thresh):
+    def one_img_process(self, img_name, load_model, thresh, connect_thresh, mip_flag):
         # Load data
         raw_img_path = os.path.join(self.input_path, img_name) # should be full path
 
@@ -178,13 +178,15 @@ class testAndPostprocess:
         nib.save(nifimg_post, save_img_path_post)
         print(f"Output processed {img_name} is successfully saved!\n")
 
+        # If mip_flag is true, then
         # save the maximum intensity projection as jpg file
-        mip = np.max(postprocessed_output, axis=2)
-        save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0], ".jpg")
-        plt.imsave(save_mip_path_post, mip, cmap='gray')
-        print(f"Output MIP image {img_name} is successfully saved!\n")
+        if mip_flag == True:
+            mip = np.max(postprocessed_output, axis=2)
+            save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0], ".jpg")
+            plt.imsave(save_mip_path_post, mip, cmap='gray')
+            print(f"Output MIP image {img_name} is successfully saved!\n")
     
-    def __call__(self, thresh, connect_thresh, test_model_name, test_img_name):
+    def __call__(self, thresh, connect_thresh, test_model_name, test_img_name, mip_flag):
 
         # model configuration
         load_model = Unet(self.ic, self.oc, self.fil)
@@ -197,7 +199,7 @@ class testAndPostprocess:
             load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         load_model.eval()
 
-        self.one_img_process(test_img_name, load_model, thresh, connect_thresh)
+        self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag)
         print("Prediction and thresholding procedure end!\n")
 
 
