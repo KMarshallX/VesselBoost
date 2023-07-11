@@ -37,7 +37,7 @@ This is a Pytorch based project, for successfully running this project on your l
 4. Then set your current working directory as the cloned repository, and install the remaining required packages
     ```
     conda env create -f environment.yml
-    conda activate vessel_boost
+    source activate vessel_boost
     ```
 
 
