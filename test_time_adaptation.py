@@ -85,7 +85,8 @@ if __name__ == "__main__":
             print("No proxies are provided, strating generating proxies...")
             # initialize the inference method for generating the proxies
             inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
-            inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i])
+            # mip flag set to be False, cuz we don't want mip when generating proxies
+            inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i], mip_flag=False)
         
         # fintuning (generate all finetuned models)
         test_img_path = os.path.join(ps_path, processed_data_list[i]) # path of the preprocessed image
@@ -153,7 +154,8 @@ if __name__ == "__main__":
         print(f"Final thresholding for {file_name} will start shortly!\n")
         # initialize the inference method for generating the proxies
         inference_postpo_final = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
-        inference_postpo_final(threshold_vector[0], threshold_vector[1], out_mo_name, processed_data_list[i])
+        # generate mip images at the final stage
+        inference_postpo_final(threshold_vector[0], threshold_vector[1], out_mo_name, processed_data_list[i], mip_flag=True)
     
     print("The test-time adaptation is finished!\n")
 
