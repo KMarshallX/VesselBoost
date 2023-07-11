@@ -21,6 +21,7 @@ echo $condaenv_command
 $condaenv_command
 
 conda init powershell
+source ~/.bashrc
 
 echo "[DEBUG]: testing conda activate command from the README:"
 condact_command=`cat ./README.md | grep activate`
