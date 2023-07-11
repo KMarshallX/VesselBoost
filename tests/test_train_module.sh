@@ -14,11 +14,14 @@ get_command=`cat /tmp/vessel_code/README.md | grep miniconda-setup.sh`
 echo $get_command
 $get_command 
 
+export PATH="/home/runner/miniconda3/bin:$PATH"
+
 echo "[DEBUG]: testing the conda env build from the README:"
 cd vessel_code
 condaenv_command=`cat ./README.md | grep environment.yml`
 echo $condaenv_command
 $condaenv_command
+
 
 conda init bash
 source ~/.bashrc
