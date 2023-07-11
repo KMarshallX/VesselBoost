@@ -20,6 +20,8 @@ condaenv_command=`cat ./README.md | grep environment.yml`
 echo $condaenv_command
 $condaenv_command
 
+conda init powershell
+
 echo "[DEBUG]: testing conda activate command from the README:"
 condact_command=`cat ./README.md | grep activate`
 echo $condact_command
