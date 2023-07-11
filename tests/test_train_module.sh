@@ -15,6 +15,7 @@ echo $get_command
 $get_command 
 
 export PATH="/home/runner/miniconda3/bin:$PATH"
+source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
 cd vessel_code
@@ -22,9 +23,8 @@ condaenv_command=`cat ./README.md | grep environment.yml`
 echo $condaenv_command
 $condaenv_command
 
-
+source /home/runner/miniconda3/bin/activate
 conda init bash
-source ~/.bashrc
 
 echo "[DEBUG]: testing conda activate command from the README:"
 condact_command=`cat ./README.md | grep activate`
