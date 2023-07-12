@@ -36,14 +36,14 @@ $condact_command
 mkdir -p data/images/
 mkdir -p data/labels/
 mkdir -p data/preprocessed/
-mkdir models
+mkdir saved_models
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./dataosf/images/sub-001.nii.gz
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii dataosf/images/sub-001.nii.gz
 
 path_to_images="data/images/"
 path_to_labels="data/labels/"
-path_to_model="models/model_test"
+path_to_model="saved_models/model_test"
 path_to_preprocessed="data/preprocessed/"
 n_epochs=5
 
