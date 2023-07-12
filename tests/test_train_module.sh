@@ -48,10 +48,10 @@ path_to_preprocessed="data/preprocessed/"
 n_epochs=5
 
 echo "[DEBUG]: testing train module:"
-train_command1=`cat ./documentation/train_readme.md | grep --prep_mode 4`
+train_command1=`cat ./documentation/train_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 $train_command1
 
-train_command2=`cat ./documentation/train_readme.md | grep --prep_mode 1`
+train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 $train_command2
