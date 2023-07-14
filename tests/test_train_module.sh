@@ -39,7 +39,7 @@ mkdir -p data/preprocessed/
 mkdir saved_models
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/images/sub-001.nii.gz
+osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/labels/sub-001.nii
 
 path_to_images="data/images/"
 echo "Path to images: "$path_to_images""
