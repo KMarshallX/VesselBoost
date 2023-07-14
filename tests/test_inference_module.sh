@@ -49,11 +49,12 @@ path_to_images="data/images/"
 path_to_output="data/predicted_labels/"
 path_to_pretrained_model="pretrained_models/manual_ep5000_0621"
 
-echo "[DEBUG]: testing train module:"
+echo "[DEBUG]: testing inference module without preprocessing:"
 train_command1=`cat ./documentation/infer_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 $train_command1
 
+echo "[DEBUG]: testing inference module with preprocessing:"
 train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 $train_command2
