@@ -35,6 +35,7 @@ $condact_command
 # settings for data download
 mkdir -p ./data/images/
 mkdir -p ./data/predicted_labels/
+mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
 pip install osfclient
@@ -50,6 +51,9 @@ echo "Path to images: "$path_to_images""
 
 path_to_output="./data/predicted_labels/"
 echo "Path to output: "$path_to_output""
+
+path_to_prep_images="./data/preprocessed_imgs/"
+echo "Path to preprocessed images: "$path_to_prep_images""
 
 path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
 echo "Path to pretrained model: "$path_to_pretrained_model""
