@@ -33,28 +33,33 @@ echo $condact_command
 $condact_command
 
 # settings for data download
-mkdir -p data/images/
-mkdir -p data/predicted_labels/
-mkdir pretrained_models
+mkdir -p ./data/images/
+mkdir -p ./data/predicted_labels/
+mkdir ./pretrained_models/
+
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/images/sub-001.nii.gz
 #pretrained model download
 osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
 osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep5000_0711 ./pretrained_models/om1_ep5000_0711
 osf -p abk4p fetch /osfstorage/pretrained_models/om2_ep5000_0711 ./pretrained_models/om2_ep5000_0711
 
 
-path_to_images="data/images/"
-path_to_output="data/predicted_labels/"
-path_to_pretrained_model="pretrained_models/manual_ep5000_0621"
+path_to_images="./data/images/"
+echo "Path to images: "$path_to_images""
+
+path_to_output="./data/predicted_labels/"
+echo "Path to output: "$path_to_output""
+
+path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
+echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing inference module without preprocessing:"
 train_command1=`cat ./documentation/infer_readme.md | grep 'prep_mode 4'`
 echo $train_command1
-$train_command1
+eval $train_command1
 
 echo "[DEBUG]: testing inference module with preprocessing:"
 train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
 echo $train_command2
-$train_command2
+eval $train_command2
