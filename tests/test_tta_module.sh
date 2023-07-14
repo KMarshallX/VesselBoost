@@ -35,16 +35,17 @@ $condact_command
 # settings for data download
 mkdir -p ./data/images/
 mkdir -p ./data/predicted_labels/
+mkdir -p ./data/proxy_labels/
 mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
 #pretrained model download
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
-osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep5000_0711 ./pretrained_models/om1_ep5000_0711
-osf -p abk4p fetch /osfstorage/pretrained_models/om2_ep5000_0711 ./pretrained_models/om2_ep5000_0711
-
+echo "[DEBUG]: testing model's weights download:"
+download_command=`cat ./documentation/tta_readme.md | grep 'osf -p abk4p'`
+echo $download_command
+$download_command
 
 path_to_images="./data/images/"
 echo "Path to images: "$path_to_images""
@@ -52,18 +53,37 @@ echo "Path to images: "$path_to_images""
 path_to_output="./data/predicted_labels/"
 echo "Path to output: "$path_to_output""
 
+path_to_proxy_labels="./data/proxy_labels/"
+echo "Path to proxy labels: "$path_to_proxy_labels""
+
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
 path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
-echo "[DEBUG]: testing inference module without preprocessing:"
-train_command1=`cat ./documentation/infer_readme.md | grep 'prep_mode 4'`
-echo $train_command1
-eval $train_command1
+n_epochs=5
+echo "Number of epochs: "$n_epochs""
 
-echo "[DEBUG]: testing inference module with preprocessing:"
-train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
-echo $train_command2
-eval $train_command2
+
+
+echo "[DEBUG]: testing tta without a proxy and no preprocessing:"
+tta_command1=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
+echo $tta_command1
+eval $tta_command1
+
+echo "[DEBUG]: testing tta without a proxy and including preprocessing:"
+tta_command2=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --out_path $path_to_output --ps_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
+echo $tta_command2
+eval $tta_command2
+
+
+echo "[DEBUG]: testing tta with a proxy and no preprocessing:"
+tta_command3=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --px_path $path_to_proxy_labels --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
+echo $tta_command3
+eval $tta_command3
+
+echo "[DEBUG]: testing tta with a proxy and including preprocessing:"
+tta_command4=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --px_path $path_to_proxy_labels --out_path $path_to_output --ps_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
+echo $tta_command4
+eval $tta_command4
