@@ -182,7 +182,8 @@ class testAndPostprocess:
         # save the maximum intensity projection as jpg file
         if mip_flag == True:
             mip = np.max(postprocessed_output, axis=2)
-            save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0], ".jpg")
+            # save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0], ".jpg")
+            save_mip_path_post = self.output_path + img_name.split('.')[0] + ".jpg"
             plt.imsave(save_mip_path_post, mip, cmap='gray')
             print(f"Output MIP image {img_name} is successfully saved!\n")
     
