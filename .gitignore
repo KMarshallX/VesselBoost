@@ -2,9 +2,6 @@
 /__pycache__
 /data
 /utils/__pycache__
-/train/__pycache__
-/infer/__pycache__
-/tta/__pycache__
 /models/__pycache__
 /saved_image
 /saved_models
@@ -14,3 +11,4 @@ readme_img/Snipaste_2023-03-08_09-06-00.jpg
 readme_img/Snipaste_2023-03-15_09-11-34.jpg
 playground.ipynb
 top_level_cli.py
+/config/__pycache__
