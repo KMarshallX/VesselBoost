@@ -29,6 +29,9 @@ class single_channel_loader:
         self.patch_size = patch_size
         self.step = step
 
+    def __repr__(self):
+        return f"Processing image {self.raw_img} and its segmentation {self.seg_img}\n"
+
     def __len__(self):
         return self.step
         

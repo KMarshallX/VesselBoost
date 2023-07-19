@@ -117,8 +117,8 @@ if __name__ == "__main__":
 
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
-        for file_idx in loaders_dict:
-
+        for file_idx in range(len(loaders_dict)):
+            print(loaders_dict[file_idx])
             image, label = next(iter(loaders_dict[file_idx]))
             image_batch, label_batch = aug_item(image, label)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
@@ -137,7 +137,7 @@ if __name__ == "__main__":
             scheduler.step(loss)
 
             current_lr = optimizer.param_groups[0]['lr']
-            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
+        tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
 
 
     print("Training finished! Please wait for the model to be saved!")
