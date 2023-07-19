@@ -38,5 +38,7 @@ jobs:
       with:
         python-version: 3.9.5
     - name: test train module
+      env:
+        OSF_TOKEN: ${{ secrets.OSF_KEY }}
       run: |
         /bin/bash tests/test_inference_module.sh
