@@ -93,6 +93,7 @@ if __name__ == "__main__":
     # start or abort preprocessing 
     preprocessing(prep_mode)
 
+    # make sure the image path and seg path contains equal number of files
     raw_file_list = os.listdir(processed_img)
     seg_file_list = os.listdir(seg_img)
     assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
@@ -111,13 +112,15 @@ if __name__ == "__main__":
                 seg_img_name = os.path.join(seg_img, seg_file_list[j])
                 break
         assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
+        # a linked hashmap to store the provoked data loaders
         loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, args.osz, args.ep))
     print("All images have been loaded, the training process will start soon!")
 
 
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
-        for file_idx in range(len(loaders_dict)):
+        #traverse every image, load a chunk with its augmented chunks to the model
+        for file_idx in tqdm(range(len(loaders_dict))):
             print(loaders_dict[file_idx])
             image, label = next(iter(loaders_dict[file_idx]))
             image_batch, label_batch = aug_item(image, label)
@@ -137,7 +140,7 @@ if __name__ == "__main__":
             scheduler.step(loss)
 
             current_lr = optimizer.param_groups[0]['lr']
-        tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
+            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
 
 
     print("Training finished! Please wait for the model to be saved!")
