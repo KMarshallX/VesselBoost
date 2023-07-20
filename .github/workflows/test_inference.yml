@@ -15,6 +15,7 @@ on:
       - utils/unet_utils.py
       - tests/test_inference_module.sh
       - miniconda-setup.sh
+      - .github/workflows/test_inference.yml
 
   pull_request:
     branches: [ master ]
@@ -28,6 +29,7 @@ on:
       - utils/unet_utils.py
       - tests/test_inference_module.sh
       - miniconda-setup.sh
+      - .github/workflows/test_inference.yml
 
 jobs:
   test_train_module_pipeline:
