@@ -1,4 +1,6 @@
-.pyc
+*.pyc
+*.sh
+*.out
 /__pycache__
 /data
 /utils/__pycache__
