@@ -69,5 +69,7 @@ echo $train_command2
 eval $train_command2
 
 echo "[DEBUG]: saving data to osf"
+export OSF_CLI_CONFIG=./.osfcli/.osfcli.config
+cat $OSF_CLI_CONFIG
 export OUTPUT=`ls ./data/predicted_labels/`
 osf upload ./data/predicted_labels/$OUTPUT /osfstorage/github_actions/inference/predicted_labels/$OUTPUT
