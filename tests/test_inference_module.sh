@@ -67,3 +67,7 @@ echo "[DEBUG]: testing inference module with preprocessing:"
 train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
+
+echo "[DEBUG]: saving data to osf"
+export OUTPUT=`ls ./data/predicted_labels/`
+osf upload ./data/predicted_labels/$OUTPUT /osfstorage/github_actions/inference/predicted_labels/$OUTPUT

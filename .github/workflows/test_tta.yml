@@ -40,5 +40,6 @@ jobs:
     - name: test tta module
       env:
         OSF_TOKEN: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
       run: |
         /bin/bash tests/test_tta_module.sh
