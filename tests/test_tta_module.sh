@@ -40,7 +40,7 @@ mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
 pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
+osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
 echo "[DEBUG]: testing model's weights download:"
 download_command=`cat ./documentation/tta_readme.md | grep 'osf -p abk4p'`
@@ -87,3 +87,12 @@ echo "[DEBUG]: testing tta with a proxy and including preprocessing:"
 tta_command4=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --px_path $path_to_proxy_labels --out_path $path_to_output --ps_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
 echo $tta_command4
 eval $tta_command4
+
+echo "[DEBUG]: saving data to osf"
+export OSF_TOKEN=$OSF_TOKEN_
+export OSF_USERNAME=$OSF_USERNAME_
+export OSF_PROJECT_ID=$OSF_PROJECT_ID_
+mkdir -p ~/.osfcli
+echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
+ls $path_to_output
+osf -p abk4p upload -r $path_to_output /osfstorage/github_actions/tta/predicted_labels/

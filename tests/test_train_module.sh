@@ -38,7 +38,7 @@ mkdir -p data/labels/
 mkdir -p data/preprocessed/
 mkdir saved_models
 pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
+osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/labels/sub-001.nii
 
 path_to_images="data/images/"
@@ -66,3 +66,12 @@ eval $train_command1
 train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
+
+echo "[DEBUG]: saving data to osf"
+export OSF_TOKEN=$OSF_TOKEN_
+export OSF_USERNAME=$OSF_USERNAME_
+export OSF_PROJECT_ID=$OSF_PROJECT_ID_
+mkdir -p ~/.osfcli
+echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
+ls $path_to_model
+osf -p abk4p upload -r $path_to_model /osfstorage/github_actions/train/saved_model/
