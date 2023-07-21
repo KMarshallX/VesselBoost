@@ -43,6 +43,7 @@ jobs:
       env:
         OSF_TOKEN: ${{ secrets.OSF_KEY }}
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID: "abk4p" 
       run: |
         mkdir -p ~/.osfcli
         echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
