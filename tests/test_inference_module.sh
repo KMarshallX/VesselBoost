@@ -75,4 +75,5 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 export OUTPUT=`ls ./data/predicted_labels/`
+echo $OUTPUT
 osf -p abk4p upload ./data/predicted_labels/$OUTPUT /osfstorage/github_actions/inference/predicted_labels/$OUTPUT
