@@ -39,14 +39,10 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: 3.9.5
-    - name: Set up osfcli configuration
+    - name: test inference module
       env:
         OSF_TOKEN: ${{ secrets.OSF_KEY }}
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID: "abk4p" 
-      run: |
-        mkdir -p ~/.osfcli
-        echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-    - name: test inference module
       run: |
         /bin/bash tests/test_inference_module.sh
