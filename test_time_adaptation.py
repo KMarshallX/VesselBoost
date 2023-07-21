@@ -33,13 +33,14 @@ prep_mode = args.prep_mode # preprocessing mode
 if prep_mode == 4:
     ps_path = ds_path
 
-# path to proxies
-px_path = os.path.join(out_path, "proxies", "")
-if os.path.exists(px_path) == False:
-    print(f"{px_path} does not exist.")     
-    os.mkdir(px_path) # create an intermediate output folder inside the output path
-    print(f"{px_path} has been created!")
-assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
+px_path = args.px_path # path to proxies
+if px_path == None: # when the proxy segmentation is not provided
+    px_path = os.path.join(out_path, "proxies", "")
+    if os.path.exists(px_path) == False:
+        print(f"{px_path} does not exist.")     
+        os.mkdir(px_path) # create an intermediate output folder inside the output path
+        print(f"{px_path} has been created!")
+    assert os.path.exists(px_path) == True, "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
 model_type = args.mo # model type
 in_chan = args.ic # input channel

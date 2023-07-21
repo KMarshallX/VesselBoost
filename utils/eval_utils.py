@@ -2,12 +2,47 @@
 helper functions library for evaluation
 
 Editor: Marshall Xu
-Last Edited: 07/07/2023
+Last Edited: 21/07/2023
 """
 
+import os
 import numpy as np
 import nibabel as nib
+import matplotlib.pyplot as plt
 
+def mra_deskull(img_path, msk_path, mip_flag):
+    """
+    apply a mask on the target nifti image, 
+    and generate an mip image
+    """
+    # Extract the file_name and dir_name
+    file_name = os.path.basename(img_path)
+    dir_name = os.path.dirname(img_path)
+
+    # Load the nifti image and its mask
+    img = nib.load(img_path)
+    affine = img.affine
+    header = img.header
+    img_arr = img.get_fdata()
+    msk_arr = nib.load(msk_path).get_fdata()
+    
+    # Apply the mask
+    masked_arr = np.multiply(img_arr, msk_arr)
+    masked_nifti = nib.Nifti1Image(masked_arr, affine, header)
+    new_file_name = "MASKED_" + file_name
+    save_path_nifti = os.path.join(dir_name, new_file_name)
+    nib.save(masked_nifti, save_path_nifti)
+    print("Masked Nifti image has been sucessfully saved!")
+
+    # When the mip_flag is on,
+    # generate an mip image to the same folder as the input image path
+    if mip_flag == True:
+        masked_mip = np.max(masked_arr, 2)
+        masked_mip = np.rot90(masked_mip, axes=(0, 1))
+        mip_name = new_file_name.split('.')[0] + ".jpg"
+        save_path_mip = os.path.join(dir_name, mip_name)
+        plt.imsave(save_path_mip, masked_mip, cmap='gray')
+        print("MIP image has been successfully saved!")
 
 class eval_scores:
     def __init__(self, seg, gt) -> None:
