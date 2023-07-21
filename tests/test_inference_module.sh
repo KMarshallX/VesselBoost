@@ -69,5 +69,9 @@ echo $train_command2
 eval $train_command2
 
 echo "[DEBUG]: saving data to osf"
+export OSF_PROJECT_ID=abk4p 
+mkdir -p ~/.osfcli
+echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
+cat ~/.osfcli/osfcli.config
 export OUTPUT=`ls ./data/predicted_labels/`
 osf upload ./data/predicted_labels/$OUTPUT /osfstorage/github_actions/inference/predicted_labels/$OUTPUT
