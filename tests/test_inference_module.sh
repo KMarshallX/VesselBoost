@@ -39,7 +39,7 @@ mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
 pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_e2.nii.gz ./data/images/sub-001.nii.gz
+osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
 osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
 osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep5000_0711 ./pretrained_models/om1_ep5000_0711
@@ -75,4 +75,5 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 export OUTPUT=`ls ./data/predicted_labels/`
+echo $OUTPUT
 osf -p abk4p upload ./data/predicted_labels/$OUTPUT /osfstorage/github_actions/inference/predicted_labels/$OUTPUT
