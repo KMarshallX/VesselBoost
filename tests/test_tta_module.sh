@@ -95,7 +95,7 @@ echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcl
 cd $path_to_output
 for file in ./*; do
     echo $file
-    osf -p abk4p remove /osfstorage/github_actions/inference/predicted_labels/"$file"
+    osf -p abk4p remove /osfstorage/github_actions/inference/predicted_labels/$file
 done
 
 echo "[DEBUG]: saving data to osf"
