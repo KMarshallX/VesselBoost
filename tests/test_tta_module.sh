@@ -86,12 +86,17 @@ tta_command4=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images 
 echo $tta_command4
 eval $tta_command4
 
-echo "[DEBUG]: saving data to osf"
+echo "[DEBUG]: osf setup"
 export OSF_TOKEN=$OSF_TOKEN_
 export OSF_USERNAME=$OSF_USERNAME_
 export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-ls $path_to_output
-osf -p abk4p remove -r /osfstorage/github_actions/tta/predicted_labels/
-osf -p abk4p upload -r $path_to_output /osfstorage/github_actions/tta/predicted_labels/
+cd $path_to_output
+for file in ./*; do
+    echo $file
+    osf -p abk4p remove /osfstorage/github_actions/inference/predicted_labels/"$file"
+done
+
+echo "[DEBUG]: saving data to osf"
+osf -p abk4p upload -r ./ /osfstorage/github_actions/tta/predicted_labels/
