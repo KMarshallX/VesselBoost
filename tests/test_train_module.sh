@@ -74,4 +74,5 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 ls $path_to_model
+osf -p abk4p delete -r /osfstorage/github_actions/train/saved_model/
 osf -p abk4p upload -r $path_to_model /osfstorage/github_actions/train/saved_model/

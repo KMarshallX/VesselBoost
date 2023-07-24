@@ -65,8 +65,6 @@ echo "Path to pretrained model: "$path_to_pretrained_model""
 n_epochs=5
 echo "Number of epochs: "$n_epochs""
 
-
-
 echo "[DEBUG]: testing tta without a proxy and no preprocessing:"
 tta_command1=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
 echo $tta_command1
@@ -95,4 +93,5 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 ls $path_to_output
+osf -p abk4p delete -r /osfstorage/github_actions/tta/predicted_labels/
 osf -p abk4p upload -r $path_to_output /osfstorage/github_actions/tta/predicted_labels/
