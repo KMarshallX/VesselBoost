@@ -67,12 +67,17 @@ train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
 
-echo "[DEBUG]: saving data to osf"
+echo "[DEBUG]: osf setup"
 export OSF_TOKEN=$OSF_TOKEN_
 export OSF_USERNAME=$OSF_USERNAME_
 export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-ls $path_to_model
-osf -p abk4p remove -r /osfstorage/github_actions/train/saved_model/
-osf -p abk4p upload -r $path_to_model /osfstorage/github_actions/train/saved_model/
+cd $path_to_model
+for file in ./*; do
+    echo $file
+    osf -p abk4p remove /osfstorage/github_actions/train/saved_model/"$file"
+done
+
+echo "[DEBUG]: saving data to osf"
+osf -p abk4p upload -r ./ /osfstorage/github_actions/train/saved_model/
