@@ -38,7 +38,14 @@ mkdir -p ./data/predicted_labels/
 mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
+echo "[DEBUG]: testing osfclient:"
 pip install osfclient
+export OSF_TOKEN=$OSF_TOKEN_
+export OSF_USERNAME=$OSF_USERNAME_
+mkdir -p ~/.osfcli
+echo -e "[osf]\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
+
+echo "[DEBUG]: testing data download:"
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
 osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
@@ -69,10 +76,8 @@ echo $train_command2
 eval $train_command2
 
 echo "[DEBUG]: saving data to osf"
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
 export OSF_PROJECT_ID=$OSF_PROJECT_ID_
-mkdir -p ~/.osfcli
+# mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 ls $path_to_output
 osf -p abk4p delete -r /osfstorage/github_actions/inference/predicted_labels/
