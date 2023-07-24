@@ -15,6 +15,7 @@ on:
       - utils/unet_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh
+      - .github/workflows/test_train.yml
 
   pull_request:
     branches: [ master ]
@@ -28,6 +29,7 @@ on:
       - utils/unet_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh
+      - .github/workflows/test_train.yml
 
 jobs:
   test_train_module_pipeline:
@@ -38,5 +40,9 @@ jobs:
       with:
         python-version: 3.9.5
     - name: test train module
+      env:
+        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID_: "abk4p" 
       run: |
         /bin/bash tests/test_train_module.sh
