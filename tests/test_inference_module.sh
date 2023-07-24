@@ -38,7 +38,6 @@ mkdir -p ./data/predicted_labels/
 mkdir -p ./data/preprocessed_imgs/
 mkdir ./pretrained_models/
 
-pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
 osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
