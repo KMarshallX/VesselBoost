@@ -69,9 +69,9 @@ echo $train_command2
 eval $train_command2
 
 echo "[DEBUG]: saving data to osf"
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
-export OSF_PROJECT_ID=$OSF_PROJECT_ID_
+export OSF_TOKEN=$TOKEN
+export OSF_USERNAME=$USERNAME
+export OSF_PROJECT_ID=$PROJECT_ID
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 ls $path_to_output
