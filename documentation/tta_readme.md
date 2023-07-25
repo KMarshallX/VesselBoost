@@ -20,7 +20,7 @@ You could apply this module directly on your on data without providing the proxy
 If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images. Note that the input path must only contain the nifti images for processing and be different to the output path.
 
 ```bash
-python test_time_adaptation.py --ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4 --ep 5000 --lr 1e-3 
+python test_time_adaptation.py --ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4 --ep $n_epochs --lr 1e-3 
 ```
 
 If you set prep_mode to 1,2 or 3, which means both(1), denosing(2) or N4 bias field correction(3) will be applied to the input images, then you have to set a path to store the preprocessed images.
