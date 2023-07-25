@@ -10,6 +10,7 @@ on:
       - test_time_adaptation.py
       - tta_config.py
       - environment.yml
+      - documentation/tta_readme.md
       - utils/module_utils.py
       - utils/new_data_loader.py
       - utils/unet_utils.py
@@ -24,6 +25,7 @@ on:
       - test_time_adaptation.py
       - tta_config.py
       - environment.yml
+      - documentation/tta_readme.md
       - utils/module_utils.py
       - utils/new_data_loader.py
       - utils/unet_utils.py
