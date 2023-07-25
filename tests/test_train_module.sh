@@ -73,10 +73,10 @@ export OSF_USERNAME=$OSF_USERNAME_
 export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-cd $path_to_model
+cd saved_models
 for file in ./*; do
     echo $file
-    osf -p abk4p remove /osfstorage/github_actions/train/saved_model/"$file"
+    osf -p abk4p remove /osfstorage/github_actions/train/saved_model/$file
 done
 
 echo "[DEBUG]: saving data to osf"
