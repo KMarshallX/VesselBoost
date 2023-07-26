@@ -76,10 +76,9 @@ mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd $path_to_output
 export timestamp=$(date -I)
-for file in ./*; do
+for file in *; do
     echo $file
     echo "$timestamp"_"$file"
-    osf -p abk4p upload ./$file /osfstorage/github_actions/check/predicted_labels/"$timestamp"_"$file"
     osf -p abk4p upload ./$file /osfstorage/github_actions/inference/predicted_labels/"$timestamp"_"$file"
     # osf -p abk4p remove /osfstorage/github_actions/inference/predicted_labels/$file
 done
