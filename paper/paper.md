@@ -7,11 +7,11 @@ tags:
   - test-time adaptation
 authors:
   - name: Ke (Marshall) Xu
-    orcid: TODO
     equal-contrib: true
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
   - name: Fernanda L. Ribeiro
+    orcid: 0000-0002-1620-4193
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
