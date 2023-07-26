@@ -43,10 +43,7 @@ bibliography: paper.bib
 
 Our *VesselBoost* application comprises of three modules: 1) deep learning model training, 2) inference with our pre-trained models, and 3) test-time adaptation (TTA). At the core of *VesselBoost* is our test-time adaptation module (Module 3) that allows the user to use their initial segmentation or the one generated with our pre-trained model (Module 2) to drive further adaptation of the provided pre-trained model (Figure 1a). In brief, we found that TTA in combination with data augmentation can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. Specifically, our pre-trained model consists of a 3D U-Net model [@cicek_2016] initially trained on the SMILE-UHURA challenge 'train' set and one sample of the 'validate' set (sub-007). We performed several modifications to the proposed 3D U-Net architecture [@cicek_2016], including increased depth (from 3 to 4 layers in both the encoder and decoder blocks), number of input and output channels equal to 1, and number of convolution filters equal to 16. These modifications were implemented to increase the model's ability to learn complex features, to classify vessels only, and to reduce training time. Our models were implemented using Python 3.9 and Pytorch 1.13 [REF]. Note, however, that our approach is flexible, allowing other developers to constribute with new model architectures and new pre-trained models. 
 
-<p align="center">
-<img src="./figure1_v1.png">
-</p>
-
+![*VesselBoost* overview.\label{fig:1}](figure1_v1.png)
 
 ## Module 1: Deep learning model training
 **Training data**: We pre-trained our models using the SMILE-UHURA challenge dataset (https://www.soumick.com/en/uhura/). This dataset was collected as part of the StudyForrest project [@forstmann_multi-modal_2014] and are 3D multi-slab time-of-flight magnetic resonance angiography data acquired at a 7T Siemens MAGNETOM magnetic resonance scanner [@hanke_high-resolution_2014] with an isotropic resolution of 300$\mu$. Twenty right-handed participants (21-38 years, 12 males) participanted in the study, but we used XXX samples for model training. 
