@@ -15,18 +15,12 @@ authors:
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
-  - name:  
-    affiliation: 1
   - name:  Saskia Bollmann
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
 affiliations:
  - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, Australia 
    index: 1
- - name: Institution Name, Country
-   index: 2
- - name: Independent Researcher, Country
-   index: 3
 date: 24 July 2023
 bibliography: paper.bib
 
