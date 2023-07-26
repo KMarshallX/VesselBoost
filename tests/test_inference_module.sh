@@ -76,7 +76,6 @@ mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd $path_to_output
 export timestamp=$(date -I)
-cd $path_to_output
 for file in ./*; do
     echo $file
     echo "$timestamp"_"$file"
