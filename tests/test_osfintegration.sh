@@ -11,8 +11,8 @@ echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcl
 cd ./paper/
 for file in *; do
     echo $file
-    osf -p abk4p remove /osfstorage/integration/file.png
+    osf -p abk4p remove /osfstorage/test/file.png
 done
 
 echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload ./figure1_v1.png /osfstorage/integration/file.png
+osf -p abk4p upload ./figure1_v1.png /osfstorage/test/file.png
