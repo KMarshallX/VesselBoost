@@ -107,7 +107,7 @@ for dir in *; do
     if [ -f "$dir" ]; then 
         echo $dir
         osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$dir
-        osf -p abk4p upload $dir /osfstorage/github_actions/tta/predicted_labels/
+        osf -p abk4p upload $dir /osfstorage/github_actions/tta/predicted_labels/$dir
     fi;
 done
 
