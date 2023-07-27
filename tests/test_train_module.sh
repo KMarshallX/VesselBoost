@@ -81,3 +81,5 @@ done
 
 echo "[DEBUG]: saving data to osf"
 osf -p abk4p upload -r ./ /osfstorage/github_actions/train/saved_model/
+
+echo "Testing done!"
