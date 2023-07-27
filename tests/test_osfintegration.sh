@@ -2,6 +2,7 @@
 set -e
 
 echo "[DEBUG]: osf setup"
+pip instal osfclient
 export OSF_TOKEN=$OSF_TOKEN_
 export OSF_USERNAME=$OSF_USERNAME_
 export OSF_PROJECT_ID=$OSF_PROJECT_ID_
