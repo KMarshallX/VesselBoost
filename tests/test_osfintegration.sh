@@ -9,7 +9,7 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 echo $OSF_PROJECT_ID
 mkdir -p ~/.osfcli
 # echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = $OSF_USERNAME" > ~/.osfcli/osfcli.config
-cat ~/.osfcli/osfcli.config
+# cat ~/.osfcli/osfcli.config
 ls
 export timestamp=$(date +%Y%m%d_%H%M%S)
 echo $timestamp
