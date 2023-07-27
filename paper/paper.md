@@ -40,7 +40,7 @@ Our *VesselBoost* application comprises of three modules: 1) deep learning model
 ![*VesselBoost* overview.\label{fig:1}](figure1_v1.png)
 
 ## Module 1: Deep learning model training
-**Training data**: We pre-trained our models using the SMILE-UHURA challenge dataset (https://www.soumick.com/en/uhura/). This dataset was collected as part of the StudyForrest project [@forstmann_multi-modal_2014] and are 3D multi-slab time-of-flight magnetic resonance angiography data acquired at a 7T Siemens MAGNETOM magnetic resonance scanner [@hanke_high-resolution_2014] with an isotropic resolution of 300$\mu$. Twenty right-handed participants (21-38 years, 12 males) participanted in the study, but we used XXX samples for model training. 
+**Training data**: We pre-trained our models using the SMILE-UHURA challenge dataset (https://www.soumick.com/en/uhura/). This dataset was collected as part of the StudyForrest project [@forstmann_multi-modal_2014] and are 3D multi-slab time-of-flight magnetic resonance angiography data acquired at a 7T Siemens MAGNETOM magnetic resonance scanner [@hanke_high-resolution_2014] with an isotropic resolution of 300$\mu$. Twenty right-handed participants (21-38 years, 12 males) participated in the study, but we used 14 samples for model training (the train and validate sets available through the challenge). 
 
 **Pre-processing**: Input images are pre-processed using N4ITK for bias field correction [@tustison_n4itk_2010] and non-local means denoising [@manjon_adaptive_2010] to increase the SNR. 
 
