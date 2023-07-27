@@ -82,3 +82,5 @@ done
 
 echo "[DEBUG]: saving data to osf"
 osf -p abk4p upload -r ./ /osfstorage/github_actions/inference/predicted_labels/
+
+echo "Testing done!"
