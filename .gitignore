@@ -1,5 +1,4 @@
 *.pyc
-*.sh
 *.out
 /__pycache__
 /data

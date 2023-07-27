@@ -1,0 +1,32 @@
+name: inference module test
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - tests/test_osfintegration.sh
+      - .github/workflows/test_osf.yml
+
+  pull_request:
+    branches: [ master ]
+    paths:
+      - tests/test_osfintegration.sh
+      - .github/workflows/test_osf.yml
+
+jobs:
+  test_train_module_pipeline:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.9.5
+    - name: test osf integration
+      env:
+        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID_: "abk4p" 
+      run: |
+        /bin/bash tests/test_osfintegration.sh
