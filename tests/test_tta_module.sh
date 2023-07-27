@@ -93,12 +93,22 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd $path_to_output
-for file in ./*; do
-    echo $file
-    osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$file
+for dir in *; do 
+    if [ -d "$dir" ]; then 
+        echo $dir
+        cd $dir
+        for file in *; do
+            echo $file
+            osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$dir/$file
+        done
+        osf -p abk4p upload -r ./ /osfstorage/github_actions/tta/predicted_labels/$dir/
+        cd .. 
+    fi;
+    if [ -f "$dir" ]; then 
+        echo $dir
+        osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$dir
+        osf -p abk4p upload $dir /osfstorage/github_actions/tta/predicted_labels/
+    fi;
 done
-
-echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload -r ./ /osfstorage/github_actions/tta/predicted_labels/
 
 echo "Testing done!"
