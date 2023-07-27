@@ -9,12 +9,10 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd ./paper/
-osf -p abk4p ls
-osf -p abk4p upload ./figure1_v1.png /osfstorage/test/file.png
 # for file in *; do
 #     echo $file
 #     osf -p abk4p remove /osfstorage/test/file.png
 # done
 
 # echo "[DEBUG]: saving data to osf"
-# osf -p abk4p upload ./figure1_v1.png /osfstorage/test/file.png
+osf -p abk4p upload ./figure1_v1.png /osfstorage/test/file.png
