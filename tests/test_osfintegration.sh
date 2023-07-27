@@ -15,4 +15,4 @@ export timestamp=$(date +%Y%m%d_%H%M%S)
 echo $timestamp
 export file="figure1_v1.png "
 echo "$timestamp"_"$file"
-osf -p abk4p upload ./paper/$file /osfstorage/github_actions/paper/"$timestamp"_"$file"
+osf -p abk4p upload ./paper/$file /osfstorage/"$timestamp"_"$file"
