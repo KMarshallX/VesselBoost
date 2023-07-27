@@ -3,9 +3,9 @@ set -e
 
 echo "[DEBUG]: osf setup"
 pip install osfclient
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
-export OSF_PROJECT_ID=$OSF_PROJECT_ID_
+# export OSF_TOKEN=$OSF_TOKEN_
+# export OSF_USERNAME=$OSF_USERNAME_
+# export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 echo $OSF_PROJECT_ID
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = ${OSF_USERNAME}" > ~/.osfcli/osfcli.config

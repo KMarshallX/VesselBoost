@@ -25,8 +25,8 @@ jobs:
         python-version: 3.9.5
     - name: test osf integration
       env:
-        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
-        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
-        OSF_PROJECT_ID_: "abk4p" 
+        OSF_TOKEN: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID: "abk4p" 
       run: |
         /bin/bash tests/test_osfintegration.sh
