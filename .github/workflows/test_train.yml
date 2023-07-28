@@ -1,8 +1,6 @@
 name: train module test
 
 on:
-  workflow_dispatch:
-  repository_dispatch:
   push:
     branches: [ master ]
     paths:
