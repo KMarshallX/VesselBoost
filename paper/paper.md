@@ -27,10 +27,12 @@ bibliography: paper.bib
 ---
 
 # Summary
+VesselBoost represents an advanced Python-based software package utilizing deep learning techniques for precise brain arterial vessel segmentation in Time-of-Flight (ToF) angiography. The comprehensive suite encompasses three essential functional modules: a conventional model training module that integrates data augmentation techniques, an inference module, and a test-time-adaptation (TTA) module. By leveraging these modules, users gain flexibility and convenience in training and evaluating their own deep-learning models on MRA image data.
+
+One of the distinguishing features of VesselBoost lies in its incorporation of TTA, enabling the adaptation of pre-trained model parameters on unlabelled image data. By integrating this approach into the package, it enhances the model's generalizability and effectively mitigates decline in inference performance when encountering test images with variations in distribution, resolution, and other attributes. Consequently, VesselBoost significantly empowers neuroscientists, experts, and clinicians, enabling them to effortlessly obtain highly detailed segmentations of the human brain vasculature with excellent accuracy and precision.
 
 
-
-# Statement of need
+# Statement of Need
 
 
 # Methodology
