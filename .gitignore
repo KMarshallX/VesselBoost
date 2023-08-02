@@ -14,3 +14,5 @@ playground.ipynb
 top_level_cli.py
 /config/__pycache__
 test_ground.ipynb
+test_train.sh
+test_tta.sh
