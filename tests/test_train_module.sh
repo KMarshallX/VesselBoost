@@ -63,7 +63,7 @@ train_command1=`cat ./documentation/train_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 eval $train_command1
 
-train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 3'`
+train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
 
