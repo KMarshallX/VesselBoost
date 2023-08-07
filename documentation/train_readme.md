@@ -35,9 +35,9 @@ python train.py --ds_path $path_to_images --lb_path $path_to_labels --prep_mode 
 
 ```
 
-- If you set prep_mode to 1,2 or 3, which means (1) N4 bias field correction, (2)denosing, or (3) both N4 biasfield correction and denoising, then you have to set a path to store the preprocessed images
+- If you set prep_mode to 1,2 or 3, which means (1) N4 bias field correction, (2)denosing, or (3) both N4 biasfield correction and denoising, then you have to set a path to store the preprocessed images. In the following example, we set the preprocessing mode to "applying N4 bias field correction only".
 ```bash
 
-python train.py --ds_path $path_to_images --lb_path $path_to_labels --prep_mode 3 --ps_path $path_to_preprocessed --ep $n_epochs --lr 1e-3 --outmo $path_to_model
+python train.py --ds_path $path_to_images --lb_path $path_to_labels --prep_mode 1 --ps_path $path_to_preprocessed --ep $n_epochs --lr 1e-3 --outmo $path_to_model
 
 ```
