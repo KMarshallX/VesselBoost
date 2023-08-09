@@ -84,10 +84,12 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = optim
 # initialize the augmentation method
 aug_item = aug_utils(args.osz, args.aug_mode)
 
-
 if __name__ == "__main__":
     print("Training session will start shortly..")
-
+    print("Parameters Info:\n*************************************************************\n")
+    print(f"Input image path: {raw_img}, Segmentation path: {seg_img}, Prep_mode: {prep_mode}\n")
+    print(f"Epoch number: {epoch_num}, Learning rate: {args.lr} \n")
+    
     # initialize the preprocessing method with input/output paths
     preprocessing = preprocess(raw_img, processed_img)
     # start or abort preprocessing 
