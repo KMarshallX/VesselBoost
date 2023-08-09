@@ -27,14 +27,17 @@ bibliography: paper.bib
 ---
 
 # Summary
-*VesselBoost* represents an advanced Python-based software package utilizing deep learning techniques for precise brain arterial vessel segmentation in Time-of-Flight (ToF) angiography. The comprehensive suite encompasses three essential functional modules: a conventional model training module that integrates data augmentation techniques, an inference module, and a test-time adaptation (TTA) module. By leveraging these modules, users gain flexibility and convenience in training and evaluating their own deep-learning models on MRA image data.
+*VesselBoost* is a Python-based software package utilizing deep learning techniques for segmentation of high-resolution time-of-flight MRI angiography data with high sensitivty towards smallest vessels. The software suite encompasses three essential functional modules: a conventional model training module that integrates data augmentation techniques, an inference module, and a test-time adaptation (TTA) module. By leveraging these modules, users can efficiently process high-resolution time-of-flight data or conveniently built models for other (vascular) MRI image contrasts.
 
 One of the distinguishing features of *VesselBoost* lies in its incorporation of TTA, enabling the adaptation of pre-trained model parameters on unlabelled image data. By integrating this approach into the package, it enhances the model's generalizability and effectively mitigates decline in inference performance when encountering test images with variations in distribution, resolution, and other attributes. Consequently, *VesselBoost* significantly empowers neuroscientists, experts, and clinicians, enabling them to effortlessly obtain highly detailed segmentations of the human brain vasculature with excellent accuracy and precision.
 
 
 # Statement of Need
+Magnetic resonance angiography (MRA) performed at ultra-high field provides the unique opportunity to study the arteries of the living human brain at the mesoscopic level (cite Bollmann et al., 2021). From this, insights into the blood supply of the brain (cite Hirsch, 2012) and vascular disease affecting small vessels (cite Hetts, 2017; McConnell, 2016) can be gained. To gather quantitative data of human angioarchitacture to —for example— inform modern blood-flow simulations (cite Park 2020, Ii 2020), detailed segmentations of smallest vessels are required. 
 
+Several challenges arise when segmenting high-resolution MRA data: (i) the low signal-to-noise ratio (SNR) inherent in acquisitions with high spatial resolution (cite Edelstein, 1986), (ii) the multi-scale nature of vessels spanning diameters of a single voxel to ten or more (cite Bollmann, 2021), and (iii) the difficulty of obtaining large data sets of correctly and comprehensively labeled data (cite UHURA challenge website).
 
+*VesselBoost* implements the idea of imperfect training labels (cite Lucena 2019) for vascular segmentations. During TTA, a proxy segmentation containing larger vessels is combined with extensive data augmentation (zooming, rotation, blurring) to sensitise the network towards smallest vessels. This enables the translation of segmentation models trained on low-resolution data to high-resolution data, without the need for additional manual labelling.
 # Methodology
 
 Our *VesselBoost* application comprises three modules: 1) deep learning model training, 2) inference with our pre-trained models, and 3) test-time adaptation (TTA). At the core of *VesselBoost* is our test-time adaptation module (Module 3) that allows the user to use a provided proxy segmentation or the one generated with our pre-trained model (Module 2) to drive further adaptation of our pre-trained models (Figure 1a). We found that TTA, in combination with data augmentation, can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. However, note that our approach is flexible, allowing other developers to contribute with new model architectures and pre-trained models. 
@@ -84,5 +87,7 @@ Neurodesk data analysis environment (https://neurodesk.github.io) or as Docker a
 # Acknowledgments
 
 The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR acknowledges funding through an ARC Linkage grant (LP200301393). MB acknowledges funding from Australian Research Council Future Fellowship grant FT140100865.
+
+Part of this work ... mention SMILE-UHURA challenge
 
 # References
