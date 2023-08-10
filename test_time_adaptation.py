@@ -4,10 +4,11 @@
 Test time adpatation module
 
 Editor: Marshall Xu
-Last Edited: 07/04/2023
+Last Edited: 10/08/2023
 """
 
 import os
+import re
 import shutil
 import numpy as np
 import config.adapt_config as adapt_config
@@ -92,7 +93,7 @@ if __name__ == "__main__":
         # fintuning (generate all finetuned models)
         test_img_path = os.path.join(ps_path, processed_data_list[i]) # path of the preprocessed image
         # find the corresponding proxy
-        assert (processed_data_list[i] in os.listdir(px_path)), "No such proxy file!"
+        assert True in [bool(re.search(processed_data_list[i].split('.')[0], filename)) for filename in os.listdir(px_path)], "No such proxy file!"
         print("Proxies are provided!")
         test_px_path = os.path.join(px_path, processed_data_list[i]) # path of the proxy seg
         
