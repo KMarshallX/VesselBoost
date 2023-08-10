@@ -93,9 +93,10 @@ if __name__ == "__main__":
         # fintuning (generate all finetuned models)
         test_img_path = os.path.join(ps_path, processed_data_list[i]) # path of the preprocessed image
         # find the corresponding proxy
-        assert True in [bool(re.search(processed_data_list[i].split('.')[0], filename)) for filename in os.listdir(px_path)], "No such proxy file!"
+        bool_list = [bool(re.search(processed_data_list[i].split('.')[0], filename)) for filename in os.listdir(px_path)]
+        assert True in bool_list, "No such proxy file!"
         print("Proxies are provided!")
-        test_px_path = os.path.join(px_path, processed_data_list[i]) # path of the proxy seg
+        test_px_path = os.path.join(px_path, os.listdir(px_path)[bool_list.index(True)]) # path of the proxy seg
         
         #initialize the data loader
         data_loader = single_channel_loader(test_img_path, test_px_path, patch_size, epoch_num)
