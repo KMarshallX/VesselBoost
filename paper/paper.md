@@ -6,7 +6,7 @@ tags:
   - small vessels
   - test-time adaptation
 authors:
-  - name: Ke (Marshall) Xu
+  - name: Marshall Xu
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
@@ -35,10 +35,10 @@ authors:
     affiliation: 1
   - name: Steffen Bollmann
     orcid: 0000-0002-2909-0906
-    affiliation: "1,13"
+    affiliation: "1,12"
   - name: Jonathan R. Polimeni
     orcid: 0000-0002-1348-1179
-    affiliation: "6,7,12"  
+    affiliation: "6,7,13"  
   - name: Markus Barth
     orcid: 0000-0002-0520-1843
     affiliation: 1
@@ -69,9 +69,9 @@ affiliations:
    index: 10
  - name: Leibniz Institute for Neurobiology, Magdeburg, Germany
    index: 11
- - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
-   index: 12
  - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
+   index: 12
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
    index: 13
 date: 24 July 2023
 bibliography: paper.bib
@@ -91,12 +91,12 @@ Several challenges arise when segmenting high-resolution MRA data, most notably 
 # Methodology
 Our *VesselBoost* application comprises three modules: 1) test-time adaptation (TTA), 2) inference with our pre-trained models, and 3) deep learning model training. At the core of *VesselBoost* is our test-time adaptation module (Module 1) that allows the user to use a provided proxy segmentation or the one generated with our pre-trained model (Module 2) to drive further adaptation of our pre-trained models (Figure 1a). We found that TTA, in combination with data augmentation, can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. However, note that our approach is flexible, allowing other developers to contribute with new model architectures and pre-trained models. 
 
-Our pre-trained model consists of a 3D U-Net model [@cicek_2016] initially trained on the SMILE-UHURA challenge 'train' and 'validate' sets. We performed several modifications to the proposed 3D U-Net architecture [@cicek_2016], including increased depth (from 3 to 4 layers in both the encoder and decoder blocks), number of input and output channels equal to 1, and number of convolution filters equal to 16. We implemented these modifications to increase the model's ability to learn complex features, classify vessels only, and reduce training time. Our models were implemented using Python 3.9 and Pytorch 1.13 (REF). 
+Our pre-trained model consists of a 3D U-Net model [@cicek_2016] initially trained on the SMILE-UHURA challenge 'train' and 'validate' sets. We performed several modifications to the proposed 3D U-Net architecture [@cicek_2016], including increased depth (from 3 to 4 layers in both the encoder and decoder blocks), number of input and output channels equal to 1, and number of convolution filters equal to 16. We implemented these modifications to increase the model's ability to learn complex features, classify vessels only, and reduce training time. Our models were implemented using Python 3.9 and Pytorch 1.13 [@paszke_automatic_2017]. 
 
 ![*VesselBoost* overview.\label{fig:1}](figure1_v1.png)
 
 ## Module 1: Test-time adaptation
-Test-time adaptation consists of adapting the weights of our pre-trained models using a proxy segmentation as the pseudo-ground-truth to guide parameter optimization (Figure 1a, step ii). The user can specify the number of epochs for the model adaptation. The initial learning rate and the loss function have default configurations equal to 0.001 and the Tversky loss (α = 0.3 and β = 0.7), respectively. Besides, the default learning rate scheduler is the ReduceLROnPlateau, which automatically reduces the learning rate when the loss reaches a plateau. Note, however, that the user can alter these parameters given their need.
+Test-time adaptation consists of adapting the weights of our pre-trained models using a proxy segmentation as the pseudo-ground-truth to guide parameter optimization (Figure 1a, step ii). The user can specify the number of epochs for the model adaptation. The initial learning rate and the loss function have default configurations equal to 0.001 and the Tversky loss (α = 0.3 and β = 0.7), respectively. Besides, the default learning rate scheduler is the ReduceLROnPlateau (available through PyTorch [@paszke_automatic_2017]), which automatically reduces the learning rate when the loss reaches a plateau. Note, however, that the user can alter these parameters given their need.
 
 ## Module 2: Inference with a pre-trained model
 Our inference pipeline includes input image pre-processing (Figure 1b, step i), image segmentation using our pre-trained model (Figure 1b, step ii), and post-processing (Figure 1b, step iii). Then, the user can use it for further analysis of the segmentations. If no proxy is provided to the TTA module, the user can use the segmentation generated by our pre-trained model as the proxy for further adaptation.
@@ -108,7 +108,7 @@ Our inference pipeline includes input image pre-processing (Figure 1b, step i), 
 
 **Data augmentation**: Our model was pre-trained using randomly cropped patches from the input images and their corresponding labels (or ground-truth segmentations). Each patch was subjected to several augmentation steps to create six different patches. In detail, at each training epoch, the training data were cropped at a random location and size and then resized to 64×64×64 using nearest-neighbor interpolation (patch 1). This procedure is equivalent to zooming in or out for patches smaller or larger than 64×64×64, respectively. Using patch 1, we applied rotation by 90, 180, and 270° (patches 2 – 4) and blurring using two different Gaussian filters (patches 5 and 6). In total, 420,000 training patches were generated (6 patches x 14 subjects x 5,000 training epochs). 
 
-**Training**: We pre-trained three distinct models, each using a specific set of labels: one using manually corrected labels provided for the challenge and the two others using the OMELETTE 1 (O1) and OMELETTE 2 (O2) labels. The OMELLETE labels were generated in an automated fashion (REF) using two different sets of parameters. Each model was trained for 5000 epochs at an initial learning rate of 0.001, which was reduced when the loss reached a plateau (ReduceLROnPlateau (REF)). The Tversky loss [@salehi_tversky_2017] [@chatterjee_ds6_2022] determined the learning objective, with α = 0.3 and β = 0.7. 
+**Training**: We pre-trained three distinct models, each using a specific set of labels: one using manually corrected labels provided for the challenge and the two others using the OMELETTE 1 (O1) and OMELETTE 2 (O2) labels. The OMELLETE labels were generated in an automated fashion [@mattern_2021] using two different sets of parameters. Each model was trained for 5000 epochs at an initial learning rate of 0.001, which was reduced when the loss reached a plateau using ReduceLROnPlateau. The Tversky loss [@salehi_tversky_2017] [@chatterjee_ds6_2022] determined the learning objective, with α = 0.3 and β = 0.7. 
 
 **Post-processing**: The model's output is post-processed to appropriately convert the predicted probabilities to binary classes by setting the threshold to 0.1. Finally, any connected components with a size smaller than ten voxels are removed [@silversmith:2021]. 
 
