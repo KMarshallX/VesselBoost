@@ -7,23 +7,74 @@ tags:
   - test-time adaptation
 authors:
   - name: Ke (Marshall) Xu
-    equal-contrib: true
+    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
   - name: Fernanda L. Ribeiro
     orcid: 0000-0002-1620-4193
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    corresponding: true # (This is how to denote the corresponding author)
+    equal-contrib: true 
+    corresponding: true 
+    affiliation: 1
+  - name: Siyu Liu
+    affiliation: "1,2"
+  - name: Thomas Shaw
+    affiliation: 1
+  - name: Vaibhavi Itkyal
+    affiliation: 3
+  - name: Francesco Cognolato
+    affiliation: "4,5"
+  - name: Michaël Bernier
+    affiliation: "6,7"
+  - name: Hendrik Mattern
+    affiliation: 8
+  - name: Soumick Chatterjee
+    affiliation: 8
+  - name: Oliver Speck
+    affiliation: "8,9,10,11"
+  - name: Shekhar S. Chandra
+    affiliation: 1
+  - name: Steffen Bollmann
+    orcid: 0000-0002-2909-0906
+    affiliation: "1,13"
+  - name: Jonathan R. Polimeni
+    orcid: 0000-0002-1348-1179
+    affiliation: "6,7,12"  
+  - name: Markus Barth
+    orcid: 0000-0002-0520-1843
     affiliation: 1
   - name:  Saskia Bollmann
-    corresponding: true # (This is how to denote the corresponding author)
+    orcid: 0000-0001-8242-8008
+    corresponding: true 
     affiliation: 1
 affiliations:
  - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, Australia 
    index: 1
+ - name: Australian eHealth Research Centre, CSIRO, Herston, QLD, Australia
+   index: 2
+ - name: Department of Biotechnology, Indian Institute of Technology, Madras, India
+   index: 3
+ - name: Centre for Advanced Imaging, The University of Queensland, Brisbane, Australia
+   index: 4
+ - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, Australia
+   index: 5
+ - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, MA, USA
+   index: 6
+ - name: Department of Radiology, Harvard Medical School, Boston, MA, USA
+   index: 7
+ - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, Germany
+   index: 8
+ - name: German Center for Neurodegenerative Diseases, Magdeburg, Germany
+   index: 9
+ - name: Center for Behavioral Brain Sciences, Magdeburg, Germany
+   index: 10
+ - name: Leibniz Institute for Neurobiology, Magdeburg, Germany
+   index: 11
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
+   index: 12
+ - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
+   index: 13
 date: 24 July 2023
 bibliography: paper.bib
-
 ---
 
 # Summary
