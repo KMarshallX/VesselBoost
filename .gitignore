@@ -5,6 +5,7 @@
 /utils/__pycache__
 /models/__pycache__
 /saved_image
+/archive
 /saved_models
 testbed.ipynb
 mip.py
