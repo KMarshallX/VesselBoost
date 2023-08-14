@@ -26,19 +26,19 @@ authors:
   - name: Michaël Bernier
     affiliation: "6,7"
   - name: Hendrik Mattern
-    affiliation: 8
+    affiliation: "8,9,10"
   - name: Soumick Chatterjee
-    affiliation: 8
+    affiliation: "8,11,12"
   - name: Oliver Speck
-    affiliation: "8,9,10,11"
+    affiliation: "8,9,10"
   - name: Shekhar S. Chandra
     affiliation: 1
   - name: Steffen Bollmann
     orcid: 0000-0002-2909-0906
-    affiliation: "1,12"
+    affiliation: "1,13"
   - name: Jonathan R. Polimeni
     orcid: 0000-0002-1348-1179
-    affiliation: "6,7,13"  
+    affiliation: "6,7,14"  
   - name: Markus Barth
     orcid: 0000-0002-0520-1843
     affiliation: 1
@@ -67,12 +67,14 @@ affiliations:
    index: 9
  - name: Center for Behavioral Brain Sciences, Magdeburg, Germany
    index: 10
- - name: Leibniz Institute for Neurobiology, Magdeburg, Germany
+ - name: Data and Knowledge Engineering Group, Faculty of Computer Science, Otto von Guericke University Magdeburg, Germany
    index: 11
- - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
+ - name: Genomics Research Centre, Human Technopole, Milan, Italy
    index: 12
- - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
+ - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
    index: 13
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
+   index: 14
 date: 24 July 2023
 bibliography: paper.bib
 ---
