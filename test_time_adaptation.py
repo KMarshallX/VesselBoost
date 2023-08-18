@@ -14,7 +14,7 @@ import numpy as np
 import config.adapt_config as adapt_config
 from utils.module_utils import preprocess, testAndPostprocess
 from utils.unet_utils import *
-from utils.new_data_loader import single_channel_loader
+from utils.single_data_loader import single_channel_loader
 from models.unet_3d import Unet
 
 args = adapt_config.args
