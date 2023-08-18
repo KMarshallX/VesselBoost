@@ -10,10 +10,10 @@ import torch
 import config.train_config as train_config
 from tqdm import tqdm
 from utils.module_utils import * 
-from utils.new_data_loader import single_channel_loader
+from utils.single_data_loader import single_channel_loader
 from models.unet_3d import Unet
 from models.asppcnn import ASPPCNN
-from models.siyu import CustomSegmentationNetwork
+from models.aspp import CustomSegmentationNetwork
 from models.ra_unet import MainArchitecture
 from utils.module_utils import preprocess
 
