@@ -1,5 +1,7 @@
 *.pyc
 *.out
+*.sh
+*.ipynb
 /__pycache__
 /data
 /utils/__pycache__
@@ -7,13 +9,8 @@
 /saved_image
 /archive
 /saved_models
-testbed.ipynb
 mip.py
 readme_img/Snipaste_2023-03-08_09-06-00.jpg
 readme_img/Snipaste_2023-03-15_09-11-34.jpg
-playground.ipynb
 top_level_cli.py
 /config/__pycache__
-test_ground.ipynb
-test_train.sh
-test_tta.sh
