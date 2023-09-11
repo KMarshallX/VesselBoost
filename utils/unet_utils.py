@@ -2,7 +2,7 @@
 helper functions library
 
 Editor: Marshall Xu
-Last Edited: 03/01/2023
+Last Edited: 07/09/2023
 """
 
 import torch
@@ -33,6 +33,38 @@ class DiceLoss(nn.Module):
 
         return 1 - dice
     
+class DiceCoeff(nn.Module):
+    def __init__(self, delta=0.5, smooth = 1e-4):
+        super().__init__()
+        self.delta = delta
+        self.smooth = smooth
+        """
+        The Dice similarity coefficient, also known as the Sørensen–Dice index or simply Dice coefficient, is a statistical tool which measures the similarity between two sets of data.
+        
+        Parameters
+        ----------
+        delta : float, optional
+            controls weight given to false positive and false negatives, by default 0.5
+        smooth : float, optional
+            smoothing constant to prevent division by zero errors, by default 0.000001
+        """
+    def forward(self, pred, target):
+        
+        pred = torch.sigmoid(pred)
+        
+        # Flatten
+        pred = pred.reshape(-1)
+        target = target.reshape(-1)
+        
+        # cardinalities
+        tp = (pred * target).sum()
+        fp = ((1-target) * pred).sum()
+        fn = (target * (1-pred)).sum()
+
+        dice_score = (tp + self.smooth) / (tp + self.delta*fn + (1-self.delta)*fp + self.smooth)
+
+        return dice_score.mean()
+
 class FocalLoss(nn.Module):
     def __init__(self, alpha = 0.8, gamma = 0, smooth = 1e-6):
         super().__init__()
@@ -87,8 +119,42 @@ class TverskyLoss(nn.Module):
         tversky_score = (tp + self.smooth) / (tp + self.alpha*fp + self.beta*fn + self.smooth)
 
         return 1 - tversky_score
+    
+class ComboLoss(nn.Module):
+    def __init__(self, alpha=0.5, beta=0.5):
+        super().__init__()
+        self.alpha = alpha
+        self.beta = beta
+        """
+        Combo Loss: Handling Input and Output Imbalance in Multi-Organ Segmentation
+        Link: https://arxiv.org/abs/1805.02798
+        
+        Parameters
+        ----------
+        alpha : float, optional
+            controls weighting of dice and cross-entropy loss., by default 0.5
+        beta : float, optional
+        beta > 0.5 penalises false negatives more than false positives., by default 0.5
+        """
+        
+    def forward(self, pred, target):
+        dice = DiceCoeff()(pred, target)
+        # Clip values to prevent division by zero error
+        epsilon = 1e-9
+        pred = torch.clamp(pred, epsilon, 1. - epsilon)
+        bce = BCELoss()(pred, target)
 
+        if self.beta is not None:
+            beta_weight = torch.Tensor([self.beta, 1-self.beta])
+            bce = beta_weight * bce
+        bce = bce.sum().mean()
 
+        if self.alpha is not None:
+            combo_loss = (self.alpha * bce) - ((1 - self.alpha) * dice)
+        else:
+            combo_loss = bce - dice
+        return combo_loss
+    
 class aug_utils:
     def __init__(self, size, mode):
         super().__init__()
