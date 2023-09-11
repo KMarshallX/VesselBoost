@@ -145,7 +145,8 @@ class ComboLoss(nn.Module):
         bce = BCELoss()(pred, target)
 
         if self.beta is not None:
-            beta_weight = torch.Tensor([self.beta, 1-self.beta])
+            device = torch.device("cuda:0" if bce.is_cuda else "cpu")
+            beta_weight = torch.tensor([self.beta, 1-self.beta], device=device)
             bce = beta_weight * bce
         bce = bce.sum().mean()
 

@@ -9,6 +9,7 @@ Last Edited: 10/07/2023
 import torch
 import config.train_config as train_config
 from tqdm import tqdm
+from utils.unet_utils import *
 from utils.module_utils import * 
 from utils.single_data_loader import single_channel_loader
 from models.unet_3d import Unet
@@ -52,6 +53,9 @@ def loss_metric(metric_name):
     elif metric_name == "tver":
         # tversky loss
         return TverskyLoss()
+    elif metric_name == "combo":
+        # combo loss
+        return ComboLoss()
     else:
         print("Enter a valid loss metric.")
 

@@ -2,6 +2,7 @@
 *.out
 *.sh
 *.ipynb
+train_zero.py
 /__pycache__
 /data
 /utils/__pycache__
