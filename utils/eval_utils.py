@@ -6,9 +6,31 @@ Last Edited: 21/07/2023
 """
 
 import os
+import re
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+
+def out_file_reader(file_path):
+    loss_values = []
+    
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Use regular expression to find values following "loss: " and ","
+            match = re.search(r'Loss:  (\d+\.\d+),', line)
+            if match:
+                loss_value = float(match.group(1))
+                loss_values.append(loss_value)
+    
+    # Create a line plot
+    plt.figure()
+    plt.plot(range(1, len(loss_values) + 1), loss_values, linestyle='-')
+    plt.xlabel('Batches')
+    plt.ylabel('Loss')
+    plt.title('Loss Values Over Iterations')
+    plt.grid(True)
+    plt.show()
 
 def mra_deskull(img_path, msk_path, mip_flag):
     """
