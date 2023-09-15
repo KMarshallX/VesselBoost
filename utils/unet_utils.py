@@ -337,9 +337,9 @@ class RandomCrop3D():
     """
     def __init__(self, img_sz, exp_sz):
         h, w, d = img_sz
-        crop_h = torch.randint(10, h, (1,)).item()
-        crop_w = torch.randint(10, w, (1,)).item()
-        crop_d = torch.randint(10, d, (1,)).item()
+        crop_h = torch.randint(32, h, (1,)).item()
+        crop_w = torch.randint(32, w, (1,)).item()
+        crop_d = torch.randint(32, d, (1,)).item()
         assert (h, w, d) > (crop_h, crop_w, crop_d)
         self.img_sz  = tuple((h, w, d))
         self.crop_sz = tuple((crop_h, crop_w, crop_d))
