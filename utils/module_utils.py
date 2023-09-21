@@ -1,7 +1,8 @@
 """
-Provides all the utilities used in eval.py
+Provides all the utilities used in the three modules
+(train.py, inference.py, test_time_adaptation.py)
 
-Last edited: 07/04/2023
+Last edited: 18/09/2023
 
 """
 
@@ -91,6 +92,10 @@ class testAndPostprocess:
         # only campatible with dtype = numpy array
         return (x - np.mean(x)) / np.std(x)
     
+    def normaliser(self, x):
+        # only campatible with dtype = numpy array
+        return (x - np.amin(x)) / (np.amax(x) - np.amin(x))
+    
     def sigmoid(self, z):
         return 1/(1+np.exp(-z))
     
@@ -141,15 +146,18 @@ class testAndPostprocess:
         raw_arr = raw_img.get_fdata() # (1080*1280*52), (480, 640, 163)
 
         ori_size = raw_arr.shape    # record the original size of the input image slab
+        
         # resize the input image, to make sure it can be cropped into small patches with size of (64,64,64)
         if (ori_size[0] // 64 != 0) and (ori_size[0] > 64):
             w = int(np.ceil(ori_size[0]/64)) * 64 # new width (x)
         else:
             w = ori_size[0]
+        
         if (ori_size[1] // 64 != 0) and (ori_size[1] > 64):
             h = int(np.ceil(ori_size[1]/64)) * 64 # new height (y)
         else:
             h = ori_size[1]
+        
         if (ori_size[2] // 64 != 0) and (ori_size[2] > 64):
             t = int(np.ceil(ori_size[2]/64)) * 64 # new thickness (z)
         elif ori_size[2] < 64:

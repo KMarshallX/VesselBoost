@@ -229,6 +229,10 @@ class aug_utils:
 def sigmoid(z):
     return 1/(1+np.exp(-z))
 
+def normaliser(x):
+    # only campatible with dtype = numpy array
+    return (x - np.amin(x)) / (np.amax(x) - np.amin(x))
+
 def standardiser(x):
     # only campatible with dtype = numpy array
     return (x - np.mean(x)) / np.std(x)

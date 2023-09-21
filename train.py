@@ -16,7 +16,6 @@ from models.unet_3d import Unet
 from models.asppcnn import ASPPCNN
 from models.aspp import CustomSegmentationNetwork
 from models.ra_unet import MainArchitecture
-from utils.module_utils import preprocess
 
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
@@ -124,6 +123,7 @@ if __name__ == "__main__":
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
         #traverse every image, load a chunk with its augmented chunks to the model
+        sum_lr = 0
         for file_idx in range(len(loaders_dict)):
             image, label = next(iter(loaders_dict[file_idx]))
             image_batch, label_batch = aug_item(image, label)
@@ -142,8 +142,9 @@ if __name__ == "__main__":
             # Learning rate shceduler
             scheduler.step(loss)
 
-            current_lr = optimizer.param_groups[0]['lr']
-            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
+            sum_lr += optimizer.param_groups[0]['lr']
+        
+        tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {(sum_lr/len(loaders_dict)): .8f}')
 
 
     print("Training finished! Please wait for the model to be saved!\n")
