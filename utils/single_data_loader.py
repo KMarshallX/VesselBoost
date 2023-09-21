@@ -8,7 +8,7 @@ Last Edited: 07/07/2023
 import nibabel as nib
 import os
 
-from .unet_utils import RandomCrop3D, standardiser
+from .unet_utils import RandomCrop3D, standardiser, normaliser
 
 class single_channel_loader:
     def __init__(self, raw_img, seg_img, patch_size, step):
@@ -20,6 +20,7 @@ class single_channel_loader:
         """
         raw_nifti = nib.load(raw_img)
         raw_numpy = raw_nifti.get_fdata()
+        # self.raw_arr = normaliser(raw_numpy) # (1090*1280*52), (480, 640, 163)
         self.raw_arr = standardiser(raw_numpy) # (1090*1280*52), (480, 640, 163)
         self.seg_arr = nib.load(seg_img).get_fdata()
 
