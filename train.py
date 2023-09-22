@@ -118,7 +118,8 @@ if __name__ == "__main__":
                 break
         assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
         # a linked hashmap to store the provoked data loaders
-        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, args.osz, args.ep))
+        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, args.osz, args.ep * args.batch_mul))
+    print(f"\nIn this test, the batch size is {6*args.batch_mul}\n")
 
     # traning loop (this could be separate out )
     for epoch in tqdm(range(epoch_num)):
@@ -127,6 +128,11 @@ if __name__ == "__main__":
         for file_idx in range(len(loaders_dict)):
             image, label = next(iter(loaders_dict[file_idx]))
             image_batch, label_batch = aug_item(image, label)
+            for i in range(1, args.batch_mul):
+                image, label = next(iter(loaders_dict[file_idx]))
+                image_batch_temp, label_batch_temp = aug_item(image, label)
+                image_batch = torch.cat((image_batch, image_batch_temp), dim=0)
+                label_batch = torch.cat((label_batch, label_batch_temp), dim=0)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
             optimizer.zero_grad()

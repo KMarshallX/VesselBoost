@@ -51,4 +51,7 @@ train_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argpar
 # Augmentation mode, available : [on, off, test, mode1]
 train_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)
 
+# batch size multiplier
+train_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
+
 args = train_parser.parse_args()
