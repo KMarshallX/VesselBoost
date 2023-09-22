@@ -43,10 +43,10 @@ def mra_deskull(img_path, msk_path, mip_flag):
 
     # Load the nifti image and its mask
     img = nib.load(img_path)
-    affine = img.affine
+    affine = img.affine # type: ignore
     header = img.header
-    img_arr = img.get_fdata()
-    msk_arr = nib.load(msk_path).get_fdata()
+    img_arr = img.get_fdata() # type: ignore
+    msk_arr = nib.load(msk_path).get_fdata() # type: ignore
     
     # Apply the mask
     masked_arr = np.multiply(img_arr, msk_arr)

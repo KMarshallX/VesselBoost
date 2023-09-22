@@ -46,21 +46,21 @@ class preprocess:
 
                 test_img = nib.load(test_data_path)
                 header = test_img.header
-                affine = test_img.affine
+                affine = test_img.affine # type: ignore
 
                 ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
-                ant_msk = ants.utils.get_mask(ant_img, low_thresh=ant_img.min(), high_thresh=ant_img.max())
+                ant_msk = ants.utils.get_mask(ant_img, low_thresh=ant_img.min(), high_thresh=ant_img.max()) # type: ignore
 
                 if prep_mode == 1:
                     # bias field correction only
                     ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
                 elif prep_mode == 2:
                     # non-local denoising only
-                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk)
+                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk) # type: ignore
                 else:
                     # bfc + denoising
                     ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
-                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk)
+                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk) # type: ignore
 
                 bfc_denoised_arr = ant_img.numpy()
                 bfc_denoised_nifti = nib.Nifti1Image(bfc_denoised_arr, affine, header)
@@ -108,7 +108,7 @@ class testAndPostprocess:
 
                     single_patch = test_patches[i,j,k, :,:,:]
                     single_patch_input = single_patch[None, :]
-                    single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
+                    single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0) # type: ignore
 
                     single_patch_prediction = load_model(single_patch_input)
 
@@ -142,8 +142,8 @@ class testAndPostprocess:
 
         raw_img = nib.load(raw_img_path)
         header = raw_img.header
-        affine = raw_img.affine
-        raw_arr = raw_img.get_fdata() # (1080*1280*52), (480, 640, 163)
+        affine = raw_img.affine # type: ignore
+        raw_arr = raw_img.get_fdata() # type: ignore # (1080*1280*52), (480, 640, 163)
 
         ori_size = raw_arr.shape    # record the original size of the input image slab
         
