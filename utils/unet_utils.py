@@ -220,8 +220,8 @@ class aug_utils:
             input_batch = np.expand_dims(input, axis=0)
             segin_batch = np.expand_dims(segin, axis=0)
             
-        input_batch = input_batch[:,None,:,:,:]
-        segin_batch = segin_batch[:,None,:,:,:]
+        input_batch = input_batch[:,None,:,:,:] # type: ignore
+        segin_batch = segin_batch[:,None,:,:,:] # type: ignore
 
         return torch.from_numpy(input_batch.copy()).to(torch.float32), torch.from_numpy(segin_batch.copy()).to(torch.float32)
 
@@ -251,7 +251,7 @@ def make_prediction(test_patches, load_model, ori_size):
 
                 single_patch = test_patches[i,j,k, :,:,:]
                 single_patch_input = single_patch[None, :]
-                single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
+                single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0) # type: ignore
                 single_patch_input = single_patch_input
 
                 single_patch_prediction = load_model(single_patch_input)
@@ -281,9 +281,9 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
     raw_img = nib.load(raw_img_path)
 
     header = raw_img.header
-    affine = raw_img.affine
+    affine = raw_img.affine # type: ignore
 
-    raw_arr = raw_img.get_fdata() # (1080*1280*52), (480, 640, 163)
+    raw_arr = raw_img.get_fdata() # type: ignore # (1080*1280*52), (480, 640, 163)
 
     ori_size = raw_arr.shape    # record the original size of the input image slab
 
@@ -332,7 +332,7 @@ def verification(traw_path, idx, load_model, sav_img_name, mode):
     # plt.imsave(sav_mip_img_path, mip, cmap='gray')
     # print("Output MIP image is successfully saved!\n")
     # save the nifti image
-    nib.save(nifimg, sav_img_path)
+    nib.save(nifimg, sav_img_path) # type: ignore
     print("Output Neuroimage is successfully saved!\n")
 
 class RandomCrop3D():
