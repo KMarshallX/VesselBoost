@@ -341,6 +341,7 @@ class RandomCrop3D():
     """
     def __init__(self, img_sz, exp_sz):
         h, w, d = img_sz
+        # test 0925, constraint the higher bound of the crop size to be 128
         crop_h = torch.randint(32, h, (1,)).item()
         crop_w = torch.randint(32, w, (1,)).item()
         crop_d = torch.randint(32, d, (1,)).item()

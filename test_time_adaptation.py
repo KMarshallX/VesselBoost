@@ -4,7 +4,7 @@
 Test time adpatation module
 
 Editor: Marshall Xu
-Last Edited: 10/08/2023
+Last Edited: 08/10/2023
 """
 
 import os
@@ -125,10 +125,16 @@ if __name__ == "__main__":
         aug_item = aug_utils(patch_size, aug_mode)
 
         print("Finetuning procedure starts!")
+        print(f"\nIn this test, the batch size is {6*args.batch_mul}\n")
         # training loop
         for epoch in tqdm(range(epoch_num)):
             image, label = next(iter(data_loader))
             image_batch, label_batch = aug_item(image, label)
+            for j in range(1, args.batch_mul):
+                image, label = next(iter(data_loader))
+                image_batch_temp, label_batch_temp = aug_item(image, label)
+                image_batch = torch.cat((image_batch, image_batch_temp), 0)
+                label_batch = torch.cat((label_batch, label_batch_temp), 0)
             image_batch, label_batch = image_batch.to(device), label_batch.to(device)
 
             optimizer.zero_grad()
@@ -144,9 +150,9 @@ if __name__ == "__main__":
             # Learning rate shceduler
             scheduler.step(loss)
 
-            # TODO: debug message, delete this
             current_lr = optimizer.param_groups[0]['lr']
-            tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr: .8f}')
+        
+        tqdm.write(f'Epoch: [{epoch+1}/{epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {current_lr : .8f}')
 
         file_name = processed_data_list[i].split('.')[0]
         out_mo_name = os.path.join(out_mo_path, file_name)
