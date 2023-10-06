@@ -55,4 +55,7 @@ adapt_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse
 # Resource optimization flag. 0: intermediate files are saved, 1: intermediate files are deleted
 adapt_parser.add_argument('--resource', type=int, default=0, help=argparse.SUPPRESS)
 
+# batch size multiplier
+adapt_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
+
 args = adapt_parser.parse_args()

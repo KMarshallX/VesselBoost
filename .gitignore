@@ -4,6 +4,7 @@
 *.ipynb
 train_zero.py
 train_test.py
+test_time_adaptation_test.py
 /__pycache__
 /data
 /utils/__pycache__
