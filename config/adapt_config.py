@@ -30,7 +30,7 @@ adapt_parser.add_argument('--fil', type=int, default=16, help=argparse.SUPPRESS)
 
 # postprocessing / threshold
 # hard thresholding value
-adapt_parser.add_argument('--thresh', type=int, default=0.1, help=argparse.SUPPRESS)
+adapt_parser.add_argument('--thresh', type=float, default=0.1, help=argparse.SUPPRESS)
 # connected components analysis threshold value (denoising)
 adapt_parser.add_argument('--cc', type=int, default=10, help=argparse.SUPPRESS)
 
