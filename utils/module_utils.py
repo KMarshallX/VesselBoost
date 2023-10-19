@@ -76,7 +76,24 @@ class preprocess:
 
 class prediction_and_postprocess:
     """
-    This opbject takes only one image and process only one image
+    A class that contains methods for standardizing, normalizing, and making predictions on 3D image patches using a given model.
+    It also includes a post-processing pipeline for thresholding and connected component analysis.
+    
+    Attributes:
+    - model_name (str): the type of the model used for prediction
+    - input_channel (int): the number of input channels for the model
+    - output_channel (int): the number of output channels for the model
+    - filter_number (int): the number of filters used in the model
+    - input_path (str): the path to the preprocessed data
+    - output_path (str): the path to save the output proxy/final segmentation
+    
+    Methods:
+    - standardiser(x): standardizes the input numpy array
+    - normaliser(x): normalizes the input numpy array
+    - sigmoid(z): applies the sigmoid function to the input numpy array
+    - make_prediction(test_patches, load_model, ori_size): makes predictions on 3D image patches using the given model
+    - post_processing_pipeline(arr, percent, connect_threshold): applies thresholding and connected component analysis to the input numpy array
+    - one_img_process(img_name, load_model, thresh, connect_thresh, mip_flag): processes a single image using the given model and post-processing pipeline
     """
     def __init__(self, model_name, input_channel, output_channel, filter_number, input_path, output_path):
         

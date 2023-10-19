@@ -7,6 +7,7 @@ Last edited: 19/10/2023
 import torch
 from tqdm import tqdm
 from utils.unet_utils import *
+from utils.module_utils import prediction_and_postprocess
 from models.unet_3d import Unet
 from models.asppcnn import ASPPCNN
 from models.aspp import CustomSegmentationNetwork
@@ -53,13 +54,44 @@ def loss_metric(metric_name):
         print("Enter a valid loss metric.")
 
 class Training:
+    """
+    A class for training a neural network model.
+
+    Args:
+    loss_name (str): Name of the loss function to be used.
+    model_name (str): Name of the neural network model to be used.
+    in_chan (int): Number of input channels.
+    out_chan (int): Number of output channels.
+    filter_num (int): Number of filters to be used.
+    optimizer_name (str): Name of the optimizer to be used.
+    learning_rate (float): Learning rate for the optimizer.
+    optim_gamma (float): Gamma value for the optimizer.
+    epoch_num (int): Number of epochs for training.
+    batch_mul (int): Batch size multiplier.
+    patch_size (tuple): Size of the patches to be used.
+    augmentation_mode (str): Name of the augmentation method to be used.
+
+    Attributes:
+    metric (function): Loss function to be used.
+    device (torch.device): cpu or gpu.
+    model (torch.nn.Module): Neural network model to be used.
+    optimizer (torch.optim.Optimizer): Optimizer to be used.
+    epoch_num (int): Number of epochs for training.
+    scheduler (torch.optim.lr_scheduler.ReduceLROnPlateau): Learning rate scheduler to be used.
+    aug_item (function): Augmentation method to be used.
+    batch_mul (int): Batch size multiplier.
+
+    Methods:
+    __call__(self, data_loader, save_path): Trains the model using the given data loader and saves the model to the given path.
+    """
+class Training:
     def __init__(self, loss_name, model_name, 
                 in_chan, out_chan, filter_num,
                 optimizer_name, learning_rate,
                 optim_gamma, epoch_num,
                 batch_mul, patch_size, 
                 augmentation_mode):
-        
+        # loss metric
         self.metric = loss_metric(loss_name)
         # hardware config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -113,3 +145,30 @@ class Training:
         
         torch.save(self.model.state_dict(), save_path)
         print(f"Model successfully saved! The location of the saved model is: {save_path}\n")
+
+class Tta:
+    def __init__(self, loss_name, model_name, 
+                in_chan, out_chan, filter_num,
+                optimizer_name, learning_rate,
+                optim_gamma, epoch_num,
+                batch_mul, patch_size, 
+                augmentation_mode):
+        # loss metric
+        self.metric = loss_metric(loss_name)
+        # hardware config
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # model configuration
+        self.model = model_chosen(model_name, in_chan, out_chan, filter_num).to(self.device)
+        # optimizer
+        self.optimizer = optim_chosen(optimizer_name, self.model.parameters(), learning_rate)
+        # epoch number
+        self.epoch_num = epoch_num
+        # set optim scheduler
+        optim_patience = np.int64(np.ceil(self.epoch_num * 0.2))
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, factor = optim_gamma, patience = optim_patience)
+        # initialize the augmentation method
+        self.aug_item = aug_utils(patch_size, augmentation_mode)
+        # batch size multiplier
+        self.batch_mul = batch_mul
+    
+

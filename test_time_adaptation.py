@@ -12,7 +12,7 @@ import re
 import shutil
 import numpy as np
 import config.adapt_config as adapt_config
-from utils.module_utils import prediction_and_postprocess, preprocess_procedure
+from utils.module_utils import prediction_and_postprocess, preprocess_procedure, make_prediction
 from utils.unet_utils import *
 from utils.single_data_loader import single_channel_loader
 from models.unet_3d import Unet
@@ -26,7 +26,6 @@ if os.path.exists(out_path) == False:
     print(f"{out_path} does not exist.")
     os.mkdir(out_path)
     print(f"{out_path} has been created!")
-
 
 prep_mode = args.prep_mode # preprocessing mode
 # when the preprocess is skipped, 
