@@ -5,12 +5,12 @@ Inference using provided pre-trained model
 
 
 Editor: Marshall Xu
-Last edited: 07/04/2023
+Last edited: 18/10/2023
 """
 
 import os
 import config.infer_config as infer_config
-from utils.module_utils import preprocess, testAndPostprocess
+from utils.module_utils import preprocess_procedure, make_prediction
 
 args = infer_config.infer_parser.parse_args()
 
@@ -40,18 +40,12 @@ if __name__ == "__main__":
 
     print("Inference session will start shortly..")
 
-    # initialize the preprocessing method with input/output paths
-    preprocessing = preprocess(ds_path, ps_path)
-    # start or abort preprocessing 
-    preprocessing(prep_mode)
+    # preprocess procedure
+    preprocess_procedure(ds_path, ps_path, prep_mode)
 
-    # initialize the inference method
-    inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
-    # take each processed image for inference
-    processed_data_list = os.listdir(ps_path)
-    for i in range(len(processed_data_list)):
-        # generate inferred segmentation fot the current image
-        inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i], mip_flag=True)
-
-
+    # make prediction
+    make_prediction(model_type, in_chan, ou_chan,
+                    fil_num, ps_path, out_path,
+                    threshold_vector[0], threshold_vector[1], pretrained_model,
+                    mip_flag=True)
 

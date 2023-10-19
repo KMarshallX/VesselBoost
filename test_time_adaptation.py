@@ -4,7 +4,7 @@
 Test time adpatation module
 
 Editor: Marshall Xu
-Last Edited: 08/10/2023
+Last Edited: 18/10/2023
 """
 
 import os
@@ -12,7 +12,7 @@ import re
 import shutil
 import numpy as np
 import config.adapt_config as adapt_config
-from utils.module_utils import preprocess, testAndPostprocess
+from utils.module_utils import prediction_and_postprocess, preprocess_procedure
 from utils.unet_utils import *
 from utils.single_data_loader import single_channel_loader
 from models.unet_3d import Unet
@@ -74,10 +74,9 @@ if __name__ == "__main__":
 
     print("TTA session will start shortly..")
 
-    # initialize the preprocessing method with input/output paths
-    preprocessing = preprocess(ds_path, ps_path)
-    # start or abort preprocessing 
-    preprocessing(prep_mode)
+    # preprocessing procedure
+    preprocess_procedure(ds_path, ps_path, prep_mode)
+    
     # traverse each image
     processed_data_list = os.listdir(ps_path)
     for i in range(len(processed_data_list)):
@@ -86,7 +85,7 @@ if __name__ == "__main__":
         if len(os.listdir(px_path)) != len(os.listdir(ds_path)):
             print("No proxies are provided, strating generating proxies...")
             # initialize the inference method for generating the proxies
-            inference_postpo = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
+            inference_postpo = prediction_and_postprocess(model_type, in_chan, ou_chan, fil_num, ps_path, px_path)
             # mip flag set to be False, cuz we don't want mip when generating proxies
             inference_postpo(threshold_vector[0], threshold_vector[1], pretrained_model, processed_data_list[i], mip_flag=False)
         
@@ -162,7 +161,7 @@ if __name__ == "__main__":
         # inference by using the finetuned model
         print(f"Final thresholding for {file_name} will start shortly!\n")
         # initialize the inference method for generating the proxies
-        inference_postpo_final = testAndPostprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
+        inference_postpo_final = prediction_and_postprocess(model_type, in_chan, ou_chan, fil_num, ps_path, out_path)
         # generate mip images at the final stage
         inference_postpo_final(threshold_vector[0], threshold_vector[1], out_mo_name, processed_data_list[i], mip_flag=True)
     

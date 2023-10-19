@@ -2,7 +2,7 @@
 Provides all the utilities used in the three modules
 (train.py, inference.py, test_time_adaptation.py)
 
-Last edited: 18/09/2023
+Last edited: 19/10/2023
 
 """
 
@@ -74,7 +74,7 @@ class preprocess:
             print("Aborting the preprocessing procedure!\n")
 
 
-class testAndPostprocess:
+class prediction_and_postprocess:
     """
     This opbject takes only one image and process only one image
     """
@@ -213,5 +213,51 @@ class testAndPostprocess:
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag)
         print("Prediction and thresholding procedure end!\n")
 
+def preprocess_procedure(ds_path, ps_path, prep_mode):
+    """
+    Preprocesses data
 
+    Args:
+        ds_path (str): The path to the dataset.
+        ps_path (str): The path to the preprocessed data storage location.
+        prep_mode (int): The preprocessing mode to use.
+
+    Returns:
+        None
+    """
+    # initialize the preprocessing method with input/output paths
+    preprocessing = preprocess(ds_path, ps_path)
+    # start or abort preprocessing 
+    preprocessing(prep_mode)
+
+def make_prediction(model_name, input_channel, output_channel, 
+                    filter_number, input_path, output_path, 
+                    thresh, connect_thresh, test_model_name, 
+                    mip_flag):
+    """
+    Makes a prediction
+
+    Args:
+        model_name (str): The name of the model.
+        input_channel (int): The number of input channels.
+        output_channel (int): The number of output channels.
+        filter_number (int): The number of filters.
+        input_path (str): The path to the input data (normally the path to processed data).
+        output_path (str): The path to the output data.
+        thresh (float): The threshold value.
+        connect_thresh (int): The connected threshold value.
+        test_model_name (str): The path to the pre-trained model.
+        test_img_name (str): The name of the test image.
+        mip_flag (bool): The MIP flag.
+
+    Returns:
+        None
+    """
+    # initialize the prediction method with model configuration and input/output paths
+    prediction_postpo = prediction_and_postprocess(model_name, input_channel, output_channel, filter_number, input_path, output_path)
+    # take each processed image for inference
+    processed_data_list = os.listdir(input_path)
+    for i in range(len(processed_data_list)):
+        # generate inferred segmentation fot the current image
+        prediction_postpo(thresh, connect_thresh, test_model_name, processed_data_list[i], mip_flag)
 
