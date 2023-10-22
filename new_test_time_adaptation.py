@@ -67,7 +67,7 @@ if __name__ == "__main__":
                                 args.pretrained,
                                 args.thresh, args.cc)
     # tta procedure
-    tta_process.tta(ps_path, px_path, out_path, out_mo_path, resource_opt)
+    tta_process.test_time_adaptation(ps_path, px_path, out_path, out_mo_path, resource_opt)
 
 
 

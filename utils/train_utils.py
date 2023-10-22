@@ -193,7 +193,7 @@ class TTA_Training:
 
         print("Training finished! Please wait for the model to be saved!\n")
         
-        torch.save(self.model.state_dict(), save_path)
+        torch.save(model.state_dict(), save_path)
         print(f"Model successfully saved! The location of the saved model is: {save_path}\n")
 
     def train(self, ps_path, seg_path, out_mo_path):

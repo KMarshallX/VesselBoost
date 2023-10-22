@@ -82,3 +82,5 @@ def multi_channel_loader(ps_path, seg_path, patch_size, step):
         assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
         # a linked hashmap to store the provoked data loaders
         loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, patch_size, step))
+    
+    return loaders_dict
