@@ -18,6 +18,8 @@ raw_img = args.ds_path
 processed_img = args.ps_path
 seg_img = args.lb_path
 prep_mode = args.prep_mode
+out_path = args.outmo
+
 # when the preprocess is skipped, 
 # directly take the raw data for inference
 if prep_mode == 4:
@@ -32,20 +34,15 @@ if __name__ == "__main__":
     # preprocess procedure
     preprocess_procedure(raw_img, processed_img, prep_mode)
     # initialize the training process
-    train_process = Training(args.loss_m, args.mo, 
+    train_process = TTA_Training(args.loss_m, args.mo, 
                             args.ic, args.oc, args.fil,
                             args.op, args.lr, 
                             args.optim_gamma, args.ep, 
-                            args.batch_mul, args.osz,
-                            args.aug_mode)
-    # initialize the data loader
-    step = int(args.ep * args.batch_mul)
-    multi_image_loder = multi_channel_loader(processed_img, seg_img, args.osz, step)
-
-    print(f"\nIn this test, the batch size is {6*args.batch_mul}\n")
+                            args.batch_mul, 
+                            args.osz, args.aug_mode)
 
     # traning loop (this could be separate out )
-    train_process(multi_image_loder, args.outmo)
+    train_process.train(processed_img, seg_img, out_path)
 
 
 
