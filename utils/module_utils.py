@@ -116,7 +116,7 @@ class prediction_and_postprocess:
     def sigmoid(self, z):
         return 1/(1+np.exp(-z))
     
-    def make_prediction(self, test_patches, load_model, ori_size):
+    def inference(self, test_patches, load_model, ori_size):
         print("Prediction procedure starts!")
         # Predict each 3D patch  
         for i in tqdm(range(test_patches.shape[0])):
@@ -189,7 +189,7 @@ class prediction_and_postprocess:
 
         # pachify
         test_patches = patchify(new_raw, (64,64,64), 64)
-        test_output_sigmoid = self.make_prediction(test_patches, load_model, new_size)
+        test_output_sigmoid = self.inference(test_patches, load_model, new_size)
 
         # reshape to original shape
         test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
