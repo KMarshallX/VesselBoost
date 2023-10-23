@@ -25,7 +25,7 @@ if os.path.exists(out_path) == False:
     print(f"{out_path} has been created!")
 
 # when the preprocess is skipped, 
-# directly take the raw data for inference
+# directly take the raw data for prediction
 if prep_mode == 4:
     ps_path = ds_path
 

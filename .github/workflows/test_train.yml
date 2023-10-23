@@ -10,7 +10,8 @@ on:
       - environment.yml
       - documentation/train_readme.md
       - utils/module_utils.py
-      - utils/new_data_loader.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
       - utils/unet_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh
@@ -25,7 +26,8 @@ on:
       - environment.yml
       - documentation/train_readme.md
       - utils/module_utils.py
-      - utils/new_data_loader.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
       - utils/unet_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh

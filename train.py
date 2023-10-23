@@ -21,7 +21,7 @@ prep_mode = args.prep_mode
 out_path = args.outmo
 
 # when the preprocess is skipped, 
-# directly take the raw data for inference
+# directly take the raw data for prediction
 if prep_mode == 4:
     processed_img = raw_img
 

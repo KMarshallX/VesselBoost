@@ -9,10 +9,10 @@ Last edited: 18/10/2023
 """
 
 import os
-import config.infer_config as infer_config
+import config.pred_config as pred_config
 from utils.module_utils import preprocess_procedure, make_prediction
 
-args = infer_config.infer_parser.parse_args()
+args = pred_config.pred_parser.parse_args()
 
 ds_path = args.ds_path # path to original data
 ps_path = args.ps_path # path to preprocessed data

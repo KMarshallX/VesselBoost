@@ -1,6 +1,6 @@
 """
 Provides all the utilities used in the three modules
-(train.py, inference.py, test_time_adaptation.py)
+(train.py, prediction.py, test_time_adaptation.py)
 
 Last edited: 19/10/2023
 
@@ -272,7 +272,7 @@ def make_prediction(model_name, input_channel, output_channel,
     """
     # initialize the prediction method with model configuration and input/output paths
     prediction_postpo = prediction_and_postprocess(model_name, input_channel, output_channel, filter_number, input_path, output_path)
-    # take each processed image for inference
+    # take each processed image for prediction
     processed_data_list = os.listdir(input_path)
     for i in range(len(processed_data_list)):
         # generate inferred segmentation fot the current image

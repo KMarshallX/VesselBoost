@@ -1,4 +1,4 @@
-name: inference module test
+name: osf test
 
 on:
   push:
