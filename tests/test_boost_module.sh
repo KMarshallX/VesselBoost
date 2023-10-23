@@ -51,8 +51,8 @@ echo "Path to labels: "$path_to_labels""
 path_to_output="./data/predicted_labels/"
 echo "Path to output: "$path_to_output""
 
-path_to_model="./data/predicted_labels/model_test"
-echo "Path to model: "$path_to_model""
+path_to_scratch_model="./data/predicted_labels/model_test"
+echo "Path to model: "$path_to_scratch_model""
 
 path_to_preprocessed="./data/preprocessed/"
 echo "Path to preprocessed data: "$path_to_preprocessed""
