@@ -41,6 +41,10 @@ adapt_parser.add_argument('--lr', type=float, default=1e-3, help="learning rate,
 adapt_parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=5000")
 # expected size after zooming
 adapt_parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPRESS)
+# optimizer type, available: [sgd, adam]
+adapt_parser.add_argument('--op', type=str, default="adam", help=argparse.SUPPRESS)
+# loss metric type, available: [bce, dice, tver]
+adapt_parser.add_argument('--loss_m', type=str, default="tver", help=argparse.SUPPRESS)
 
 # Optimizer tuning
 # Decays the learning rate of each parameter group by this ratio, dtype: float

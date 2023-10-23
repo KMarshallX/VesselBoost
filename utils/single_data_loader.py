@@ -49,3 +49,38 @@ class single_channel_loader:
             img_crop, seg_crop = cropper(self.raw_arr, self.seg_arr)
 
             yield img_crop, seg_crop
+
+def multi_channel_loader(ps_path, seg_path, patch_size, step):
+    """
+    Loads multiple images and their corresponding segmentation masks from the given paths.
+    Args:
+        ps_path (str): Path to the folder containing the processed images.
+        seg_path (str): Path to the folder containing the label images.
+        patch_size (tuple): Size of the patches to be extracted from the images.
+        step (int): Step size for the sliding window approach to extract patches.
+    Returns:
+        dict: A dictionary containing the initialized single_channel_loaders for each image.
+    """
+    # make sure the image path and seg path contains equal number of files
+    raw_file_list = os.listdir(ps_path)
+    seg_file_list = os.listdir(seg_path)
+    assert (len(raw_file_list) == len(seg_file_list)), "Number of images and correspinding segs not matched!"
+    file_num = len(raw_file_list)
+
+    # initialize single_channel_loaders for each image
+    # and store the initialized loaders in a linked hashmaps
+    loaders_dict = dict()
+    for i in range(file_num):
+        # joined path to the current image file 
+        raw_img_name = os.path.join(ps_path, raw_file_list[i])
+        # find the corresponding seg file in the seg_folder
+        seg_img_name = None
+        for j in range(file_num):
+            if seg_file_list[j].find(raw_file_list[i].split('.')[0]) != -1:
+                seg_img_name = os.path.join(seg_path, seg_file_list[j])
+                break
+        assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
+        # a linked hashmap to store the provoked data loaders
+        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, patch_size, step))
+    
+    return loaders_dict

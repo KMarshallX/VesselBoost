@@ -1,8 +1,8 @@
 """
 Provides all the utilities used in the three modules
-(train.py, inference.py, test_time_adaptation.py)
+(train.py, prediction.py, test_time_adaptation.py)
 
-Last edited: 18/09/2023
+Last edited: 19/10/2023
 
 """
 
@@ -74,9 +74,26 @@ class preprocess:
             print("Aborting the preprocessing procedure!\n")
 
 
-class testAndPostprocess:
+class prediction_and_postprocess:
     """
-    This opbject takes only one image and process only one image
+    A class that contains methods for standardizing, normalizing, and making predictions on 3D image patches using a given model.
+    It also includes a post-processing pipeline for thresholding and connected component analysis.
+    
+    Attributes:
+    - model_name (str): the type of the model used for prediction
+    - input_channel (int): the number of input channels for the model
+    - output_channel (int): the number of output channels for the model
+    - filter_number (int): the number of filters used in the model
+    - input_path (str): the path to the preprocessed data
+    - output_path (str): the path to save the output proxy/final segmentation
+    
+    Methods:
+    - standardiser(x): standardizes the input numpy array
+    - normaliser(x): normalizes the input numpy array
+    - sigmoid(z): applies the sigmoid function to the input numpy array
+    - make_prediction(test_patches, load_model, ori_size): makes predictions on 3D image patches using the given model
+    - post_processing_pipeline(arr, percent, connect_threshold): applies thresholding and connected component analysis to the input numpy array
+    - one_img_process(img_name, load_model, thresh, connect_thresh, mip_flag): processes a single image using the given model and post-processing pipeline
     """
     def __init__(self, model_name, input_channel, output_channel, filter_number, input_path, output_path):
         
@@ -99,7 +116,7 @@ class testAndPostprocess:
     def sigmoid(self, z):
         return 1/(1+np.exp(-z))
     
-    def make_prediction(self, test_patches, load_model, ori_size):
+    def inference(self, test_patches, load_model, ori_size):
         print("Prediction procedure starts!")
         # Predict each 3D patch  
         for i in tqdm(range(test_patches.shape[0])):
@@ -172,7 +189,7 @@ class testAndPostprocess:
 
         # pachify
         test_patches = patchify(new_raw, (64,64,64), 64)
-        test_output_sigmoid = self.make_prediction(test_patches, load_model, new_size)
+        test_output_sigmoid = self.inference(test_patches, load_model, new_size)
 
         # reshape to original shape
         test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
@@ -213,5 +230,51 @@ class testAndPostprocess:
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag)
         print("Prediction and thresholding procedure end!\n")
 
+def preprocess_procedure(ds_path, ps_path, prep_mode):
+    """
+    Preprocesses data
 
+    Args:
+        ds_path (str): The path to the dataset.
+        ps_path (str): The path to the preprocessed data storage location.
+        prep_mode (int): The preprocessing mode to use.
+
+    Returns:
+        None
+    """
+    # initialize the preprocessing method with input/output paths
+    preprocessing = preprocess(ds_path, ps_path)
+    # start or abort preprocessing 
+    preprocessing(prep_mode)
+
+def make_prediction(model_name, input_channel, output_channel, 
+                    filter_number, input_path, output_path, 
+                    thresh, connect_thresh, test_model_name, 
+                    mip_flag):
+    """
+    Makes a prediction
+
+    Args:
+        model_name (str): The name of the model.
+        input_channel (int): The number of input channels.
+        output_channel (int): The number of output channels.
+        filter_number (int): The number of filters.
+        input_path (str): The path to the input data (normally the path to processed data).
+        output_path (str): The path to the output data.
+        thresh (float): The threshold value.
+        connect_thresh (int): The connected threshold value.
+        test_model_name (str): The path to the pre-trained model.
+        test_img_name (str): The name of the test image.
+        mip_flag (bool): The MIP flag.
+
+    Returns:
+        None
+    """
+    # initialize the prediction method with model configuration and input/output paths
+    prediction_postpo = prediction_and_postprocess(model_name, input_channel, output_channel, filter_number, input_path, output_path)
+    # take each processed image for prediction
+    processed_data_list = os.listdir(input_path)
+    for i in range(len(processed_data_list)):
+        # generate inferred segmentation fot the current image
+        prediction_postpo(thresh, connect_thresh, test_model_name, processed_data_list[i], mip_flag)
 

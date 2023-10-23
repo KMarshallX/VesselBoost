@@ -1,7 +1,7 @@
 *.pyc
 *.out
-*.sh
-*.ipynb
+/*.ipynb
+/*.sh
 train_zero.py
 train_test.py
 test_time_adaptation_test.py
@@ -16,3 +16,4 @@ readme_img/Snipaste_2023-03-08_09-06-00.jpg
 readme_img/Snipaste_2023-03-15_09-11-34.jpg
 /config/__pycache__
 config/train_test_config.py
+

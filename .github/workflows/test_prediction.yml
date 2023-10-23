@@ -1,48 +1,50 @@
-name: inference module test
+name: prediction module test
 
 on:
   push:
     branches: [ master ]
     paths:
       - README.md
-      - inference.py
-      - infer_config.py
+      - prediction.py
+      - pred_config.py
       - environment.yml
       - documentation/infer_readme.md
       - utils/module_utils.py
-      - utils/new_data_loader.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
       - utils/unet_utils.py
-      - tests/test_inference_module.sh
+      - tests/test_prediction_module.sh
       - miniconda-setup.sh
-      - .github/workflows/test_inference.yml
+      - .github/workflows/test_prediction.yml
 
   pull_request:
     branches: [ master ]
     paths:
       - README.md
-      - inference.py
-      - infer_config.py
+      - prediction.py
+      - pred_config.py
       - environment.yml
       - documentation/infer_readme.md
       - utils/module_utils.py
-      - utils/new_data_loader.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
       - utils/unet_utils.py
-      - tests/test_inference_module.sh
+      - tests/test_prediction_module.sh
       - miniconda-setup.sh
-      - .github/workflows/test_inference.yml
+      - .github/workflows/test_prediction.yml
 
 jobs:
-  test_inference_module_pipeline:
+  test_prediction_module_pipeline:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
       with:
         python-version: 3.9.5
-    - name: test inference module
+    - name: test prediction module
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}
         OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID_: "abk4p" 
       run: |
-        /bin/bash tests/test_inference_module.sh
+        /bin/bash tests/test_prediction_module.sh

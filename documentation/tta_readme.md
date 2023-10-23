@@ -1,8 +1,8 @@
 # **Test-Time Adaptation Module**
 Test-time adaptation module, using a pretrained model or provided segmentations as a basis and finetune on your image data. 
-## **Inference with pre-trained model**
+## **prediction with pre-trained model**
 ### **Prepare prerequisite model**
-We currently provide 3 pre-trained models, you can download them to make inference on your images. The models are ... 
+We currently provide 3 pre-trained models, you can download them to make prediction on your images. The models are ... 
 
 To access them, make a directory for the pre-trained models within the vessel_code folder:
 ```bash

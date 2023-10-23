@@ -58,12 +58,12 @@ echo "Path to preprocessed images: "$path_to_preprocessed_images""
 path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
-echo "[DEBUG]: testing inference module without preprocessing:"
+echo "[DEBUG]: testing prediction module without preprocessing:"
 train_command1=`cat ./documentation/infer_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 eval $train_command1
 
-echo "[DEBUG]: testing inference module with preprocessing:"
+echo "[DEBUG]: testing prediction module with preprocessing:"
 train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
@@ -77,10 +77,10 @@ echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcl
 cd $path_to_output
 for file in ./*; do
     echo $file
-    osf -p abk4p remove /osfstorage/github_actions/inference/predicted_labels/$file
+    osf -p abk4p remove /osfstorage/github_actions/prediction/predicted_labels/$file
 done
 
 echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload -r ./ /osfstorage/github_actions/inference/predicted_labels/
+osf -p abk4p upload -r ./ /osfstorage/github_actions/prediction/predicted_labels/
 
 echo "Testing done!"
