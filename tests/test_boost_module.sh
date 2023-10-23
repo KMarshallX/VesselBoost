@@ -54,8 +54,8 @@ echo "Path to output: "$path_to_output""
 path_to_scratch_model="./data/predicted_labels/model_test"
 echo "Path to model: "$path_to_scratch_model""
 
-path_to_preprocessed="./data/preprocessed/"
-echo "Path to preprocessed data: "$path_to_preprocessed""
+path_to_preprocessed_images="./data/preprocessed/"
+echo "Path to preprocessed data: "$path_to_preprocessed_images""
 
 n_epochs=5
 echo "Number of epochs: "$n_epochs""
