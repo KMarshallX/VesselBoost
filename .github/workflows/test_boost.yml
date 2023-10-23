@@ -1,0 +1,50 @@
+name: boost module test
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - README.md
+      - boost.py
+      - boost_config.py
+      - environment.yml
+      - documentation/boost_readme.md
+      - utils/module_utils.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
+      - utils/unet_utils.py
+      - tests/test_boost_module.sh
+      - miniconda-setup.sh
+      - .github/workflows/test_boost.yml
+
+  pull_request:
+    branches: [ master ]
+    paths:
+      - README.md
+      - boost.py
+      - boost_config.py
+      - environment.yml
+      - documentation/boost_readme.md
+      - utils/module_utils.py
+      - utils/train_utils.py
+      - utils/single_data_loader.py
+      - utils/unet_utils.py
+      - tests/test_boost_module.sh
+      - miniconda-setup.sh
+      - .github/workflows/test_boost.yml
+
+jobs:
+  test_boost_module_pipeline:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.9.5
+    - name: test boost module
+      env:
+        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID_: "abk4p" 
+      run: |
+        /bin/bash tests/test_boost_module.sh
