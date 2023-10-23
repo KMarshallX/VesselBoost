@@ -1,6 +1,6 @@
 # **Initial Training Module**
 You can use this module to train your own base model.
-## **Create a base modle from scratch**
+## **Create a base model from scratch**
 ### Prepare the training data
 If you are working outside of a container, you can store you data under *data* folder as the instruction below. If you are working inside a container, you can mount your data folder to *./data/train/* and  *./data/label/*.\
 Please make sure that the name of a segmentation image file should contain the FULL NAME of its corresponding MRI image. \
