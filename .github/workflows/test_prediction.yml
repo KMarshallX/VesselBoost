@@ -6,9 +6,9 @@ on:
     paths:
       - README.md
       - prediction.py
-      - pred_config.py
+      - config/pred_config.py
       - environment.yml
-      - documentation/infer_readme.md
+      - documentation/predict_readme.md
       - utils/module_utils.py
       - utils/train_utils.py
       - utils/single_data_loader.py
@@ -22,9 +22,9 @@ on:
     paths:
       - README.md
       - prediction.py
-      - pred_config.py
+      - config/pred_config.py
       - environment.yml
-      - documentation/infer_readme.md
+      - documentation/predict_readme.md
       - utils/module_utils.py
       - utils/train_utils.py
       - utils/single_data_loader.py
