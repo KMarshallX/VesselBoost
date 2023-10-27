@@ -59,12 +59,12 @@ path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"
-train_command1=`cat ./documentation/infer_readme.md | grep 'prep_mode 4'`
+train_command1=`cat ./documentation/predict_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 eval $train_command1
 
 echo "[DEBUG]: testing prediction module with preprocessing:"
-train_command2=`cat ./documentation/infer_readme.md | grep 'prep_mode 1'`
+train_command2=`cat ./documentation/predict_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
 
