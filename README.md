@@ -64,6 +64,8 @@ This is a Python-based software package. To successfully run this project on you
 
 ## **Contact**
 Marshall Xu <[marshall.xu@uq.edu.au](marshall.xu@uq.edu.au)>
+
 Saskia Bollmann <[saskia.bollmann@uq.edu.au](saskia.bollmann@uq.edu.au)>
+
 Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>
 
