@@ -6,7 +6,7 @@ on:
     paths:
       - README.md
       - boost.py
-      - boost_config.py
+      - config/boost_config.py
       - environment.yml
       - documentation/boost_readme.md
       - utils/module_utils.py
@@ -22,7 +22,7 @@ on:
     paths:
       - README.md
       - boost.py
-      - boost_config.py
+      - config/boost_config.py
       - environment.yml
       - documentation/boost_readme.md
       - utils/module_utils.py
