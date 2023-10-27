@@ -1,53 +1,69 @@
 # **Vessel Boost**
-This repository contains functional modules and stand-alone scripts for Vessel Boost.
+*VesselBoost* is a Python-based software package utilizing deep learning techniques to segment high-resolution time-of-flight MRI angiography data, with high sensitivity towards small vessels. The software suite encompasses three essential functional modules: (1) *predict*, (2) *test-time adaptation* (TTA), and (3) *boost*. By leveraging these modules, users can efficiently segment high-resolution time-of-flight data or conveniently leverage our command line interface to boost segmentations for other vascular MRI image contrasts.
+
 ## **Table of Contents**
 - [Purpose](https://github.com/KMarshallX/vessel_code#purpose)
 - [Current Version](https://github.com/KMarshallX/vessel_code#current-version)
-- [Installation & Requirements](https://github.com/KMarshallX/vessel_code#installation--requirements)
+- [Requirements](https://github.com/KMarshallX/vessel_code#requirements)
+- [Software container](https://github.com/KMarshallX/software-container)
+- [Installation](https://github.com/KMarshallX/software-container)
 - [Citation](https://github.com/KMarshallX/vessel_code#citation)
 - [Contact](https://github.com/KMarshallX/vessel_code#contact)
 
 ## **Purpose**
-*Vessel Boost* is a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
+*VesselBoost* is a Python-based software package leveraging a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
 This repository contains 3 major modules: 
-1. [Initial training](https://github.com/KMarshallX/vessel_code/blob/master/documentation/train_readme.md). You can use this module to train your own base model.
-2. [Prediction](https://github.com/KMarshallX/vessel_code/blob/master/documentation/infer_readme.md). This module takes one pre-trained model for prediction on the MRA data you provide. It can be used to generate intermediate proxy segmentations as well as the final ones.
-3. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/documentation/tta_readme.md). This module takes a pre-trained model and specified proxies for model adaptation. If no proxies are provided, this module will generate proxies automatically.
+
+1. [Predict](https://github.com/KMarshallX/vessel_code/blob/master/documentation/predict_readme.md). With this module, users can segment high-resolution time-of-flight using our pre-trained models. It can be used to generate intermediate proxy segmentations as well as the final ones.
+2. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/documentation/tta_readme.md). This module allows the user to provide a proxy segmentation, or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models.
+3. [Boost](https://github.com/KMarshallX/vessel_code/blob/master/documentation/boost_readme.md). *Boost* allows users to train a segmentation model on a single or more data using existing imperfect segmentation.
+
 <p align="center">
-<img src="./readme_img/methods.png">
+<img src="./paper/figure1.png">
 </p>
 
-### *Pipeline overview*
 
-The complete pipeline will firstly train an intial model on the provided high resolution MRAs, or you can directly use our pre-trained models. The pre-trained models will be used to infer intermediate segmentations (proxies) of the images you want to process. Lastly, a test-time-adaptation (TTA) process will be conducted based on the chosen pre-trained model and proxies.
 ## **Current Version**
 VesselBoost 0.9.1
-## **Installation & Requirements**
-This is a Pytorch based project, for successfully running this project on your local machine, please follow the following steps to set up necessary sofware environment.
-1. Make sure your local machine has Nvidia GPU(s) and CUDA installed 
-2. Clone this repository to your local machine
+
+## ** Requirements **
+- Docker / Singularity container
+
+## **Software container**
+
+VesselBoost, pre-trained models, and required software are packaged in software containers available through Dockerhub and [Neurodesk](https://www.neurodesk.org/).
+
+### **Docker**
+
+The Dockerhub container is available at Dockerhub. To download the container, run the following command:
+
+```
+docker pull vnmd/vesselboost_0.6.0
+```
+
+## **Installation**
+This is Python-based software package. For successfully running this project on your local machine, please follow the following steps to set up necessary sofware environment.
+
+1. Clone this repository to your local machine
     ```
     git clone https://github.com/KMarshallX/vessel_code.git
     ```
-3. Install miniconda:
+2. Install miniconda:
     ```
     cd vessel_code
     bash miniconda-setup.sh
     ```
-4. Then set your current working directory as the cloned repository, and install the remaining required packages
+3. Then set your current working directory as the cloned repository, and install the remaining required packages
     ```
     conda env create -f environment.yml
     conda activate vessel_boost
     ```
 
-
-Done. Happy tuning!
-
-
-
 ## **Citation**
 ...
 
 ## **Contact**
-...
+Marshall Xu <[marshall.xu@uq.edu.au](marshall.xu@uq.edu.au)>
+Saskia Bollmann <[saskia.bollmann@uq.edu.au](saskia.bollmann@uq.edu.au)>
+Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>
 
