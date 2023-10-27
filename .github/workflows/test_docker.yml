@@ -30,4 +30,4 @@ jobs:
         OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID_: "abk4p" 
       run: |
-        /bin/bash echo "test"
+        pwd
