@@ -2,20 +2,20 @@
 *VesselBoost* is a Python-based software package utilizing deep learning techniques to segment high-resolution time-of-flight MRI angiography data, with high sensitivity towards small vessels. The software suite encompasses three essential functional modules: (1) *predict*, (2) *test-time adaptation* (TTA), and (3) *boost*. By leveraging these modules, users can efficiently segment high-resolution time-of-flight data or conveniently leverage our command line interface to boost segmentations for other vascular MRI image contrasts.
 
 ## **Table of Contents**
-- [Purpose](https://github.com/KMarshallX/vessel_code#purpose)
-- [Current Version](https://github.com/KMarshallX/vessel_code#current-version)
-- [Requirements](https://github.com/KMarshallX/vessel_code#requirements)
-- [Software container](https://github.com/KMarshallX/software-container)
-- [Installation](https://github.com/KMarshallX/software-container)
-- [Citation](https://github.com/KMarshallX/vessel_code#citation)
-- [Contact](https://github.com/KMarshallX/vessel_code#contact)
+- [Purpose](#purpose)
+- [Current Version](#current-version)
+- [Requirements](#requirements)
+- [Software container](#software-container)
+- [Installation](#installation)
+- [Citation](#citation)
+- [Contact](#contact)
 
 ## **Purpose**
 *VesselBoost* is a Python-based software package leveraging a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
 This repository contains 3 major modules: 
 
 1. [Predict](https://github.com/KMarshallX/vessel_code/blob/master/documentation/predict_readme.md). With this module, users can segment high-resolution time-of-flight using our pre-trained models. It can be used to generate intermediate proxy segmentations as well as the final ones.
-2. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/documentation/tta_readme.md). This module allows the user to provide a proxy segmentation, or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models.
+2. [Test-time-adaptation](https://github.com/KMarshallX/vessel_code/blob/master/documentation/tta_readme.md). This module allows the user to provide a proxy segmentation or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models.
 3. [Boost](https://github.com/KMarshallX/vessel_code/blob/master/documentation/boost_readme.md). *Boost* allows users to train a segmentation model on a single or more data using existing imperfect segmentation.
 
 <p align="center">
@@ -26,7 +26,7 @@ This repository contains 3 major modules:
 ## **Current Version**
 VesselBoost 0.9.1
 
-## ** Requirements **
+## **Requirements**
 - Docker / Singularity container
 
 ## **Software container**
@@ -42,7 +42,7 @@ docker pull vnmd/vesselboost_0.6.0
 ```
 
 ## **Installation**
-This is Python-based software package. For successfully running this project on your local machine, please follow the following steps to set up necessary sofware environment.
+This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
 
 1. Clone this repository to your local machine
     ```
