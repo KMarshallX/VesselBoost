@@ -18,7 +18,7 @@ jobs:
     container: 
       image: vnmd/vesselboost_0.6.0
       volumes:
-        - ./:./
+        - ~/:~/
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
