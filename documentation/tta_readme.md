@@ -11,7 +11,7 @@ mkdir ./pretrained_models/
 Download the pre-trained model from osf:
 
 ```bash
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
+osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep1000_0925 ./pretrained_models/manual_ep1000_0925
 ```
 
 

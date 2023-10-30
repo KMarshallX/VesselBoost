@@ -59,7 +59,7 @@ echo "Path to proxy labels: "$path_to_proxy_labels""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/manual_ep5000_0621"
+path_to_pretrained_model="./pretrained_models/manual_ep1000_0925"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 n_epochs=5
