@@ -41,9 +41,9 @@ mkdir ./pretrained_models/
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep5000_0621 ./pretrained_models/manual_ep5000_0621
-osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep5000_0711 ./pretrained_models/om1_ep5000_0711
-osf -p abk4p fetch /osfstorage/pretrained_models/om2_ep5000_0711 ./pretrained_models/om2_ep5000_0711
+osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep1000_0925 ./pretrained_models/manual_ep1000_0925
+osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep1000_1029 ./pretrained_models/om1_ep1000_1029
+osf -p abk4p fetch /osfstorage/pretrained_models/om2_ep1000_1029 ./pretrained_models/om2_ep1000_1029
 
 
 path_to_images="./data/images/"
