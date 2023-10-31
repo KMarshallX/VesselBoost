@@ -114,7 +114,7 @@ The prediction pipeline includes input image pre-processing (\autoref{fig:1}a, s
 
 ## Module 2: Test-time adaptation
 
-Test-time adaptation consists of adapting the weights of pre-trained models using a proxy segmentation as the pseudo-ground-truth to guide parameter optimization (\autoref{fig:1}b, step ii). The user can specify the number of epochs for the model adaptation. The initial learning rate and the loss function have default configurations equal to 0.001 and the Tversky loss (α = 0.3 and β = 0.7), respectively. The default learning rate scheduler is the ReduceLROnPlateau (available through PyTorch [@paszke_automatic_2017]), which automatically reduces the learning rate when the loss reaches a plateau.
+Test-time adaptation consists of adapting the weights of pre-trained models using a proxy segmentation to guide parameter optimization (\autoref{fig:1}b, step ii). The user can specify the number of epochs for the model adaptation. The initial learning rate and the loss function have default configurations equal to 0.001 and the Tversky loss (α = 0.3 and β = 0.7), respectively. The default learning rate scheduler is the ReduceLROnPlateau (available through PyTorch [@paszke_automatic_2017]), which automatically reduces the learning rate when the loss reaches a plateau.
 
 ## Module 3: Boost
 
