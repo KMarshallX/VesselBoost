@@ -6,11 +6,15 @@ on:
     branches: [ master ]
     paths:
       - README.md
+      - .github/workflows/test_docker.yml
+      - tests/test_docker.sh
 
   pull_request:
     branches: [ master ]
     paths:
       - README.md
+      - .github/workflows/test_docker.yml
+      - tests/test_docker.sh
 
 jobs:
   test_docker_pipeline:
