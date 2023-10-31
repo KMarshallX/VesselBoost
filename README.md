@@ -38,7 +38,7 @@ VesselBoost, pre-trained models, and required software are packaged in software 
 The Dockerhub container is available at Dockerhub. To download the container, run the following command:
 
 ```
-docker pull vnmd/vesselboost_0.6.0
+docker pull vnmd/vesselboost_0.9.1
 ```
 
 ## **Installation**
