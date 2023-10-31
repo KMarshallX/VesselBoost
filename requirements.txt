@@ -5,6 +5,6 @@ patchify==0.2.3
 scikit-learn==1.1.1
 scipy==1.9.3
 tqdm==4.64.1
-antspyx==0.3.7
+antspyx==0.3.8
 connected-components-3d==3.10.5
 osfclient==0.0.5
