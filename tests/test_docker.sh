@@ -7,7 +7,6 @@ cd /opt/vessel_code
 mkdir -p data/images/
 mkdir -p data/labels/
 mkdir -p data/preprocessed/
-mkdir saved_models
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/labels/sub-001.nii
@@ -45,12 +44,10 @@ export OSF_PROJECT_ID=$OSF_PROJECT_ID_
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd saved_models
-for file in ./*; do
-    echo $file
-    osf -p abk4p remove /osfstorage/github_actions/docker/saved_model/$file
+osf -p abk4p remove /osfstorage/github_actions/docker/saved_model/model_test
 done
 
 echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload -r ./ /osfstorage/github_actions/docker/saved_model/
+osf -p abk4p upload ./model_test /osfstorage/github_actions/docker/saved_model/
 
 echo "Testing done!"
