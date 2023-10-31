@@ -28,7 +28,7 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: 3.9.5
-    - name: test osf integration
+    - name: test docker container
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}
         OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
