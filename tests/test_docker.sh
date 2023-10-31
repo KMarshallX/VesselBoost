@@ -44,6 +44,6 @@ osf -p abk4p remove /osfstorage/github_actions/docker/saved_model/model_test
 
 
 echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload ./model_test /osfstorage/github_actions/docker/saved_model/
+osf -p abk4p upload ./model_test /osfstorage/github_actions/docker/saved_model/model_test
 
 echo "Testing done!"
