@@ -38,7 +38,7 @@ pretrained_model = args.pretrained # path to pretrained model
 
 if __name__ == "__main__":
 
-    print("Inference session will start shortly..")
+    print("Prediction session will start shortly..")
 
     # preprocess procedure
     preprocess_procedure(ds_path, ps_path, prep_mode)
