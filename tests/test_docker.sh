@@ -33,10 +33,6 @@ train_command1=`cat ./documentation/train_readme.md | grep 'prep_mode 4'`
 echo $train_command1
 eval $train_command1
 
-train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
-echo $train_command2
-eval $train_command2
-
 echo "[DEBUG]: osf setup"
 export OSF_TOKEN=$OSF_TOKEN_
 export OSF_USERNAME=$OSF_USERNAME_
@@ -45,7 +41,6 @@ mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 cd saved_models
 osf -p abk4p remove /osfstorage/github_actions/docker/saved_model/model_test
-done
 
 echo "[DEBUG]: saving data to osf"
 osf -p abk4p upload ./model_test /osfstorage/github_actions/docker/saved_model/
