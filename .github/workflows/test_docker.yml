@@ -16,7 +16,7 @@ jobs:
   test_docker_pipeline:
     runs-on: ubuntu-20.04
     container: 
-      image: vnmd/vesselboost_0.6.0
+      image: vnmd/vesselboost_0.9.1
       volumes:
         - /home/runner/:/home/
     steps:
@@ -30,4 +30,4 @@ jobs:
         OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID_: "abk4p" 
       run: |
-        pwd
+        /bin/bash tests/test_docker.sh
