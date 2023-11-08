@@ -34,8 +34,15 @@ def out_file_reader(file_path):
 
 def mra_deskull(img_path, msk_path, mip_flag):
     """
-    apply a mask on the target nifti image, 
-    and generate an mip image
+    Apply a mask on the target nifti image and generate an MIP image.
+
+    Args:
+        img_path (str): Path to the input nifti image.
+        msk_path (str): Path to the mask nifti image.
+        mip_flag (bool): Flag to generate an MIP image.
+
+    Returns:
+        None
     """
     # Extract the file_name and dir_name
     file_name = os.path.basename(img_path)
