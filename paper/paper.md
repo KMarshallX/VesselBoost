@@ -31,8 +31,6 @@ authors:
     affiliation: "8,11,12"
   - name: Oliver Speck
     affiliation: "8,9,10"
-  - name: Shekhar S. Chandra
-    affiliation: 1
   - name: Steffen Bollmann
     orcid: 0000-0002-2909-0906
     affiliation: "1,13"
@@ -42,6 +40,9 @@ authors:
   - name: Markus Barth
     orcid: 0000-0002-0520-1843
     affiliation: 1
+  - name: Omer Faruk Gulban
+    orcid: 0000-0001-7761-3727
+    affiliation: "15, 16"
   - name:  Saskia Bollmann
     orcid: 0000-0001-8242-8008
     corresponding: true 
@@ -49,7 +50,7 @@ authors:
 affiliations:
  - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, Australia 
    index: 1
- - name: Australian eHealth Research Centre, CSIRO, Herston, QLD, Australia
+ - name: Australian eHealth Research Centre, CSIRO, Herston, Australia
    index: 2
  - name: Department of Biotechnology, Indian Institute of Technology, Madras, India
    index: 3
@@ -57,9 +58,9 @@ affiliations:
    index: 4
  - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, Australia
    index: 5
- - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, MA, USA
+ - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, USA
    index: 6
- - name: Department of Radiology, Harvard Medical School, Boston, MA, USA
+ - name: Department of Radiology, Harvard Medical School, Boston, USA
    index: 7
  - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, Germany
    index: 8
@@ -73,8 +74,12 @@ affiliations:
    index: 12
  - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
    index: 13
- - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, USA
    index: 14
+ - name: Faculty of Psychology and Neuroscience, Maastricht University, Maastricht, Netherlands
+   index: 15
+ - name: Brain Innovation, Maastricht, Netherlands
+   index: 16
 date: 24 July 2023
 bibliography: paper.bib
 ---
@@ -82,7 +87,7 @@ bibliography: paper.bib
 # Summary
 *VesselBoost* is a Python-based software package utilizing deep learning techniques to segment high-resolution time-of-flight MRI angiography data, with high sensitivity towards small vessels. The software suite encompasses three functional modules: (1) *predict*, (2) *test-time adaptation* (TTA), and (3) *boost*. By leveraging these modules, users can efficiently segment high-resolution time-of-flight data or conveniently 'boost' segmentations for other vascular MRI image contrasts.
 
-One of the distinguishing features of *VesselBoost* lies in its incorporation of the idea of imperfect training labels for vasculature segmentation. At the core of *VesselBoost* is a data augmentation strategy that leverages the self-similarity of large and small vessels, which sensitise a segmentation model towards the smallest vessels. This allows to 'boost' coarse segmentations and increase the number of segmented, small vessels. In summary, *VesselBoost* can provide detailed segmentations of the human brain vasculature from high-resolution MRI angiographic imaging, using either *predict* or *test-time adaptation*, or it can *boost* segmentations for other vascular MRI image contrasts.
+One of the distinguishing features of *VesselBoost* lies is the idea of incorporating imperfect training labels for vessel segmentation. At the core of *VesselBoost* is a data augmentation strategy that leverages the self-similarity of large and small vessels, which sensitise a segmentation model towards the smallest vessels. This allows to 'boost' coarse segmentations and increase the number of segmented, small vessels. In summary, *VesselBoost* can provide detailed segmentations of the human brain vasculature from high-resolution MRI angiographic imaging, using either *predict* or *test-time adaptation*, or it can *boost* segmentations for other vascular MRI image contrasts.
 
 
 # Statement of Need
@@ -91,34 +96,41 @@ Magnetic resonance angiography (MRA) performed at ultra-high field provides the 
 Several challenges arise when segmenting high-resolution MRA data, most notably the difficulty of obtaining large data sets of correctly and comprehensively labeled data. Thus, *VesselBoost* implements the idea of imperfect training labels [@lucena_convolutional_2019] for vasculature segmentation. At the core of *VesselBoost* is a data augmentation strategy that leverages the self-similarity of large and small vessels, which sensitise a segmentation model towards the smallest vessels, enabling 'boosting' of coarser, imperfect segmentations. 
 
 # Methodology
-*VesselBoost* comprises three main modules: 1) *predict*, 2) test-time adaptation (*TTA*), and 3) *boost*. These modules are designed to capture different levels of similarity between the original training data and the new data. If the properties of the new data are close to the original training data, *predict* can be directly applied to the new data. *TTA* will be useful if the new data is somewhat similar, but some adaptation of the network is needed. *Boost* utilises the same preprocessing and data augementation strategies, but trains a new network completely from scratch. Thus, *boost* caters for cases when the new data is significantly different from the original training data, for example when using a different vascular MRI contrast.
+## Overview
+*VesselBoost* comprises three modules: 1) *predict*, 2) test-time adaptation (*TTA*), and 3) *boost*. These modules are designed to capture different levels of similarity between the original training data and the new data. If the properties of the new data are close to the original training data, *predict* can be directly applied to the new data. *TTA* will be useful if the new data is somewhat similar, but some adaptation of the network is needed. *Boost* utilises the same preprocessing and data augementation strategies, but trains a new network completely from scratch. Thus, *boost* caters for cases when the new data is significantly different from the original training data, for example when using a different vascular MRI contrast.
 
-At the core of *VesselBoost* is a data augmentation strategy that leverages the self-similarity of large and small vessels, which sensitise a segmentation model towards the smallest vessels. Using our pre-trained models, users can segment high-resolution time-of-flight data with *predict* (Module 1). The *TTA* module (Module 2) allows the user to provide a proxy segmentation, or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models. We found that TTA, in combination with data augmentation, can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. Finally, the *boost* module (Module 3) allows users to train a segmentation model on a new data set using existing imperfect segmentation. This module is particularly useful for users who have access to a small number of labeled data and want to boost small vessel segmentation. The key difference between *TTA* and *boost* is that the latter allows users to train a model from scratch, whereas the former adapts a pre-trained model.
+## Training Data
+All models were trained on the SMILE-UHURA challenge dataset [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023], which uses the data collected in the StudyForrest project [@forstmann_multi-modal_2014]. It consists of 3D multi-slab time-of-flight magnetic resonance angiography (MRA) data acquired at a 7T Siemens MAGNETOM magnetic resonance scanner [@hanke_high-resolution_2014] with an isotropic resolution of 300$\mu$m. Twenty right-handed individuals (21-38 years, 12 males) participated in the original study, but we used the 14 samples for model training where corresponding segmentations were made available through the SMILE-UHURA challenge. 
 
-The pre-trained model consists of a 3D U-Net model [@cicek_2016] initially trained on the SMILE-UHURA challenge "train" and "validate" sets [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023]. We performed several modifications to the proposed 3D U-Net architecture [@cicek_2016], including increased depth (from 3 to 4 layers in both the encoder and decoder blocks), number of input and output channels equal to 1, and number of convolution filters equal to 16. We implemented these modifications to increase the model's ability to learn complex features, classify vessels only, and reduce training time. The models were implemented using Python 3.9 and Pytorch 1.13 [@paszke_automatic_2017]. 
+## Model Architecture
+The pre-trained model consists of a 3D U-Net model [@cicek_2016]. We performed several modifications to the proposed 3D U-Net architecture [@cicek_2016], including increased depth (from 3 to 4 layers in both the encoder and decoder blocks), number of input and output channels equal to 1, and number of convolution filters equal to 16. We implemented these modifications to increase the model's ability to learn complex features, classify vessels only, and reduce training time. The models were implemented using Python 3.9 and Pytorch 1.13 [@paszke_automatic_2017]. 
 
-The SMILE-UHURA challenge dataset [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023] was collected as part of the StudyForrest project [@forstmann_multi-modal_2014]. It consists of 3D multi-slab time-of-flight magnetic resonance angiography (MRA) data acquired at a 7T Siemens MAGNETOM magnetic resonance scanner [@hanke_high-resolution_2014] with an isotropic resolution of 300$\mu$m. Twenty right-handed individuals (21-38 years, 12 males) participated in the study, but we used 14 samples for model training (the "train" and "validate" sets available through the challenge). Before model training, the MRA data were pre-processed as described below.
-
-Data augmentation was performed to increase the amount of training data and to leverage the self-similarity of large and small vessels. The input data is cropped at random locations and sizes at each training epoch and then resized to 64×64×64 using nearest-neighbor interpolation (patch 1). The minimum size for each dimension of the cropped patch is 32, and the maximum is the dimension size of the original image. This procedure is equivalent to zooming in or out for patches smaller or larger than 64×64×64. We generated multiple copies (5 more copies per patch) of each of these patches and applied rotation by 90°, 180°, and 270° (copies 1-3) or blurring using two different Gaussian filters (copies 4 and 5), totalling six copies per patch at each epoch. Four unique patches are generated per training data and training epoch and, with data augmentation, that amounts to 24 images per training sample and epoch (4 patches x 6 copies). By increasing the number of unique patches per training sample and epoch and setting the minimum size for each dimension of the cropped patch to 32, pre-trained models were more stable across a range of random seeds (used to initialize model weights).
+## Training Procedure
+Before model training, the MRA data were pre-processed as described below. Data augmentation was performed to increase the amount of training data and to leverage the self-similarity of large and small vessels. The input data is cropped at random locations and sizes at each training epoch and then resized to 64×64×64 using nearest-neighbor interpolation (patch 1). The minimum size for each dimension of the cropped patch is 32, and the maximum is the dimension size of the original image. This procedure is equivalent to zooming in or out for patches smaller or larger than 64×64×64. We generated multiple copies (5 more copies per patch) of each of these patches and applied rotation by 90°, 180°, and 270° (copies 1-3) or blurring using two different Gaussian filters (copies 4 and 5), totalling six copies per patch at each epoch. Four unique patches are generated per training data and training epoch and, with data augmentation, that amounts to 24 images per training sample and epoch (4 patches x 6 copies). We found that by increasing the number of unique patches per training sample and epoch and setting the minimum size for each dimension of the cropped patch to 32, the pre-trained models were more stable across a range of random seeds used to initialize model weights.
 
 We pre-trained three distinct models, each using a specific set of labels: one using manually corrected labels provided for the challenge and the two others using the OMELETTE 1 (O1) and OMELETTE 2 (O2) labels. The OMELLETE labels were generated in an automated fashion [@mattern_2021] using two different sets of parameters. Each model was trained for 1000 epochs at an initial learning rate of 0.001, which was reduced when the loss reached a plateau using ReduceLROnPlateau. The Tversky loss [@salehi_tversky_2017; @chatterjee_ds6_2022] determined the learning objective, with α = 0.3 and β = 0.7.
 
+## VesselBoost Modules
+
 ![*VesselBoost* overview. (a) *Predict* allows users to segment high-resolution time-of-flight data using our pre-trained models. (b) The test-time adaptation module allows users to provide a proxy segmentation to drive further adaptation of the pre-trained models. (c) *Boost* allows users to train a segmentation model on a single or more data using existing imperfect segmentation. \label{fig:1}](figure1.png)
 
-## Module 1: Predict
+### Module 1: Predict
 The prediction pipeline includes input image pre-processing (\autoref{fig:1}a, step i), image segmentation using a pre-trained model (\autoref{fig:1}b, step ii), and post-processing (\autoref{fig:1}b, step iii). This module provides extra flexibility for users to manipulate post-processing parameters to obtain a more suitable proxy before, for example, using it for TTA.
 
 **Pre-processing**: Input images are pre-processed using N4ITK for bias field correction [@tustison_n4itk_2010] and non-local means denoising [@manjon_adaptive_2010] to increase the signal-to-noise ratio (SNR) (\autoref{fig:1}a, step i).
 
 **Post-processing**: The model's output is post-processed to appropriately convert the predicted probabilities to binary classes by setting the threshold to 0.1. Finally, any connected components with a size smaller than ten voxels are removed [@silversmith:2021]. 
 
-## Module 2: Test-time adaptation
+### Module 2: Test-time adaptation
 
 Test-time adaptation consists of adapting the weights of pre-trained models using a proxy segmentation to guide parameter optimization (\autoref{fig:1}b, step ii). The user can specify the number of epochs for the model adaptation. The initial learning rate and the loss function have default configurations equal to 0.001 and the Tversky loss (α = 0.3 and β = 0.7), respectively. The default learning rate scheduler is the ReduceLROnPlateau (available through PyTorch [@paszke_automatic_2017]), which automatically reduces the learning rate when the loss reaches a plateau.
 
-## Module 3: Boost
+### Module 3: Boost
 
 *Boost* (Module 3) allows users to train a segmentation model from scratch using imperfect segmentation from a new data set. This module is beneficial for users who have access to a small number of labeled data and want to boost small vessel segmentation. This module shares the general training settings previously described, but the user can specify the number of training epochs.
+
+## Summary
+Using our pre-trained models, users can segment high-resolution time-of-flight data with *predict* (Module 1). The *TTA* module (Module 2) allows the user to provide a proxy segmentation, or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models. We found that TTA, in combination with data augmentation, can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. Finally, the *boost* module (Module 3) allows users to train a segmentation model on a new data set using existing imperfect segmentation. This module is particularly useful for users who have access to a small number of labeled data and want to boost small vessel segmentation. The key difference between *TTA* and *boost* is that the latter allows users to train a model from scratch, whereas the former adapts a pre-trained model.
 
 # Results
 ## Quantitative evaluation
