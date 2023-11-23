@@ -156,8 +156,11 @@ To quantitatively evaluate the TTA module, we trained a model using 13 MRA image
 ## Other considerations
 As with most deep learning models, our segmentation model is susceptible to distribution shifts and has limited performance under certain conditions. Specifically, our models were trained on images without any brain mask applied. Given the similarity in the intensity of skin or fat and cerebral vessels in MRA images, the segmentation output may inevitably include false-positive voxels outside the brain. Thus, to achieve optimal segmentation of cerebral vasculature, we recommend users apply a brain mask after prediction, eliminating any potential artifacts from skin or fat. This additional step will further enhance the accuracy and reliability of *VesselBoost*'s segmentation performance. Moreover, throughout our assessment, we use a fixed threshold for removing small disconnected components as part of our post-processing. Fine-tuning the post-processing parameters in a case-by-case scenario will enable users to optimize the segmentation outcomes and effectively mitigate any potential artifacts arising from variations in image resolution.
 
-## Discussion and Conclusion
-
+# Discussion and Conclusion
+- predict - works well on MRA images at different resolutions
+- boost - shows the potential to train networks on comparatively small amounts of data, which then improve their segmentation performance beyond the training data
+- tta - allows to train on larger, imperfect labels and then improve upon the inital prediction for a specific image
+- Potential application include the segmentation of small datasets with unique contrasts, e.g. ex vivo MRI. VesselBoost can also be combined with existing, traditional segmentation techniques, which can receive a *boost* in their performance. 
 
 # Code Availability
 
