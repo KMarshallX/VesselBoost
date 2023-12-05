@@ -152,15 +152,10 @@ To quantitatively evaluate Module 2, *TTA*, we trained a model using 13 MRA imag
 
 ![Quantitative evaluation of *Module 2* (*TTA*) from **VesselBoost** on 3D MRA image slab with an isotropic resolution of 300 $\mu$m. Dice scores were estimated for the initial segmentation (proxy) and the final segmentation, with the ground truth image as a reference. In green, we show the boost in Dice score after test-time adaptation. \label{fig:5}](figure5.png)
 
-
-## Other considerations
-As with most deep learning models, our segmentation model is susceptible to distribution shifts and has limited performance under certain conditions. Specifically, our models were trained on images without any brain mask applied. Given the similarity in the intensity of skin or fat and cerebral vessels in MRA images, the segmentation output may inevitably include false-positive voxels outside the brain. Thus, to achieve optimal segmentation of cerebral vasculature, we recommend users apply a brain mask after prediction, eliminating any potential artifacts from skin or fat. This additional step will further enhance the accuracy and reliability of *VesselBoost*'s segmentation performance. Moreover, throughout our assessment, we use a fixed threshold for removing small disconnected components as part of our post-processing. Fine-tuning the post-processing parameters in a case-by-case scenario will enable users to optimize the segmentation outcomes and effectively mitigate any potential artifacts arising from variations in image resolution.
-
 # Discussion and Conclusion
-- predict - works well on MRA images at different resolutions
-- boost - shows the potential to train networks on comparatively small amounts of data, which then improve their segmentation performance beyond the training data
-- tta - allows to train on larger, imperfect labels and then improve upon the inital prediction for a specific image
-- Potential application include the segmentation of small datasets with unique contrasts, e.g. ex vivo MRI. VesselBoost can also be combined with existing, traditional segmentation techniques, which can receive a *boost* in their performance. 
+We found that the networked trained on low-resolution MRA images performed well on high-resolution data. We could also show that for vessel segmentation, there is the potential to train networks on a single data set, which then create segmentations better than the training data. In addition, test-time adaption allows to train on larger data sets with imperfect labels, and then improve upon the inital prediction for a specific image.
+Note that we always trained and predicted on un-masked images, but applied a brain mask afterwards to remove unwanted false postitive segmentations stemming from the skin or fat around the skull. When prediciting directly on masked images, we noticed that the network would segment the rim of the masked volume as a vessel. Thus, we recommend to predict first and then apply a brain mask. During post-processing, we use a fixed threshold for removing small disconnected components. This threshold can be adapted to cater for very high- or low-resolution images.
+In conclusion, VesselBoost has the potential to facilitate the segmentation of small datasets with unique contrasts, such as ex-vivo MRI. It can also be combined with existing, traditional segmentation techniques, to provide a *boost* to their performance. 
 
 # Code Availability
 
