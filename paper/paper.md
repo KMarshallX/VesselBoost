@@ -15,34 +15,34 @@ authors:
     equal-contrib: true 
     corresponding: true 
     affiliation: 1
-  - name: Siyu Liu
-    affiliation: "1,2"
-  - name: Thomas B. Shaw
-    affiliation: 1
-  - name: Vaibhavi Itkyal
-    affiliation: 3
-  - name: Francesco Cognolato
-    affiliation: "4,5"
-  - name: Michaël Bernier
-    affiliation: "6,7"
-  - name: Hendrik Mattern
-    affiliation: "8,9,10"
-  - name: Soumick Chatterjee
-    affiliation: "8,11,12"
-  - name: Oliver Speck
-    affiliation: "8,9,10"
-  - name: Steffen Bollmann
-    orcid: 0000-0002-2909-0906
-    affiliation: "1,13"
-  - name: Jonathan R. Polimeni
-    orcid: 0000-0002-1348-1179
-    affiliation: "6,7,14"
   - name: Markus Barth
     orcid: 0000-0002-0520-1843
     affiliation: 1
+  - name: Michaël Bernier
+    affiliation: "2,3"
+  - name: Steffen Bollmann
+    orcid: 0000-0002-2909-0906
+    affiliation: "1,4"
+  - name: Soumick Chatterjee
+    affiliation: "5,6,7"
+  - name: Francesco Cognolato
+    affiliation: "8,9"
   - name: Omer Faruk Gulban
     orcid: 0000-0001-7761-3727
-    affiliation: "15, 16"
+    affiliation: "10,11"
+  - name: Vaibhavi Itkyal
+    affiliation: 12
+  - name: Siyu Liu
+    affiliation: "1,13"
+  - name: Hendrik Mattern
+    affiliation: "5,14,15"
+  - name: Jonathan R. Polimeni
+    orcid: 0000-0002-1348-1179
+    affiliation: "2,3,16"
+  - name: Thomas B. Shaw
+    affiliation: 1
+  - name: Oliver Speck
+    affiliation: "5,14,15"
   - name: Saskia Bollmann
     orcid: 0000-0001-8242-8008
     corresponding: true 
@@ -50,36 +50,37 @@ authors:
 affiliations:
  - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, Australia 
    index: 1
- - name: Australian eHealth Research Centre, CSIRO, Herston, Australia
-   index: 2
- - name: Department of Biotechnology, Indian Institute of Technology, Madras, India
-   index: 3
- - name: Centre for Advanced Imaging, The University of Queensland, Brisbane, Australia
-   index: 4
- - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, Australia
-   index: 5
  - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, USA
-   index: 6
+   index: 2
  - name: Department of Radiology, Harvard Medical School, Boston, USA
-   index: 7
- - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, Germany
-   index: 8
- - name: German Center for Neurodegenerative Diseases, Magdeburg, Germany
-   index: 9
- - name: Center for Behavioral Brain Sciences, Magdeburg, Germany
-   index: 10
- - name: Data and Knowledge Engineering Group, Faculty of Computer Science, Otto von Guericke University Magdeburg, Germany
-   index: 11
- - name: Genomics Research Centre, Human Technopole, Milan, Italy
-   index: 12
+   index: 3
  - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
-   index: 13
- - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, USA
-   index: 14
+   index: 4
+ - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, Germany
+   index: 5
+ - name: Data and Knowledge Engineering Group, Faculty of Computer Science, Otto von Guericke University Magdeburg, Germany
+   index: 6
+ - name: Genomics Research Centre, Human Technopole, Milan, Italy
+   index: 7
+ - name: Centre for Advanced Imaging, The University of Queensland, Brisbane, Australia
+   index: 8
+ - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, Australia
+   index: 9
  - name: Faculty of Psychology and Neuroscience, Maastricht University, Maastricht, Netherlands
-   index: 15
+   index: 10
  - name: Brain Innovation, Maastricht, Netherlands
+   index: 11
+ - name: Department of Biotechnology, Indian Institute of Technology, Madras, India
+   index: 12
+ - name: Australian eHealth Research Centre, CSIRO, Herston, Australia
+   index: 13
+ - name: German Center for Neurodegenerative Diseases, Magdeburg, Germany
+   index: 14
+ - name: Center for Behavioral Brain Sciences, Magdeburg, Germany
+   index: 15
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, USA
    index: 16
+
 date: 24 July 2023
 bibliography: paper.bib
 ---
@@ -164,7 +165,7 @@ Neurodesk [@renton_neurodesk_2023] data analysis environment (https://neurodesk.
 
 # Acknowledgments
 
-The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR and Steffen Bollmann acknowledge funding through an ARC Linkage grant (LP200301393). HM acknowledges funding from the Deutsche Forschungsgemeinschaft (DFG) (501214112, MA 9235/3-1) and the Deutsche Alzheimer Gesellschaft (DAG) e.V. (MD-DARS project). MB acknowledges funding from the Australian Research Council Future Fellowship grant FT140100865.
+The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR and Steffen Bollmann acknowledge funding through an ARC Linkage grant (LP200301393). HM acknowledges funding from the Deutsche Forschungsgemeinschaft (DFG) (501214112, MA 9235/3-1) and the Deutsche Alzheimer Gesellschaft (DAG) e.V. (MD-DARS project). MB acknowledges funding from the Australian Research Council Future Fellowship grant FT140100865. This work was initiated with the support of UQ AI Collaboratory.
 
 An early prototype of this work was presented at the 12th Scientific Symposium on Clinical Needs, Research Promises and Technical Solutions in Ultrahigh Field Magnetic Resonance in Berlin in 2021. This work was also submitted to the SMILE-UHURA challenge [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023].
 
