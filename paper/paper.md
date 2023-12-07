@@ -167,6 +167,6 @@ Neurodesk [@renton_neurodesk_2023] data analysis environment (https://neurodesk.
 
 The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR and Steffen Bollmann acknowledge funding through an ARC Linkage grant (LP200301393). HM acknowledges funding from the Deutsche Forschungsgemeinschaft (DFG) (501214112, MA 9235/3-1) and the Deutsche Alzheimer Gesellschaft (DAG) e.V. (MD-DARS project). MB acknowledges funding from the Australian Research Council Future Fellowship grant FT140100865. This work was initiated with the support of UQ AI Collaboratory.
 
-An early prototype of this work was presented at the 12th Scientific Symposium on Clinical Needs, Research Promises and Technical Solutions in Ultrahigh Field Magnetic Resonance in Berlin in 2021. This work was also submitted to the SMILE-UHURA challenge [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023].
+An early prototype of this work was presented at the 12th Scientific Symposium on Clinical Needs, Research Promises and Technical Solutions in Ultrahigh Field Magnetic Resonance in Berlin in 2021. This work was also submitted to the SMILE-UHURA challenge [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023]. Special thanks to the organizers (Soumick Chatterjee, Hendrik Mattern, Florian Dubost, Stefanie Schreiber, Andreas Nürnberger and Oliver Speck) of the SMILE-UHURA challenge for providing the data and the opportunity to participate in the challenge.
 
 # References
