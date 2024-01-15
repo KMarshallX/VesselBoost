@@ -48,37 +48,37 @@ authors:
     corresponding: true 
     affiliation: 1
 affiliations:
- - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, Australia 
+ - name: School of Electrical Engineering and Computer Science, The University of Queensland, Brisbane, QLD, Australia 
    index: 1
- - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, USA
+ - name: Athinoula A. Martinos Center for Biomedical Imaging, Massachusetts General Hospital, Charlestown, MA, USA
    index: 2
- - name: Department of Radiology, Harvard Medical School, Boston, USA
+ - name: Department of Radiology, Harvard Medical School, Boston, MA, USA
    index: 3
- - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, Australia
+ - name: Queensland Digital Health Centre, The University of Queensland, Brisbane, QLD, Australia
    index: 4
- - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, Germany
+ - name: Department of Biomedical Magnetic Resonance, Institute of Experimental Physics, Otto-von-Guericke-University, Magdeburg, ST, Germany
    index: 5
- - name: Data and Knowledge Engineering Group, Faculty of Computer Science, Otto von Guericke University Magdeburg, Germany
+ - name: Data and Knowledge Engineering Group, Faculty of Computer Science, Otto von Guericke University Magdeburg, ST, Germany
    index: 6
- - name: Genomics Research Centre, Human Technopole, Milan, Italy
+ - name: Genomics Research Centre, Human Technopole, Milan, LOM, Italy
    index: 7
- - name: Centre for Advanced Imaging, The University of Queensland, Brisbane, Australia
+ - name: Centre for Advanced Imaging, The University of Queensland, Brisbane, QLD, Australia
    index: 8
- - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, Australia
+ - name: ARC Training Centre for Innovation in Biomedical Imaging Technology, The University of Queensland, Brisbane, QLD, Australia
    index: 9
- - name: Faculty of Psychology and Neuroscience, Maastricht University, Maastricht, Netherlands
+ - name: Faculty of Psychology and Neuroscience, Maastricht University, Maastricht, LI, Netherlands
    index: 10
- - name: Brain Innovation, Maastricht, Netherlands
+ - name: Brain Innovation, Maastricht, LI, Netherlands
    index: 11
- - name: Department of Biotechnology, Indian Institute of Technology, Madras, India
+ - name: Department of Biotechnology, Indian Institute of Technology, Madras, TN, India
    index: 12
- - name: Australian eHealth Research Centre, CSIRO, Herston, Australia
+ - name: Australian eHealth Research Centre, CSIRO, Herston, QLD, Australia
    index: 13
- - name: German Center for Neurodegenerative Diseases, Magdeburg, Germany
+ - name: German Center for Neurodegenerative Diseases, Magdeburg, ST, Germany
    index: 14
- - name: Center for Behavioral Brain Sciences, Magdeburg, Germany
+ - name: Center for Behavioral Brain Sciences, Magdeburg, ST, Germany
    index: 15
- - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, USA
+ - name: Division of Health Sciences and Technology, Massachusetts Institute of Technology, Cambridge, MA, USA
    index: 16
 
 date: 24 July 2023
@@ -126,7 +126,7 @@ Test-time adaptation consists of adapting the weights of pre-trained models usin
 ### Module 3: Boost
 *Boost* (Module 3) allows users to train a segmentation model from scratch using imperfect training labels from a new data set. This module benefits users with access to a small number of labeled data who want to boost small vessel segmentation. This module shares the general training settings previously described, but the user can specify the number of training epochs.
 
-![*VesselBoost* overview. (a) *Predict* allows users to segment high-resolution time-of-flight data using our pre-trained models. (b) The test-time adaptation module allows users to provide a proxy segmentation to drive further adaptation of the pre-trained models. (c) *Boost* allows users to train a segmentation model on a single or more data using existing imperfect training labels. \label{fig:1}](figure1.png)
+![*VesselBoost* overview. (a) *Predict* allows users to segment high-resolution time-of-flight data using our pre-trained models. (b) The test-time adaptation module allows users to provide a proxy segmentation to drive further adaptation of the pre-trained models. (c) *Boost* allows users to train a segmentation model on data using existing imperfect training labels. \label{fig:1}](figure1.png)
 
 ## Summary
 Using our pre-trained models, users can segment high-resolution time-of-flight data with *predict* (Module 1). The *TTA* module (Module 2) allows the user to provide a proxy segmentation, or generate a proxy with our pre-trained model (Module 1), to drive further adaptation of the pre-trained models. We found that TTA, in combination with data augmentation, can improve the segmentation results beyond the training data (i.e., proxies) and increase sensitivity to small vessels. Finally, the *boost* module (Module 3) allows users to train a segmentation model on a new data set using existing imperfect training labels. This module is particularly useful for users with access to a small number of labeled data who want to boost small vessel segmentation. The key difference between *TTA* and *boost* is that the latter allows users to train a model from scratch, whereas the former adapts a pre-trained model.
@@ -135,7 +135,7 @@ Using our pre-trained models, users can segment high-resolution time-of-flight d
 
 ## Qualitative evaluation
 
-To qualitatively evaluate our software, we used 3D MRA image slabs with a diverse range of image resolution (from 400 $\mu$m to 150 $\mu$m [@mattern_prospective_2018; @Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023; @bollmann_imaging_2022]). \autoref{fig:2}a shows the maximum intensity projections (MIP) of the original input images, and \autoref{fig:2}b shows the predicted segmentation using *predict* (note that here we use the model trained on manually corrected labels from the SMILE-UHURA challenge). We found that even though our models were trained on lower resolution data, i.e., using 3D multi-slab time-of-flight MRA with an isotropic resolution of 300 $\mu$m, it can be generalized to MRA images with varying resolutions.
+To qualitatively evaluate our software, we used 3D MRA image slabs with a diverse range of image resolutions (from 400 $\mu$m to 150 $\mu$m [@mattern_prospective_2018; @Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023; @bollmann_imaging_2022]). \autoref{fig:2}a shows the maximum intensity projections (MIP) of the original input images, and \autoref{fig:2}b shows the predicted segmentation using *predict* (note that here we use the model trained on manually corrected labels from the SMILE-UHURA challenge). We found that even though our models were trained on lower resolution data, i.e., using 3D multi-slab time-of-flight MRA with an isotropic resolution of 300 $\mu$m, it can be generalized to MRA images with varying resolutions.
 
 ![Qualitative evaluation of *Module 1* (*predict*) from **VesselBoost**. (a) Maximum intensity projection of input images with a diverse range of image resolutions. (b) Predicted segmentations. \label{fig:2}](figure2.png)
 
@@ -154,18 +154,18 @@ To quantitatively evaluate Module 2, *TTA*, we trained a model using 13 MRA imag
 ![Quantitative evaluation of *Module 2* (*TTA*) from **VesselBoost** on 3D MRA image slab with an isotropic resolution of 300 $\mu$m. Dice scores were estimated for the initial segmentation (proxy) and the final segmentation, with the ground truth image as a reference. In green, we show the boost in Dice score after test-time adaptation. \label{fig:5}](figure5.png)
 
 # Discussion and Conclusion
-We found that the network trained on low-resolution MRA images performed well on high-resolution data. We also showed the potential to train networks on a single data set for vessel segmentation to generate segmentations with more detail than the training data. In addition, test-time adaption allows training on larger data sets with imperfect labels and improves the initial prediction for a new input image.
+We found that the network trained on low-resolution MRA images performed well on high-resolution data. We also showed the potential to train networks on a single data set for vessel segmentation to generate segmentations with more detail than the training data. In addition, test-time adaptation allows training on larger data sets with imperfect labels and improves the initial prediction for a new input image.
 Note that we always trained and predicted on unmasked images but applied a brain mask afterwards to remove unwanted false positive segmentations stemming from the skin or fat around the skull. When predicting directly on masked images, we noticed that the network would segment the rim of the masked volume as a vessel. Thus, we recommend predicting unmasked images first and then applying a brain mask. Moreover, we used a fixed threshold for removing small disconnected components during post-processing. This threshold can be adapted to cater for very high- or low-resolution images.
 In conclusion, VesselBoost has the potential to facilitate the segmentation of small datasets with unique contrasts, such as ex-vivo MRI. VesselBoost can also be combined with existing, traditional segmentation techniques to provide a *boost* to their performance. 
 
 # Code Availability
 
 The VesselBoost tool is freely available at [Open Science Framework](https://osf.io/abk4p/), [GitHub](https://github.com/KMarshallX/vessel_code) and via the
-Neurodesk [@renton_neurodesk_2023] data analysis environment (https://neurodesk.github.io) as Docker and Singularity containers. 
+Neurodesk [@renton_neurodesk_2023] data analysis environment (https://neurodesk.org) as Docker and Singularity containers. 
 
 # Acknowledgments
 
-The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR and Steffen Bollmann acknowledge funding through an ARC Linkage grant (LP200301393). HM acknowledges funding from the Deutsche Forschungsgemeinschaft (DFG) (501214112, MA 9235/3-1) and the Deutsche Alzheimer Gesellschaft (DAG) e.V. (MD-DARS project). MB acknowledges funding from the Australian Research Council Future Fellowship grant FT140100865. This work was initiated with the support of UQ AI Collaboratory.
+The authors acknowledge funding by NHMRC-NIH BRAIN Initiative Collaborative Research Grant APP1117020 and by the NIH NIMH BRAIN Initiative grant R01-MH111419. FLR and Steffen Bollmann acknowledge funding through an ARC Linkage grant (LP200301393). HM acknowledges funding from the Deutsche Forschungsgemeinschaft (DFG) (501214112, MA 9235/3-1) and the Deutsche Alzheimer Gesellschaft (DAG) e.V. (MD-DARS project). Markus Barth acknowledges funding from the Australian Research Council Future Fellowship grant FT140100865. TS is supported by a Motor Neurone Disease Research Australia (MNDRA) Postdoctoral Research Fellowship (PDF2112). This work was initiated with the support of UQ AI Collaboratory.
 
 An early prototype of this work was presented at the 12th Scientific Symposium on Clinical Needs, Research Promises and Technical Solutions in Ultrahigh Field Magnetic Resonance in Berlin in 2021. This work was also submitted to the SMILE-UHURA challenge [@Chatterjee_Mattern_Dubost_Schreiber_Nürnberger_Speck_2023]. Special thanks to the organizers (Soumick Chatterjee, Hendrik Mattern, Florian Dubost, Stefanie Schreiber, Andreas Nürnberger and Oliver Speck) of the SMILE-UHURA challenge for providing the data and the opportunity to participate in the challenge.
 
