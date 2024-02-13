@@ -162,7 +162,7 @@ In conclusion, *VesselBoost* has the potential to facilitate the segmentation of
 
 # Code Availability
 
-The *VesselBoost* tool is freely available at [Open Science Framework](https://osf.io/abk4p/), [GitHub](https://github.com/KMarshallX/vessel_code) and via the
+The *VesselBoost* tool is freely available at [Open Science Framework](https://osf.io/abk4p/), [GitHub](https://github.com/KMarshallX/VesselBoost) and via the
 Neurodesk [@renton_neurodesk_2023] data analysis environment (https://neurodesk.org) as Docker and Singularity containers. 
 
 # Acknowledgments
