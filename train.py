@@ -7,7 +7,7 @@ Editor: Marshall Xu
 Last Edited: 18/10/2023
 """
 
-from config import train_config
+import config.train_config as train_config
 from utils import preprocess_procedure
 from utils import TTA_Training
 

@@ -9,7 +9,7 @@ Last edited: 18/10/2023
 """
 
 import os
-from config import pred_config
+import config.pred_config as pred_config
 from utils import preprocess_procedure, make_prediction
 
 args = pred_config.pred_parser.parse_args()
