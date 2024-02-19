@@ -8,10 +8,9 @@ Last Edited: 22/10/2023
 """
 
 import os
-import config.adapt_config as adapt_config
-from utils.module_utils import preprocess_procedure
-from utils.unet_utils import *
-from utils.train_utils import TTA_Training
+from config import adapt_config
+from utils import preprocess_procedure
+from utils import TTA_Training
 
 
 args = adapt_config.args

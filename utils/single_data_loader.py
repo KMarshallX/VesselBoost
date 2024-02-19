@@ -8,7 +8,7 @@ Last Edited: 07/07/2023
 import nibabel as nib
 import os
 
-from .unet_utils import RandomCrop3D, standardiser, normaliser
+from .unet_utils import RandomCrop3D, standardiser
 
 class single_channel_loader:
     def __init__(self, raw_img, seg_img, patch_size, step):

@@ -8,13 +8,10 @@ import re
 import shutil
 import torch
 from tqdm import tqdm
-from utils.unet_utils import *
-from utils.single_data_loader import single_channel_loader, multi_channel_loader
-from utils.module_utils import prediction_and_postprocess
-from models.unet_3d import Unet
-from models.asppcnn import ASPPCNN
-from models.aspp import CustomSegmentationNetwork
-from models.ra_unet import MainArchitecture
+from .unet_utils import *
+from .single_data_loader import single_channel_loader, multi_channel_loader
+from .module_utils import prediction_and_postprocess
+from models import Unet, ASPPCNN, CustomSegmentationNetwork, MainArchitecture
 
 def model_chosen(model_name, in_chan, out_chan, filter_num):
     if model_name == "unet3d":

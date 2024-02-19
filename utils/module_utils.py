@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 from patchify import patchify, unpatchify
 import cc3d
 
-from utils.unet_utils import *
-from models.unet_3d import Unet
+from .unet_utils import *
+from models import Unet
 
 class preprocess:
     """
