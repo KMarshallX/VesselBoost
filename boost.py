@@ -7,7 +7,7 @@ Editor: Marshall Xu
 Last Edited: 22/10/2023
 """
 
-from config import boost_config
+import config.boost_config as boost_config
 from utils import preprocess_procedure, make_prediction
 from utils import TTA_Training
 import os
