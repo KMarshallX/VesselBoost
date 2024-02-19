@@ -10,10 +10,6 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 import scipy.ndimage as scind
-import nibabel as nib
-from tqdm import tqdm
-from patchify import patchify, unpatchify
-import os
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1e-4):

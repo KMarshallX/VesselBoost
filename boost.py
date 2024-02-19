@@ -7,9 +7,10 @@ Editor: Marshall Xu
 Last Edited: 22/10/2023
 """
 
-import config.boost_config as boost_config
-from utils.module_utils import preprocess_procedure, make_prediction
-from utils.train_utils import *
+from config import boost_config
+from utils import preprocess_procedure, make_prediction
+from utils import TTA_Training
+import os
 
 args = boost_config.args
 # input images & labels

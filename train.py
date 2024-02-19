@@ -7,10 +7,9 @@ Editor: Marshall Xu
 Last Edited: 18/10/2023
 """
 
-import config.train_config as train_config
-from utils.module_utils import preprocess_procedure
-from utils.train_utils import *
-from utils.single_data_loader import multi_channel_loader
+from config import train_config
+from utils import preprocess_procedure
+from utils import TTA_Training
 
 args = train_config.args
 # input images & labels
