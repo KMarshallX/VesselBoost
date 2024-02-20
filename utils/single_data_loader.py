@@ -11,7 +11,7 @@ import os
 from .unet_utils import RandomCrop3D, standardiser
 
 class single_channel_loader:
-    def __init__(self, raw_img, seg_img, patch_size, step):
+    def __init__(self, raw_img, seg_img, patch_size, step, test_mode=False):
         """
         :param raw_img: str, path of the raw file
         :param seg_img: str, path of the label file
@@ -30,6 +30,8 @@ class single_channel_loader:
         self.patch_size = patch_size
         self.step = step
 
+        self.test_mode = test_mode
+
     def __repr__(self):
         return f"Processing image {self.raw_img} and its segmentation {self.seg_img}\n"
 
@@ -45,12 +47,12 @@ class single_channel_loader:
         assert (raw_size[2] == seg_size[2]), "Input image and segmentation dimension not matched, 2"
 
         for i in range(self.step):
-            cropper = RandomCrop3D(raw_size, self.patch_size)
+            cropper = RandomCrop3D(raw_size, self.patch_size, self.test_mode)
             img_crop, seg_crop = cropper(self.raw_arr, self.seg_arr)
 
             yield img_crop, seg_crop
 
-def multi_channel_loader(ps_path, seg_path, patch_size, step):
+def multi_channel_loader(ps_path, seg_path, patch_size, step, test_mode=False):
     """
     Loads multiple images and their corresponding segmentation masks from the given paths.
     Args:
@@ -81,6 +83,6 @@ def multi_channel_loader(ps_path, seg_path, patch_size, step):
                 break
         assert (seg_img_name != None), f"There is no corresponding label to {raw_file_list[i]}!"
         # a linked hashmap to store the provoked data loaders
-        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, patch_size, step))
+        loaders_dict.__setitem__(i, single_channel_loader(raw_img_name, seg_img_name, patch_size, step, test_mode))
     
     return loaders_dict

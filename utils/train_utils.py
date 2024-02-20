@@ -94,7 +94,8 @@ class TTA_Training:
                 batch_mul,  
                 patch_size, augmentation_mode,
                 pretrained_model = None,
-                thresh = None, connect_thresh = None):
+                thresh = None, connect_thresh = None,
+                test_mode = False):
         # type of the loss metric
         self.loss_name = loss_name
         # type of the model
@@ -119,6 +120,8 @@ class TTA_Training:
         self.pretrained_model = pretrained_model
         # hardware config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # test mode
+        self.test_mode = test_mode
 
     def loss_init(self):
         return loss_metric(self.loss_name)  
@@ -131,7 +134,10 @@ class TTA_Training:
         return torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = self.optim_gamma, patience = optim_patience)
     
     def aug_init(self):
-        return aug_utils(self.aug_config[0], self.aug_config[1])
+        if not self.test_mode:
+            return aug_utils(self.aug_config[0], "mode3")
+        else:
+            return aug_utils(self.aug_config[0], "off")
     
     def pretrained_model_loader(self):
         load_model = self.model_init()
@@ -196,7 +202,7 @@ class TTA_Training:
     def train(self, ps_path, seg_path, out_mo_path):
         # initialize the data loader
         step = int(self.epoch_num * self.batch_mul)
-        multi_image_loder = multi_channel_loader(ps_path, seg_path, self.aug_config[0], step)
+        multi_image_loder = multi_channel_loader(ps_path, seg_path, self.aug_config[0], step, self.test_mode)
         # initialize the model
         model = self.model_init()
 
