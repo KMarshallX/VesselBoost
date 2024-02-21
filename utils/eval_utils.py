@@ -74,16 +74,37 @@ def mra_deskull(img_path, msk_path, mip_flag):
         print("MIP image has been successfully saved!")
 
 class eval_scores:
+    """
+    Class to calculate evaluation scores for segmentation results.
+
+    Args:
+        seg (ndarray): Segmentation result.
+        gt (ndarray): Ground truth.
+
+    Returns:
+        scores (list): List of evaluation scores. [Dice, Jaccard, Volume similarity, Mutual information, Adjusted Rand index]
+    """
+
     def __init__(self, seg, gt) -> None:
-        """
-        seg, gt: numpy array
-        """
         self.seg = seg.reshape(-1,1)
         self.gt = gt.reshape(-1,1)
         self.tn, self.fp, self.fn, self.tp = self._four_cardinalities(self.seg, self.gt)
         self.n = self.tn + self.fp + self.fn + self.tp
 
     def _four_cardinalities(self, seg, gt):
+        """
+        Calculate the four cardinalities.
+
+        Args:
+            seg (ndarray): Segmentation result.
+            gt (ndarray): Ground truth.
+
+        Returns:
+            tn (int): True negative count.
+            fp (int): False positive count.
+            fn (int): False negative count.
+            tp (int): True positive count.
+        """
         tp = (seg*gt).sum()
         fp = (seg*(1-gt)).sum()
         fn = ((1-seg)*gt).sum()
@@ -91,19 +112,39 @@ class eval_scores:
         return tn, fp, fn, tp
     
     def _dice(self):
-        # dice score
+        """
+        Calculate the Dice score.
+
+        Returns:
+            dice (float): Dice score.
+        """
         return (2*self.tp) / (2*self.tp + self.fp + self.fn)
     
     def _jaccard(self):
-        # jaccard score
+        """
+        Calculate the Jaccard score.
+
+        Returns:
+            jaccard (float): Jaccard score.
+        """
         return self.tp / (self.tp + self.fp + self.fn)
     
     def _vol_sim(self):
-        # volume similarity
+        """
+        Calculate the volume similarity.
+
+        Returns:
+            vol_sim (float): Volume similarity.
+        """
         return 1 - np.abs(self.fn - self.fp) / (2*self.tp + self.fp + self.fn)
     
     def _mutual_info(self):
-        # mutual information (discarded)
+        """
+        Calculate the mutual information.
+
+        Returns:
+            mutual_info (float): Mutual information.
+        """
         psg1 = (self.tp + self.fn) / self.n
         psg2 = (self.tn + self.fn) / self.n
         pst1 = (self.tp + self.fp) / self.n
@@ -117,9 +158,12 @@ class eval_scores:
         return 2 * MI / (Hsg + Hst)
     
     def _adjusted_ri(self):
-        # adjusted rand index (replacement for Balanced Average Hausdorff Distance)
+        """
+        Calculate the adjusted Rand index.
 
-        # basic cardinalities
+        Returns:
+            adjusted_ri (float): Adjusted Rand index.
+        """
         a = (self.tp*(self.tp-1) + self.fp*(self.fp-1) + self.tn*(self.tn-1) + self.fn*(self.fn-1)) / 2
         b = ((self.tp+self.fn)**2 + (self.tn+self.fp)**2 - (self.tp**2+self.tn**2+self.fp**2+self.fn**2)) / 2
         c = ((self.tp+self.fp)**2 + (self.tn+self.fn)**2 - (self.tp**2+self.tn**2+self.fp**2+self.fn**2)) / 2
@@ -128,6 +172,12 @@ class eval_scores:
         return 2*(a*d - b*c) / (c**2 + b**2 + 2*a*d + (a+d)*(c+b))
     
     def __call__(self):
+        """
+        Calculate all evaluation scores and return as a list.
+
+        Returns:
+            scores (list): List of evaluation scores.
+        """
         a = self._dice()
         b = self._jaccard()
         c = self._vol_sim()
