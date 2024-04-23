@@ -9,7 +9,8 @@ import shutil
 import torch
 from tqdm import tqdm
 from .unet_utils import *
-from .single_data_loader import single_channel_loader, multi_channel_loader
+from .eval_utils import cv_helper
+from .single_data_loader import single_channel_loader, multi_channel_loader, cv_multi_channel_loader
 from .module_utils import prediction_and_postprocess
 from models import Unet, ASPPCNN, CustomSegmentationNetwork, MainArchitecture
 
@@ -135,8 +136,8 @@ class TTA_Training:
     
     def aug_init(self):
         if not self.test_mode:
-            return aug_utils(self.aug_config[0], "mode3")
-        else:
+            return aug_utils(self.aug_config[0], "on")
+        else: # test_mode = True
             return aug_utils(self.aug_config[0], "off")
     
     def pretrained_model_loader(self):
@@ -206,10 +207,31 @@ class TTA_Training:
         # initialize the model
         model = self.model_init()
 
-        print(f"\nIn this test, the batch size is {6 * self.batch_mul}\n")
+        # print(f"\nIn this test, the batch size is {6 * self.batch_mul}\n")
 
         # training loop
         self.training_loop(multi_image_loder, model, out_mo_path)
+
+    def cross_valid_train(self, ps_path, seg_path, model_path):
+        cv_dict = cv_helper(ps_path)
+        cnt = 0
+        print(f"Total {len(cv_dict)} will be generated!\n")
+        for key, value in cv_dict.items():
+            cnt += 1
+            print(f"Cross validation {cnt} will start shortly!\n Test image is {key}\n")
+            # initialize the data loader
+            step = int(self.epoch_num * self.batch_mul)
+            multi_image_loder = cv_multi_channel_loader(ps_path, seg_path, value, self.aug_config[0], step, self.test_mode)
+            # initialize the model
+            model = self.model_init()
+            # out model path
+            test_name = key.split('.')[0]
+            if os.path.exists(model_path) == False:
+                os.makedirs(model_path)
+                print(f"{model_path}doesn't exists! {model_path} has been created!")
+            out_mo_path = os.path.join(model_path, f"cv_{cnt}_{test_name}")
+            # training loop
+            self.training_loop(multi_image_loder, model, out_mo_path)
 
     def test_time_adaptation(self, ps_path, px_path, out_path, out_mo_path, resource_opt):
         # traverse each image

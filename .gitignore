@@ -17,3 +17,5 @@ readme_img/Snipaste_2023-03-15_09-11-34.jpg
 /config/__pycache__
 config/train_test_config.py
 
+*.json
+*.npy

@@ -201,19 +201,21 @@ class aug_utils:
         segin = self.zooming(segin)
 
         if self.mode == "on":
+            # print("Aug mode on, rotation/flip only")
             input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), 
             self.flip_hr(input, 1), self.flip_vt(input, 1)), axis=0)
             segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), 
             self.flip_hr(segin, 1), self.flip_vt(segin, 1)), axis=0)
         elif self.mode == "repeat":
+            # print("Aug mode repeat, repeat the same patch 6 times")
             input_batch = np.stack((input, input, input, input, input, input), axis=0)
             segin_batch = np.stack((segin, segin, segin, segin, segin, segin), axis=0)
         elif self.mode == "mode1":
-            print("Aug mode 1")
+            # print("Aug mode 1, rotation & blurring")
             input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), self.filter(input, 2), self.filter(input, 3)), axis=0)
             segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), segin, segin), axis=0)
         elif self.mode == "mode2":
-            print("Aug mode 2, only one patch, with blurring effect")
+            # print("Aug mode 2, only one patch, with blurring effect")
             input_batch = np.expand_dims(self.filter(input, 2), axis=0)
             segin_batch = np.expand_dims(self.filter(segin, 2), axis=0)
         elif self.mode == "mode3":

@@ -32,6 +32,20 @@ def out_file_reader(file_path):
     plt.grid(True)
     plt.show()
 
+def cv_helper(ps_path):
+    
+    if any(entry.is_dir() for entry in os.scandir(ps_path) if entry.is_dir()):
+        raise ValueError("The image directory contains subdirs")
+    
+    # make sure the image path and seg path contains equal number of files
+    raw_file_list = os.listdir(ps_path)
+
+    cv_dict = {}
+    for i, current_file in enumerate(raw_file_list):
+        cv_dict.__setitem__(current_file, raw_file_list[: i] + raw_file_list[i + 1 :])
+    
+    return cv_dict
+
 def mra_deskull(img_path, msk_path, mip_flag):
     """
     Apply a mask on the target nifti image and generate an MIP image.
