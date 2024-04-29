@@ -116,6 +116,10 @@ class prediction_and_postprocess:
     def sigmoid(self, z):
         return 1/(1+np.exp(-z))
     
+    def nn_sigmoid(self, z):
+        sigmoid_fn = torch.nn.Sigmoid()
+        return sigmoid_fn(z)
+    
     def inference(self, test_patches, load_model, ori_size):
         print("Prediction procedure starts!")
         # Predict each 3D patch  
@@ -125,18 +129,18 @@ class prediction_and_postprocess:
 
                     single_patch = test_patches[i,j,k, :,:,:]
                     single_patch_input = single_patch[None, :]
-                    single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0) # type: ignore
+                    single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
 
-                    single_patch_prediction = load_model(single_patch_input)
+                    single_patch_prediction = self.nn_sigmoid(load_model(single_patch_input)) 
 
                     single_patch_prediction_out = single_patch_prediction.detach().numpy()[0,0,:,:,:]
 
                     test_patches[i,j,k, :,:,:] = single_patch_prediction_out
 
         test_output = unpatchify(test_patches, (ori_size[0], ori_size[1], ori_size[2]))
-        test_output_sigmoid = self.sigmoid(test_output)
+
         print("Prediction procedure ends! Please wait for the post processing!")
-        return test_output_sigmoid
+        return test_output
     
     def post_processing_pipeline(self, arr, percent, connect_threshold):
         """

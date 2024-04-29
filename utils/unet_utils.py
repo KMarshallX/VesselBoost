@@ -201,18 +201,36 @@ class aug_utils:
         segin = self.zooming(segin)
 
         if self.mode == "on":
+            # print("Aug mode on, rotation/flip only")
             input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), 
             self.flip_hr(input, 1), self.flip_vt(input, 1)), axis=0)
             segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), 
             self.flip_hr(segin, 1), self.flip_vt(segin, 1)), axis=0)
-        elif self.mode == "off":
+        elif self.mode == "repeat":
+            # print("Aug mode repeat, repeat the same patch 6 times")
             input_batch = np.stack((input, input, input, input, input, input), axis=0)
             segin_batch = np.stack((segin, segin, segin, segin, segin, segin), axis=0)
         elif self.mode == "mode1":
+            # print("Aug mode 1, rotation & blurring")
             input_batch = np.stack((input, self.rot(input, 1), self.rot(input, 2), self.rot(input, 3), self.filter(input, 2), self.filter(input, 3)), axis=0)
             segin_batch = np.stack((segin, self.rot(segin, 1), self.rot(segin, 2), self.rot(segin, 3), segin, segin), axis=0)
-        elif self.mode == "test":
-            
+        elif self.mode == "mode2":
+            # print("Aug mode 2, only one patch, with blurring effect")
+            input_batch = np.expand_dims(self.filter(input, 2), axis=0)
+            segin_batch = np.expand_dims(self.filter(segin, 2), axis=0)
+        elif self.mode == "mode3":
+            ind = np.random.randint(0, 2)
+            if ind == 0:
+                k = np.random.randint(1, 4)
+                print("Aug mode 3, rotate")
+                input_batch = np.expand_dims(self.rot(input, k), axis=0)
+                segin_batch = np.expand_dims(self.rot(segin, k), axis=0)
+            elif ind == 1:
+                print("Aug mode 3, blur")
+                input_batch = np.expand_dims(self.filter(input, 2), axis=0)
+                segin_batch = np.expand_dims(self.filter(segin, 2), axis=0)
+        elif self.mode == "off":
+            print("Aug mode off")
             input_batch = np.expand_dims(input, axis=0)
             segin_batch = np.expand_dims(segin, axis=0)
             
@@ -242,21 +260,29 @@ class RandomCrop3D():
     """
     Resample the input image slab by randomly cropping a 3D volume, and reshape to a fixed size e.g.(64,64,64)
     """
-    def __init__(self, img_sz, exp_sz):
+    def __init__(self, img_sz, exp_sz, test_mode=False, test_crop_sz=(64,64,64)):
         h, w, d = img_sz
-        # test 0925, constraint the higher bound of the crop size to be 128
-        crop_h = torch.randint(32, h, (1,)).item()
-        crop_w = torch.randint(32, w, (1,)).item()
-        crop_d = torch.randint(32, d, (1,)).item()
-        assert (h, w, d) > (crop_h, crop_w, crop_d)
+        self.test_mode = test_mode
+        if not test_mode:
+            crop_h = torch.randint(32, h, (1,)).item()
+            crop_w = torch.randint(32, w, (1,)).item()
+            crop_d = torch.randint(32, d, (1,)).item()
+            assert (h, w, d) > (crop_h, crop_w, crop_d)
+            self.crop_sz = tuple((crop_h, crop_w, crop_d))
+        else:
+            self.crop_sz = test_crop_sz
         self.img_sz  = tuple((h, w, d))
-        self.crop_sz = tuple((crop_h, crop_w, crop_d))
         self.exp_sz = exp_sz
         
     def __call__(self, img, lab):
         slice_hwd = [self._get_slice(i, k) for i, k in zip(self.img_sz, self.crop_sz)]
-        return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
-        
+        if not self.test_mode:
+            print("TEST MODE: The patch are zoomed")
+            return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
+        else:
+            print("TEST MODE: The patch hasn't been zoomed")
+            return self._crop(img, *slice_hwd), self._crop(lab, *slice_hwd)
+
     @staticmethod
     def _get_slice(sz, crop_sz):
         try : 
