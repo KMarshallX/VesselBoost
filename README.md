@@ -47,7 +47,7 @@ To predict vessel segmentation using your data and the latest version of VesselB
 ```bash
 ml vesselboost
 path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_0.9.4_20240404/vesselboost_0.9.4_20240404.simg/opt/VesselBoost/saved_models
-prediction.py --ds_path /path/ --out_path /path/ --pretrained "$path_to_model"/manual_ep1000_1029 --prep_mode 4
+prediction.py --ds_path /path/ --out_path /path/ --pretrained "$path_to_model"/manual_0429 --prep_mode 4
 ```
 
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).

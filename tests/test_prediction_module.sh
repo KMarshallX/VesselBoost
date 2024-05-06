@@ -41,9 +41,9 @@ mkdir ./pretrained_models/
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_ep1000_1029 ./pretrained_models/manual_ep1000_1029
-osf -p abk4p fetch /osfstorage/pretrained_models/om1_ep1000_1029 ./pretrained_models/om1_ep1000_1029
-osf -p abk4p fetch /osfstorage/pretrained_models/om2_ep1000_1029 ./pretrained_models/om2_ep1000_1029
+osf -p abk4p fetch /osfstorage/pretrained_models/manual_0429 ./pretrained_models/manual_0429
+osf -p abk4p fetch /osfstorage/pretrained_models/omelette1_0429 ./pretrained_models/omelette1_0429
+osf -p abk4p fetch /osfstorage/pretrained_models/omelette2_0429 ./pretrained_models/omelette2_0429
 
 
 path_to_images="./data/images/"
@@ -55,7 +55,7 @@ echo "Path to output: "$path_to_output""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/manual_ep1000_1029"
+path_to_pretrained_model="./pretrained_models/manual_0429"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"
