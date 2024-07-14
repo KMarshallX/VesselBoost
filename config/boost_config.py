@@ -8,8 +8,6 @@ Last Edited: 23/10/2023
 
 import argparse
 
-import boost
-
 boost_parser = argparse.ArgumentParser(description="VesselBoost training arguments")
 
 # Train.py
