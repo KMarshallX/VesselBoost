@@ -8,6 +8,8 @@ Last Edited: 23/10/2023
 
 import argparse
 
+import boost
+
 boost_parser = argparse.ArgumentParser(description="VesselBoost training arguments")
 
 # Train.py
@@ -59,8 +61,8 @@ boost_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPP
 
 # postprocessing / threshold
 # hard thresholding value
-boost_parser.add_argument('--thresh', type=float, default=0.1, help=argparse.SUPPRESS)
+boost_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 # connected components analysis threshold value (denoising)
-boost_parser.add_argument('--cc', type=int, default=10, help=argparse.SUPPRESS)
+boost_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
 
 args = boost_parser.parse_args()

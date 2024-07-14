@@ -30,9 +30,9 @@ adapt_parser.add_argument('--fil', type=int, default=16, help=argparse.SUPPRESS)
 
 # postprocessing / threshold
 # hard thresholding value
-adapt_parser.add_argument('--thresh', type=float, default=0.1, help=argparse.SUPPRESS)
+adapt_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 # connected components analysis threshold value (denoising)
-adapt_parser.add_argument('--cc', type=int, default=10, help=argparse.SUPPRESS)
+adapt_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
 
 adapt_parser.add_argument('--pretrained', type=str, default = "/pretrained_model_path/", help="path of the prertrained model")
 

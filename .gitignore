@@ -4,6 +4,10 @@
 /*.sh
 train_zero.py
 train_test.py
+test_0315.py
+test_plt.click.py
+test_postpo_0319.py
+zcrosval_test.py
 test_time_adaptation_test.py
 /__pycache__
 /data
