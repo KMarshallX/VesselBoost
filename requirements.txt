@@ -1,4 +1,4 @@
-numpy==1.26.4
+numpy==1.23.5
 matplotlib==3.8.4
 nibabel==5.2.1
 patchify==0.2.3
