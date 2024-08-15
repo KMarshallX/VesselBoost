@@ -3,7 +3,7 @@ matplotlib==3.8.4
 nibabel==5.2.1
 patchify==0.2.3
 scikit-learn==1.1.1
-scipy==1.13.3
+scipy==1.9.3
 tqdm==4.64.1
 antspyx==0.4.2
 connected-components-3d==3.13.0
