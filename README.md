@@ -24,7 +24,7 @@ This repository contains 3 major modules:
 
 
 ## **Current Version**
-VesselBoost 0.9.4
+VesselBoost 1.0.0
 
 ## **Requirements**
 - Docker / Singularity container
@@ -38,10 +38,10 @@ VesselBoost, pre-trained models, and required software are packaged in software 
 The Dockerhub container is available at Dockerhub. To download the container, run the following command:
 
 ```
-docker pull vnmd/vesselboost_0.9.4
+docker pull vnmd/vesselboost_1.0.0
 ```
 
-### Neurodesk
+### Neurodesk (will be updated soon - 18/Aug/2024)
 To predict vessel segmentation using your data and the latest version of VesselBoost on Neurodesk, you can run the following code snippet:
 
 ```bash
@@ -57,11 +57,11 @@ This is a Python-based software package. To successfully run this project on you
 
 1. Clone this repository to your local machine
     ```
-    git clone https://github.com/KMarshallX/vessel_code.git
+    git clone https://github.com/KMarshallX/VesselBoost.git
     ```
 2. Install miniconda:
     ```
-    cd vessel_code
+    cd VesselBoost
     bash miniconda-setup.sh
     ```
 3. Then set your current working directory as the cloned repository, and install the remaining required packages
@@ -71,7 +71,21 @@ This is a Python-based software package. To successfully run this project on you
     ```
 
 ## **Citation**
-...
+VesselBoost paper is currently available as a bioRxiv preprint. Please cite the following paper if you use VesselBoost in your research:
+
+```
+@misc{xu_vesselboost_2024,
+	title = {{VesselBoost}: {A} {Python} {Toolbox} for {Small} {Blood} {Vessel} {Segmentation} in {Human} {Magnetic} {Resonance} {Angiography} {Data}},
+	shorttitle = {{VesselBoost}},
+	url = {http://biorxiv.org/lookup/doi/10.1101/2024.05.22.595251},
+	doi = {10.1101/2024.05.22.595251},
+	language = {en},
+	urldate = {2024-05-24},
+	author = {Xu, Marshall and Ribeiro, Fernanda L and Barth, Markus and Bernier, Michael and Bollmann, Steffen and Chatterjee, Soumick and Cognolato, Francesco and Gulban, Omer Faruk and Itkyal, Vaibhavi and Liu, Siyu and Mattern, Hendrik and Polimeni, Jonathan R. and Shaw, Thomas B and Speck, Oliver and Bollmann, Saskia},
+	month = may,
+	year = {2024}
+}
+```
 
 ## **Contact**
 Marshall Xu <[marshall.xu@uq.edu.au](marshall.xu@uq.edu.au)>
