@@ -20,7 +20,7 @@ jobs:
   test_docker_pipeline:
     runs-on: ubuntu-20.04
     container: 
-      image: vnmd/vesselboost_1.0.0
+      image: vnmd/vesselboost_1.0.0:latest
       volumes:
         - /home/runner/:/home/
     steps:
