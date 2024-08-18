@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-cd /opt/vessel_code
+cd /opt/VesselBoost
 
 # settings for data download
 mkdir -p data/images/

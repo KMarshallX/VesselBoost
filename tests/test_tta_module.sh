@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
-cp -r . /tmp/vessel_code
+cp -r . /tmp/VesselBoost
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/vessel_code/README.md | grep https://github.com/KMarshallX/vessel_code.git`
+clone_command=`cat /tmp/VesselBoost/README.md | grep https://github.com/KMarshallX/VesselBoost.git`
 echo $clone_command
 $clone_command
 
 echo "[DEBUG]: testing the miniconda installation from the README:"
-get_command=`cat /tmp/vessel_code/README.md | grep miniconda-setup.sh`
+get_command=`cat /tmp/VesselBoost/README.md | grep miniconda-setup.sh`
 echo $get_command
 $get_command 
 
@@ -18,7 +18,7 @@ export PATH="/home/runner/miniconda3/bin:$PATH"
 source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
-cd vessel_code
+cd VesselBoost
 condaenv_command=`cat ./README.md | grep environment.yml`
 echo $condaenv_command
 $condaenv_command
