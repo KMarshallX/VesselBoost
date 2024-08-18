@@ -24,7 +24,7 @@ jobs:
       volumes:
         - /home/runner/:/home/
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: test docker container
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}
