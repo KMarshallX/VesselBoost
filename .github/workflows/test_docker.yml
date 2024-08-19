@@ -23,14 +23,15 @@ jobs:
       image: vnmd/vesselboost_1.0.0:latest
       volumes:
         - /home/runner/:/home/
+    env:
+      # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node16
+      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
+      OSF_TOKEN_: ${{ secrets.OSF_KEY }}
+      OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
+      OSF_PROJECT_ID_: "abk4p" 
     steps:
     - uses: actions/checkout@v3
     - name: test docker container
-      env:
-        ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node16
-        ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
-        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
-        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
-        OSF_PROJECT_ID_: "abk4p" 
       run: |
         /bin/bash tests/test_docker.sh
