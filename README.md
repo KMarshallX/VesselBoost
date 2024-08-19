@@ -41,12 +41,12 @@ The Dockerhub container is available at Dockerhub. To download the container, ru
 docker pull vnmd/vesselboost_1.0.0
 ```
 
-### Neurodesk (will be updated soon - 18/Aug/2024)
+### Neurodesk 
 To predict vessel segmentation using your data and the latest version of VesselBoost on Neurodesk, you can run the following code snippet:
 
 ```bash
 ml vesselboost
-path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_0.9.4_20240404/vesselboost_0.9.4_20240404.simg/opt/VesselBoost/saved_models
+path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_1.0.0_20240815/vesselboost_1.0.0_20240815.simg/opt/VesselBoost/saved_models/
 prediction.py --ds_path /path/ --out_path /path/ --pretrained "$path_to_model"/manual_0429 --prep_mode 4
 ```
 
