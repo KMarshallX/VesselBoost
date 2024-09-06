@@ -2,7 +2,7 @@ numpy==1.26.4
 matplotlib==3.8.4
 nibabel==5.2.1
 patchify==0.2.3
-scikit-learn==1.4.1
+scikit-learn==1.4.0
 scipy==1.13.0
 tqdm==4.66.2
 antspyx==0.4.2
