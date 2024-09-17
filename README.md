@@ -71,19 +71,23 @@ This is a Python-based software package. To successfully run this project on you
     ```
 
 ## **Citation**
-VesselBoost paper is currently available as a bioRxiv preprint. Please cite the following paper if you use VesselBoost in your research:
+VesselBoost paper is now published! Please cite us if you use VesselBoost in your research:
 
 ```
-@misc{xu_vesselboost_2024,
-	title = {{VesselBoost}: {A} {Python} {Toolbox} for {Small} {Blood} {Vessel} {Segmentation} in {Human} {Magnetic} {Resonance} {Angiography} {Data}},
-	shorttitle = {{VesselBoost}},
-	url = {http://biorxiv.org/lookup/doi/10.1101/2024.05.22.595251},
-	doi = {10.1101/2024.05.22.595251},
-	language = {en},
-	urldate = {2024-05-24},
-	author = {Xu, Marshall and Ribeiro, Fernanda L and Barth, Markus and Bernier, Michael and Bollmann, Steffen and Chatterjee, Soumick and Cognolato, Francesco and Gulban, Omer Faruk and Itkyal, Vaibhavi and Liu, Siyu and Mattern, Hendrik and Polimeni, Jonathan R. and Shaw, Thomas B and Speck, Oliver and Bollmann, Saskia},
-	month = may,
-	year = {2024}
+@article{xuVesselBoostPythonToolbox2024a,
+  title = {{{VesselBoost}}: {{A Python Toolbox}} for {{Small Blood Vessel Segmentation}} in {{Human Magnetic Resonance Angiography Data}}},
+  shorttitle = {{{VesselBoost}}},
+  author = {Xu, Marshall and Ribeiro, Fernanda L. and Barth, Markus and Bernier, Micha{\"e}l and Bollmann, Steffen and Chatterjee, Soumick and Cognolato, Francesco and Gulban, Omer F. and Itkyal, Vaibhavi and Liu, Siyu and Mattern, Hendrik and Polimeni, Jonathan R. and Shaw, Thomas B. and Speck, Oliver and Bollmann, Saskia},
+  year = {2024},
+  month = sep,
+  journal = {Aperture Neuro},
+  volume = {4},
+  publisher = {Organization for Human Brain Mapping},
+  issn = {2957-3963},
+  doi = {10.52294/001c.123217},
+  urldate = {2024-09-17},
+  copyright = {http://creativecommons.org/licenses/by/4.0},
+  langid = {english}
 }
 ```
 
