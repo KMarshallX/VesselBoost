@@ -19,7 +19,7 @@ This repository contains 3 major modules:
 3. [Booster](https://github.com/KMarshallX/vessel_code/blob/master/documentation/boost_readme.md). *Boost* allows users to train a segmentation model on a single or more data using existing imperfect segmentation.
 
 <p align="center">
-<img src="./paper/figure1.png">
+<img src="./figures/figure1.png">
 </p>
 
 
