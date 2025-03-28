@@ -4,21 +4,17 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - cuda-cudart=11.7.99=0
-  - cuda-cupti=11.7.101=0
-  - cuda-libraries=11.7.1=0
-  - cuda-nvrtc=11.7.99=0
-  - cuda-nvtx=11.7.91=0
-  - cuda-runtime=11.7.1=0
-  - python=3.9.15
-  - pytorch=1.13.1
-  - torchvision=0.14.1
-  - numpy=1.23.5
-  - scikit-learn=1.1.1
-  - scipy=1.9.3
+  - pytorch=2.5.0
+  - torchvision=0.20.0
+  - torchaudio=2.5.0
+  - pytorch-cuda=12.1
+  - python=3.10
   - pip=22.3.1
-  - yaml=0.1.7
   - pip:
+    - numpy=1.26.4
+    - scipy=1.15.2
+    - scikit-learn=1.1.1
+    - pyYAML==6.0.2  
     - matplotlib==3.8.4
     - nibabel==5.2.1
     - patchify==0.2.3
