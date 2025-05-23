@@ -39,7 +39,8 @@ angiboost_parser.add_argument('--lr', type=float, default=1e-3, help="learning r
 angiboost_parser.add_argument('--ep', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=16")
 
 # expected size after zooming
-angiboost_parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPRESS)
+angiboost_parser.add_argument('--osz', nargs=3, type=int, default=(64, 64, 64),
+                        help='Expected size after zooming (x y z)')
 # optimizer type, available: [sgd, adam]
 angiboost_parser.add_argument('--op', type=str, default="adam", help=argparse.SUPPRESS)
 # loss metric type, available: [bce, dice, tver]

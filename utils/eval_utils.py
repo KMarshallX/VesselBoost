@@ -72,7 +72,13 @@ def mra_deskull(img_path, msk_path, mip_flag):
     # Apply the mask
     masked_arr = np.multiply(img_arr, msk_arr)
     masked_nifti = nib.Nifti1Image(masked_arr, affine, header)
-    new_file_name = "MASKED_" + file_name
+    # Add "_MASKED" before the extension ".nii.gz" or ".nii"
+    if file_name.endswith(".nii.gz"):
+        new_file_name = file_name.replace(".nii.gz", "_MASKED.nii.gz")
+    elif file_name.endswith(".nii"):
+        new_file_name = file_name.replace(".nii", "_MASKED.nii")
+    else:
+        raise ValueError("Unsupported file format. Only '.nii' and '.nii.gz' are allowed.")
     save_path_nifti = os.path.join(dir_name, new_file_name)
     nib.save(masked_nifti, save_path_nifti)
     print("Masked Nifti image has been sucessfully saved!")

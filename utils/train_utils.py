@@ -275,7 +275,7 @@ class TTA_Training:
             # initialize the inference method for generating the proxies
             inference_postpo_final = prediction_and_postprocess(self.model_name, self.model_config[0], self.model_config[1], self.model_config[2], ps_path, out_path)
             # generate mip images at the final stage
-            inference_postpo_final(self.threshhold_vector[0], self.threshhold_vector[1], out_mo_name, processed_data_list[i], mip_flag=True)
+            inference_postpo_final(self.threshhold_vector[0], self.threshhold_vector[1], out_mo_name, processed_data_list[i], mip_flag=True, sig_flag=True)
     
         print("The test-time adaptation is finished!\n")
 

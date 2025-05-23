@@ -157,7 +157,7 @@ class prediction_and_postprocess:
         # connected components
         return cc3d.dust(arr, connect_threshold, connectivity=26, in_place=False)
     
-    def one_img_process(self, img_name, load_model, thresh, connect_thresh, mip_flag):
+    def one_img_process(self, img_name, load_model, thresh, connect_thresh, mip_flag, sig_flag):
         # Load data
         raw_img_path = os.path.join(self.input_path, img_name) # should be full path
 
@@ -198,6 +198,13 @@ class prediction_and_postprocess:
         # reshape to original shape
         test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
 
+        # save the nifti file for probability map (if sig_flag is true)
+        if sig_flag == True:
+            nifimg_sig = nib.Nifti1Image(test_output_sigmoid, affine, header)
+            save_sigimg_path_post = os.path.join(self.output_path, "SIGMOID_"+img_name) #img_name with extension
+            nib.save(nifimg_sig, save_sigimg_path_post)
+            print(f"Output sigmoid {img_name} is successfully saved!\n")
+
         # thresholding
         postprocessed_output = self.post_processing_pipeline(test_output_sigmoid, thresh, connect_thresh)
         nifimg_post = nib.Nifti1Image(postprocessed_output, affine, header)
@@ -217,8 +224,9 @@ class prediction_and_postprocess:
             mip = np.rot90(mip, axes=(0, 1))
             plt.imsave(save_mip_path_post, mip, cmap='gray')
             print(f"Output MIP image {img_name} is successfully saved!\n")
+            
     
-    def __call__(self, thresh, connect_thresh, test_model_name, test_img_name, mip_flag):
+    def __call__(self, thresh, connect_thresh, test_model_name, test_img_name, mip_flag, sig_flag=False):
 
         # model configuration
         load_model = Unet(self.ic, self.oc, self.fil)
@@ -231,7 +239,7 @@ class prediction_and_postprocess:
             load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         load_model.eval()
 
-        self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag)
+        self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag, sig_flag)
         print("Prediction and thresholding procedure end!\n")
 
 def preprocess_procedure(ds_path, ps_path, prep_mode):
