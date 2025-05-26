@@ -11,6 +11,22 @@ import torch.nn.functional as F
 import numpy as np
 import scipy.ndimage as scind
 
+def sigmoid(z):
+    return 1/(1+np.exp(-z))
+
+def normaliser(x):
+    # only campatible with dtype = numpy array
+    return (x - np.amin(x)) / (np.amax(x) - np.amin(x))
+
+def standardiser(x):
+    # only campatible with dtype = numpy array
+    return (x - np.mean(x)) / np.std(x)
+
+def thresholding(arr,thresh):
+    arr[arr<thresh] = 0
+    arr[arr>thresh] = 1
+    return arr
+
 class DiceLoss(nn.Module):
     def __init__(self, smooth = 1e-4):
         super().__init__()
@@ -238,23 +254,6 @@ class aug_utils:
         segin_batch = segin_batch[:,None,:,:,:] # type: ignore
 
         return torch.from_numpy(input_batch.copy()).to(torch.float32), torch.from_numpy(segin_batch.copy()).to(torch.float32)
-
-
-def sigmoid(z):
-    return 1/(1+np.exp(-z))
-
-def normaliser(x):
-    # only campatible with dtype = numpy array
-    return (x - np.amin(x)) / (np.amax(x) - np.amin(x))
-
-def standardiser(x):
-    # only campatible with dtype = numpy array
-    return (x - np.mean(x)) / np.std(x)
-
-def thresholding(arr,thresh):
-    arr[arr<thresh] = 0
-    arr[arr>thresh] = 1
-    return arr
 
 class RandomCrop3D():
     """

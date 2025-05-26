@@ -5,8 +5,9 @@ Editor: Marshall Xu
 Last Edited: 07/07/2023
 """
 
-import nibabel as nib
 import os
+import nibabel as nib
+import numpy as np
 
 from .unet_utils import RandomCrop3D, standardiser, normaliser
 
@@ -49,7 +50,6 @@ class single_channel_loader:
         for i in range(self.step):
             cropper = RandomCrop3D(raw_size, self.patch_size, self.test_mode)
             img_crop, seg_crop = cropper(self.raw_arr, self.seg_arr)
-
             yield img_crop, seg_crop
 
 def multi_channel_loader(ps_path, seg_path, patch_size, step, test_mode=False):
