@@ -259,9 +259,10 @@ class RandomCrop3D():
     """
     Resample the input image slab by randomly cropping a 3D volume, and reshape to a fixed size e.g.(64,64,64)
     """
-    def __init__(self, img_sz, exp_sz, test_mode=False, test_crop_sz=(64,64,64)):
+    def __init__(self, img_sz, exp_sz, test_mode=False, lower_thresh=128):
         h, w, d = img_sz
         self.test_mode = test_mode
+        
         if not test_mode:
             crop_h = torch.randint(128, h, (1,)).item()
             crop_w = torch.randint(128, w, (1,)).item()
@@ -269,16 +270,19 @@ class RandomCrop3D():
             assert (h, w, d) > (crop_h, crop_w, crop_d)
             self.crop_sz = tuple((crop_h, crop_w, crop_d))
         else:
-            self.crop_sz = test_crop_sz
+            #NOTE: modified @ 26/05/2025
+            crop_h = torch.randint(lower_thresh, h, (1,)).item()
+            crop_w = torch.randint(lower_thresh, w, (1,)).item()
+            crop_d = torch.randint(lower_thresh, d, (1,)).item()
+            assert (h, w, d) > (crop_h, crop_w, crop_d)
+            self.crop_sz = tuple((crop_h, crop_w, crop_d))
+        
         self.img_sz  = tuple((h, w, d))
         self.exp_sz = exp_sz
         
     def __call__(self, img, lab):
         slice_hwd = [self._get_slice(i, k) for i, k in zip(self.img_sz, self.crop_sz)]
-        if not self.test_mode:
-            return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
-        else:
-            return self._crop(img, *slice_hwd), self._crop(lab, *slice_hwd)
+        return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
 
     @staticmethod
     def _get_slice(sz, crop_sz):
