@@ -12,47 +12,7 @@ from .unet_utils import *
 from .eval_utils import cv_helper
 from .single_data_loader import single_channel_loader, multi_channel_loader, cv_multi_channel_loader
 from .module_utils import prediction_and_postprocess
-from models import Unet, ASPPCNN, CustomSegmentationNetwork, MainArchitecture
 
-def model_chosen(model_name, in_chan, out_chan, filter_num):
-    if model_name == "unet3d":
-        return Unet(in_chan, out_chan, filter_num)
-    elif model_name == "aspp":
-        return ASPPCNN(in_chan, out_chan, [1,2,3,5,7])
-    elif model_name == "test": # another aspp
-        return CustomSegmentationNetwork()
-    elif model_name == "atrous":
-        return MainArchitecture()
-    else:
-        print("Insert a valid model name.")
-
-def optim_chosen(optim_name, model_params, lr):
-    if optim_name == 'sgd':
-        return torch.optim.SGD(model_params, lr)
-    elif optim_name == 'adam':
-        return torch.optim.Adam(model_params, lr)
-    else:
-        print("Insert a valid optimizer name.")
-
-def loss_metric(metric_name):
-    """
-    :params metric_name: string, choose from the following: bce->binary cross entropy, dice->dice score 
-    """
-    # loss metric could be updated later -> split into 2 parts
-    if metric_name == "bce":
-        # binary cross entropy
-        return BCELoss()
-    elif metric_name == "dice":
-        # dice loss
-        return DiceLoss()
-    elif metric_name == "tver":
-        # tversky loss
-        return TverskyLoss()
-    elif metric_name == "combo":
-        # combo loss
-        return ComboLoss()
-    else:
-        print("Enter a valid loss metric.")
 
 
 class TTA_Training:

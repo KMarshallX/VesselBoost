@@ -18,7 +18,7 @@ from patchify import patchify, unpatchify
 import cc3d
 
 from .unet_utils import *
-from models import Unet
+from models import *
 
 class preprocess:
     """
@@ -229,15 +229,16 @@ class prediction_and_postprocess:
     def __call__(self, thresh, connect_thresh, test_model_name, test_img_name, mip_flag, sig_flag=False):
 
         # model configuration
-        load_model = Unet(self.ic, self.oc, self.fil)
+        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil)
+        # load_model = Unet(self.ic, self.oc, self.fil)
         model_path = test_model_name # this should be the path to the model
         if torch.cuda.is_available() == True:
             print("Running with GPU")
-            load_model.load_state_dict(torch.load(model_path))
+            load_model.load_state_dict(torch.load(model_path)) # type: ignore
         else:
             print("Running with CPU")
-            load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-        load_model.eval()
+            load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))) # type: ignore
+        load_model.eval()   # type: ignore
 
         self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag, sig_flag)
         print("Prediction and thresholding procedure end!\n")
