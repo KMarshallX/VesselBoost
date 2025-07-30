@@ -8,8 +8,8 @@ Last Edited: 04/10/2024
 """
 
 import config.angiboost_config as angiboost_config
-from utils import preprocess_procedure, make_prediction
-from utils import TTA_Training
+from library import preprocess_procedure, make_prediction
+from library import TTA_Training
 import os
 
 args = angiboost_config.args

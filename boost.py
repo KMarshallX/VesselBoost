@@ -8,8 +8,8 @@ Last Edited: 22/10/2023
 """
 import logging
 import config.boost_config as boost_config
-from utils import preprocess_procedure, make_prediction
-from utils import TTA_Training
+from library import preprocess_procedure, make_prediction
+from library import TTA_Training
 import os
 
 # Set up logging & arguments

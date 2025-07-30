@@ -9,8 +9,8 @@ Last Edited: 22/10/2023
 
 import os
 import config.adapt_config as adapt_config
-from utils import preprocess_procedure
-from utils import TTA_Training
+from library import preprocess_procedure
+from library import TTA_Training
 
 
 args = adapt_config.args

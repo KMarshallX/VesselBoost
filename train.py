@@ -8,8 +8,8 @@ Last Edited: 18/10/2023
 """
 
 import config.train_config as train_config
-from utils import preprocess_procedure
-from utils import TTA_Training
+from library import preprocess_procedure
+from library import TTA_Training
 
 args = train_config.args
 # input images & labels
