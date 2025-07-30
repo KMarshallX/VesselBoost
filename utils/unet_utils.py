@@ -306,9 +306,9 @@ class RandomCrop3D():
         self.test_mode = test_mode
         
         if not test_mode:
-            crop_h = torch.randint(128, 256, (1,)).item()
-            crop_w = torch.randint(128, 256, (1,)).item()
-            crop_d = torch.randint(128, 256, (1,)).item()
+            crop_h = torch.randint(128, h, (1,)).item()
+            crop_w = torch.randint(128, w, (1,)).item()
+            crop_d = torch.randint(128, d, (1,)).item()
             assert (h, w, d) > (crop_h, crop_w, crop_d)
             self.crop_sz = tuple((crop_h, crop_w, crop_d))
         else:
@@ -323,17 +323,17 @@ class RandomCrop3D():
         self.exp_sz = exp_sz
         
     def __call__(self, img, lab):
-        print("*"*50+'/n')
+        # print("*"*50+'/n')
         slice_hwd = [self._get_slice(i, k) for i, k in zip(self.img_sz, self.crop_sz)]
-        print(f"Random crop size: {self.crop_sz}")
-        print("*"*50+'/n')
+        # print(f"Random crop size: {self.crop_sz}")
+        # print("*"*50+'/n')
         return scind.zoom(self._crop(img, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest'), scind.zoom(self._crop(lab, *slice_hwd),(self.exp_sz[0]/self.crop_sz[0], self.exp_sz[1]/self.crop_sz[1], self.exp_sz[2]/self.crop_sz[2]), order=0, mode='nearest')
 
     @staticmethod
     def _get_slice(sz, crop_sz):
         try : 
             lower_bound = torch.randint(sz-crop_sz, (1,)).item()
-            print(f"Origin location of the crop: {lower_bound}")
+            # print(f"Origin location of the crop: {lower_bound}")
             return lower_bound, lower_bound + crop_sz
         except: 
             return (None, None)

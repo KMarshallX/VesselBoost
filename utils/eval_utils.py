@@ -66,12 +66,14 @@ def mra_deskull(img_path, msk_path, mip_flag):
     img = nib.load(img_path)
     affine = img.affine # type: ignore
     header = img.header
+    
     img_arr = img.get_fdata() # type: ignore
     msk_arr = nib.load(msk_path).get_fdata() # type: ignore
     
     # Apply the mask
     masked_arr = np.multiply(img_arr, msk_arr)
     masked_nifti = nib.Nifti1Image(masked_arr, affine, header)
+
     # Add "_MASKED" before the extension ".nii.gz" or ".nii"
     if file_name.endswith(".nii.gz"):
         new_file_name = file_name.replace(".nii.gz", "_MASKED.nii.gz")
