@@ -18,7 +18,7 @@ on:
 
 jobs:
   test_docker_pipeline:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: 
       image: vnmd/vesselboost_1.0.0:latest
       volumes:
