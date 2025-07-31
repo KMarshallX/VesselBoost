@@ -9,10 +9,12 @@ on:
       - config/train_config.py
       - environment.yml
       - documentation/train_readme.md
-      - utils/module_utils.py
-      - utils/train_utils.py
-      - utils/single_data_loader.py
-      - utils/unet_utils.py
+      - library/aug_utils.py
+      - library/data_loaders.py
+      - library/eval_utils.py
+      - library/loss_func.py
+      - library/module_utils.py
+      - library/train_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh
       - .github/workflows/test_train.yml
@@ -25,10 +27,12 @@ on:
       - config/train_config.py
       - environment.yml
       - documentation/train_readme.md
-      - utils/module_utils.py
-      - utils/train_utils.py
-      - utils/single_data_loader.py
-      - utils/unet_utils.py
+      - library/aug_utils.py
+      - library/data_loaders.py
+      - library/eval_utils.py
+      - library/loss_func.py
+      - library/module_utils.py
+      - library/train_utils.py
       - tests/test_train_module.sh
       - miniconda-setup.sh
       - .github/workflows/test_train.yml
