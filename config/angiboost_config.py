@@ -2,9 +2,8 @@
 argparse configuration for angiboost.py (openrecon)
 
 Editor: Marshall Xu
-Last Edited: 04/10/2024
+Last Edited: 31/07/2025
 """
-#@TODO: remember change the optim_patience
 
 import argparse
 
@@ -39,7 +38,8 @@ angiboost_parser.add_argument('--lr', type=float, default=1e-3, help="learning r
 angiboost_parser.add_argument('--ep', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=16")
 
 # expected size after zooming
-angiboost_parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPRESS)
+angiboost_parser.add_argument('--osz', nargs=3, type=int, default=(64, 64, 64),
+                        help='Expected size after zooming (x y z)')
 # optimizer type, available: [sgd, adam]
 angiboost_parser.add_argument('--op', type=str, default="adam", help=argparse.SUPPRESS)
 # loss metric type, available: [bce, dice, tver]
@@ -53,7 +53,8 @@ angiboost_parser.add_argument('--optim_gamma', type=float, default=0.95, help=ar
 # angiboost_parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
-angiboost_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)
+angiboost_parser.add_argument('--aug_mode', type=str, default="on", help=argparse.SUPPRESS)
+angiboost_parser.add_argument('--crop_low_thresh', type=int, default=128, help=argparse.SUPPRESS)
 
 # batch size multiplier
 angiboost_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
@@ -63,5 +64,6 @@ angiboost_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.
 angiboost_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 # connected components analysis threshold value (denoising)
 angiboost_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
+# lower threshold for random crop minimum size
 
 args = angiboost_parser.parse_args()

@@ -2,9 +2,8 @@
 argparse configuration for boost.py
 
 Editor: Marshall Xu
-Last Edited: 23/10/2023
+Last Edited: 31/07/2025
 """
-#@TODO: remember change the optim_patience
 
 import argparse
 
@@ -38,7 +37,8 @@ boost_parser.add_argument('--lr', type=float, default=1e-3, help="learning rate,
 boost_parser.add_argument('--ep', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=16")
 
 # expected size after zooming
-boost_parser.add_argument('--osz', type=tuple, default=(64,64,64), help=argparse.SUPPRESS)
+boost_parser.add_argument('--osz', nargs=3, type=int, default=(64, 64, 64),
+                        help='Expected size after zooming (x y z)')
 # optimizer type, available: [sgd, adam]
 boost_parser.add_argument('--op', type=str, default="adam", help=argparse.SUPPRESS)
 # loss metric type, available: [bce, dice, tver]
@@ -47,12 +47,10 @@ boost_parser.add_argument('--loss_m', type=str, default="tver", help=argparse.SU
 # Optimizer tuning
 # Decays the learning rate of each parameter group by this ratio, dtype: float
 boost_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argparse.SUPPRESS)
-# Number of steps with no improvement after which learning rate will be reduced. For example, if patience = 2, then we will ignore the first 2 steps with no improvement, and will only decrease the LR after the 3rd step if the loss still hasn’t improved then. Default: 10.
-# Discarded feature (06/20/2023)
-# boost_parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
-boost_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)
+boost_parser.add_argument('--aug_mode', type=str, default="on", help=argparse.SUPPRESS)
+boost_parser.add_argument('--crop_low_thresh', type=int, default=128, help=argparse.SUPPRESS)
 
 # batch size multiplier
 boost_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
@@ -62,5 +60,6 @@ boost_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPP
 boost_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 # connected components analysis threshold value (denoising)
 boost_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
+# lower threshold for random crop minimum size
 
 args = boost_parser.parse_args()

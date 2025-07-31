@@ -6,12 +6,14 @@ Boost module - train a model on single subject from scratch, then make predictio
 Editor: Marshall Xu
 Last Edited: 22/10/2023
 """
-
+import logging
 import config.boost_config as boost_config
-from utils import preprocess_procedure, make_prediction
-from utils import TTA_Training
+from library import preprocess_procedure, make_prediction
+from library import Trainer
 import os
 
+# Set up logging & arguments
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 args = boost_config.args
 # input images & labels
 ds_path = args.ds_path
@@ -31,20 +33,21 @@ if prep_mode == 4:
     ps_path = ds_path
 
 if __name__ == "__main__":
-    print("Boosting session will start shortly..")
-    print("Parameters Info:\n*************************************************************\n")
-    print(f"Input image path: {ds_path}, Segmentation path: {seg_path}, Prep_mode: {prep_mode}\n")
-    print(f"Epoch number: {args.ep}, Learning rate: {args.lr} \n")
+    logging.info("Boosting session will start shortly..")
+    logging.info("Parameters Info:\n*************************************************************\n")
+    logging.info(f"Input image path: {ds_path}, Segmentation path: {seg_path}, Prep_mode: {prep_mode}\n")
+    logging.info(f"Epoch number: {args.ep}, Learning rate: {args.lr} \n")
     
     # preprocess procedure
     preprocess_procedure(ds_path, ps_path, prep_mode)
     # initialize the training process
-    train_process = TTA_Training(args.loss_m, args.mo, 
+    train_process = Trainer(args.loss_m, args.mo, 
                             args.ic, args.oc, args.fil,
                             args.op, args.lr, 
                             args.optim_gamma, args.ep, 
                             args.batch_mul, 
-                            args.osz, args.aug_mode)
+                            args.osz, args.aug_mode,
+                            crop_low_thresh=args.crop_low_thresh) #NOTE: modified @ 26/05 
 
     # traning loop (this could be separate out )
     train_process.train(ps_path, seg_path, outmo_path)
