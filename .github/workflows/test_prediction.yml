@@ -9,10 +9,10 @@ on:
       - config/pred_config.py
       - environment.yml
       - documentation/predict_readme.md
-      - utils/module_utils.py
-      - utils/train_utils.py
-      - utils/single_data_loader.py
-      - utils/unet_utils.py
+      - library/module_utils.py
+      - library/train_utils.py
+      - library/data_loaders.py
+      - library/unet_utils.py
       - tests/test_prediction_module.sh
       - miniconda-setup.sh
       - .github/workflows/test_prediction.yml
@@ -25,10 +25,10 @@ on:
       - config/pred_config.py
       - environment.yml
       - documentation/predict_readme.md
-      - utils/module_utils.py
-      - utils/train_utils.py
-      - utils/single_data_loader.py
-      - utils/unet_utils.py
+      - library/module_utils.py
+      - library/train_utils.py
+      - library/data_loaders.py
+      - library/unet_utils.py
       - tests/test_prediction_module.sh
       - miniconda-setup.sh
       - .github/workflows/test_prediction.yml

@@ -1,250 +1,476 @@
 """
-Provides all the utilities used for training process
+Training utilities.
 
-Last edited: 19/10/2023
+This module provides:
+- TTA training implementation
+- Cross-validation training support
+- Model initialization and optimization utilities
+- Resource management for training workflows
+
+Editor: Marshall Xu
+Last edited: 31/07/2025
 """
-import os
-import re
+
 import shutil
 import torch
+import numpy as np
 from tqdm import tqdm
-from .unet_utils import *
-from .eval_utils import cv_helper
-from .single_data_loader import single_channel_loader, multi_channel_loader, cv_multi_channel_loader
-from .module_utils import prediction_and_postprocess
+from typing import Dict, List, Optional, Tuple, Union, Any
+from pathlib import Path
+import logging
+
+from .loss_func import choose_DL_model, choose_optimizer, choose_loss_metric
+from .aug_utils import AugmentationUtils
+from .eval_utils import CrossValidationHelper
+from .data_loaders import SingleChannelLoader, MultiChannelDataset
+from .module_utils import ImagePredictor
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 
-class TTA_Training:
+class Trainer:
     """
-    A class that defines the training process for a model using Test Time Augmentation (TTA).
-    TTA is a technique that involves augmenting test images with various transformations and averaging the predictions
-    of the model on these augmented images to improve performance.
+    Instance for training models and TTA process.
+    
+    This class implements training workflows for DL segmentation models
+    with support for test-time adaptation, cross-validation, and resource optimization.
     
     Args:
-    loss_name (str): The name of the loss metric to be used during training.
-    model_name (str): The name of the model to be used during training.
-    in_chan (int): The number of input channels for the model.
-    out_chan (int): The number of output channels for the model.
-    filter_num (int): The number of filters to be used in the model.
-    optimizer_name (str): The name of the optimizer to be used during training.
-    learning_rate (float): The learning rate to be used during training.
-    optim_gamma (float): The gamma value to be used for the optimizer.
-    epoch_num (int): The number of epochs to be used during training.
-    batch_mul (int): The batch size multiplier to be used during training.
-    patch_size (int): The size of the patches to be used during training.
-    augmentation_mode (str): The type of augmentation to be used during training.
-    pretrained_model (str): The path to the pre-trained model to be used during training.
-    thresh (float): The threshold value to be used during training.
-    connect_thresh (float): The connection threshold value to be used during training.
-    
-    Methods:
-    loss_init(): Initializes the loss metric to be used during training.
-    model_init(): Initializes the model to be used during training.
-    scheduler_init(optimizer): Initializes the learning rate scheduler to be used during training.
-    aug_init(): Initializes the augmentation object to be used during training.
-    pretrained_model_loader(): Loads the pre-trained model to be used during training.
-    training_loop(data_loader, model, save_path): Defines the training loop for the model.
-    train(ps_path, seg_path, out_mo_path): Trains the model using the specified data and saves the trained model.
-    test_time_adaptation(ps_path, px_path, out_path, out_mo_path, resource_opt): Applies the trained model to test data.
+        loss_name: Name of the loss function to use
+        model_name: Name of the neural network architecture
+        input_channels: Number of input channels
+        output_channels: Number of output channels
+        filter_count: Number of filters in the model
+        optimizer_name: Name of the optimizer ('adam', 'sgd')
+        learning_rate: Learning rate for training
+        optimizer_gamma: Learning rate decay factor
+        num_epochs: Number of training epochs
+        batch_multiplier: Batch size multiplier for data loading
+        patch_size: Size of image patches for training
+        augmentation_mode: Augmentation strategy ('on', 'off', etc.)
+        pretrained_model_path: Path to pretrained model (optional)
+        threshold: Probability threshold for binarization (optional)
+        connect_threshold: Minimum connected component size (optional)
+        test_mode: Whether to run in test mode (disables some augmentations)
+        crop_low_thresh: Minimum crop size for RandomCrop3D (optional)
+        
+    Raises:
+        ValueError: If required parameters are invalid
+        FileNotFoundError: If pretrained model path doesn't exist
     """
-    def __init__(self, loss_name, model_name, 
-                in_chan, out_chan, filter_num,
-                optimizer_name, learning_rate,
-                optim_gamma, epoch_num,
-                batch_mul,  
-                patch_size, augmentation_mode,
-                pretrained_model = None,
-                thresh = None, connect_thresh = None,
-                test_mode = False):
-        # type of the loss metric
+    
+    def __init__(
+        self,
+        loss_name: str,
+        model_name: str,
+        input_channels: int,
+        output_channels: int,
+        filter_count: int,
+        optimizer_name: str,
+        learning_rate: float,
+        optimizer_gamma: float,
+        num_epochs: int,
+        batch_multiplier: int,
+        patch_size: Tuple[int, int, int],
+        augmentation_mode: str,
+        pretrained_model_path: Optional[Union[str, Path]] = None,
+        threshold: Optional[float] = None,
+        connect_threshold: Optional[int] = None,
+        test_mode: bool = False,
+        crop_low_thresh: int = 128
+    ):
+        # Validate inputs
+        if input_channels <= 0 or output_channels <= 0 or filter_count <= 0:
+            raise ValueError("Channel and filter counts must be positive")
+        if learning_rate <= 0 or num_epochs <= 0:
+            raise ValueError("Learning rate and epochs must be positive")
+        if batch_multiplier <= 0:
+            raise ValueError("Batch multiplier must be positive")
+        
+        # Core model configuration
         self.loss_name = loss_name
-        # type of the model
         self.model_name = model_name
-        # model inti configuration
-        self.model_config = [in_chan, out_chan, filter_num]
-        # type of the optimizer
+        self.model_config = [input_channels, output_channels, filter_count]
+        
+        # Training configuration
         self.optimizer_name = optimizer_name
-        # learning rate
         self.learning_rate = learning_rate
-        # gamma value for optimizer
-        self.optim_gamma = optim_gamma
-        # epoch number
-        self.epoch_num = epoch_num
-        # batch size multiplier
-        self.batch_mul = batch_mul
-        # thresholding parameters
-        self.threshhold_vector = [thresh, connect_thresh]
-        # augmentation configuration
-        self.aug_config = [patch_size, augmentation_mode]
-        # pretrained model path
-        self.pretrained_model = pretrained_model
-        # hardware config
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # test mode
+        self.optimizer_gamma = optimizer_gamma
+        self.num_epochs = num_epochs
+        self.batch_multiplier = batch_multiplier
+        
+        # Data configuration
+        self.patch_size = patch_size if isinstance(patch_size, tuple) else (patch_size, patch_size, patch_size)
+        self.augmentation_mode = augmentation_mode
         self.test_mode = test_mode
-
-    def loss_init(self):
-        return loss_metric(self.loss_name)  
-
-    def model_init(self):
-        return model_chosen(self.model_name, self.model_config[0], self.model_config[1], self.model_config[2]).to(self.device)
-    
-    def scheduler_init(self, optimizer):
-        optim_patience = np.int64(np.ceil(self.epoch_num * 0.2))
-        return torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = self.optim_gamma, patience = optim_patience)
-    
-    def aug_init(self):
-        if not self.test_mode:
-            return aug_utils(self.aug_config[0], "on")
-        else: # test_mode = True
-            return aug_utils(self.aug_config[0], "off")
-    
-    def pretrained_model_loader(self):
-        load_model = self.model_init()
-        # load the pre-trained model
-        if torch.cuda.is_available() == True:
-            print("Running with GPU")
-            load_model.load_state_dict(torch.load(self.pretrained_model))
+        
+        # Postprocessing configuration
+        self.threshold = threshold
+        self.connect_threshold = connect_threshold
+        
+        # RandomCrop3D configuration
+        self.crop_low_thresh = crop_low_thresh
+        
+        # Model path validation
+        if pretrained_model_path is not None:
+            self.pretrained_model_path = Path(pretrained_model_path)
+            if not self.pretrained_model_path.exists():
+                raise FileNotFoundError(f"Pretrained model not found: {self.pretrained_model_path}")
         else:
-            print("Running with CPU")
-            load_model.load_state_dict(torch.load(self.pretrained_model, map_location=torch.device('cpu')))
-        load_model.eval()
-        print(f"The chosen model is: {self.pretrained_model}")
-
-        return load_model
-
-    def training_loop(self, data_loader, model, save_path):
+            self.pretrained_model_path = None
         
-        # initialize optimizer & scheduler
-        optimizer = optim_chosen(self.optimizer_name, model.parameters(), self.learning_rate)
-        scheduler = self.scheduler_init(optimizer)
-        # initialize loss metric
-        metric = self.loss_init()
-        # initialize augmentation object    
-        aug_item = self.aug_init()
+        # Hardware configuration
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        logger.info(f"Trainer initialized on device: {self.device}")
 
-        # traning loop (this could be separate out )
-        for epoch in tqdm(range(self.epoch_num)):
-            #traverse every image, load a chunk with its augmented chunks to the model
-            sum_lr = 0
-            for file_idx in range(len(data_loader)):
-                image, label = next(iter(data_loader[file_idx]))
-                image_batch, label_batch = aug_item(image, label)
-                for i in range(1, self.batch_mul):
-                    image, label = next(iter(data_loader[file_idx]))
-                    image_batch_temp, label_batch_temp = aug_item(image, label)
-                    image_batch = torch.cat((image_batch, image_batch_temp), dim=0)
-                    label_batch = torch.cat((label_batch, label_batch_temp), dim=0)
-                image_batch, label_batch = image_batch.to(self.device), label_batch.to(self.device)
+    def _initialize_loss(self) -> torch.nn.Module:
+        """Initialize and return the loss function."""
+        return choose_loss_metric(self.loss_name)
 
-                optimizer.zero_grad()
-                
-                # Forward pass
-                output = model(image_batch)
-                loss = metric(output, label_batch)
+    def _initialize_model(self) -> torch.nn.Module:
+        """Initialize and return the model."""
+        return choose_DL_model(
+            self.model_name, 
+            self.model_config[0], 
+            self.model_config[1], 
+            self.model_config[2]
+        ).to(self.device)
 
-                # Backward and optimize
-                loss.backward()
-                optimizer.step()
+    def _initialize_scheduler(self, optimizer: torch.optim.Optimizer) -> torch.optim.lr_scheduler.ReduceLROnPlateau:
+        """Initialize learning rate scheduler with patience based on epoch count."""
+        patience = int(np.ceil(self.num_epochs * 0.2))
+        return torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, 
+            factor=self.optimizer_gamma, 
+            patience=patience
+        )
 
-                # Learning rate shceduler
-                scheduler.step(loss)
+    def _initialize_augmentation(self) -> AugmentationUtils:
+        """Initialize augmentation utilities based on test mode."""
+        mode = "off" if self.test_mode else "on"
+        return AugmentationUtils(self.patch_size, mode)
 
-                sum_lr += optimizer.param_groups[0]['lr']
+    def _load_pretrained_model(self) -> torch.nn.Module:
+        """Load and return a pretrained model."""
+        if self.pretrained_model_path is None:
+            raise ValueError("Running TTA, but no pretrained model path specified")
+
+        model = self._initialize_model()
+        
+        try:
+            if self.device.type == "cuda":
+                logger.info("Loading pretrained model on GPU")
+                model.load_state_dict(torch.load(str(self.pretrained_model_path)))
+            else:
+                logger.info("Loading pretrained model on CPU")
+                model.load_state_dict(
+                    torch.load(str(self.pretrained_model_path), map_location=self.device)
+                )
             
-            tqdm.write(f'Epoch: [{epoch+1}/{self.epoch_num}], Loss: {loss.item(): .4f}, Current learning rate: {(sum_lr/len(data_loader)): .8f}')
+            model.eval()
+            logger.info(f"Loaded pretrained model: {self.pretrained_model_path}")
+            return model
+            
+        except Exception as e:
+            logger.error(f"Failed to load pretrained model: {e}")
+            raise RuntimeError(f"Could not load pretrained model: {e}")
 
-        print("Training finished! Please wait for the model to be saved!\n")
+    def _train_epoch(
+        self, 
+        data_loaders: Dict[int, Any], 
+        model: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau,
+        loss_function: torch.nn.Module,
+        augmentation: AugmentationUtils
+    ) -> Tuple[float, float]:
+        """
+        Train model for one epoch.
         
-        torch.save(model.state_dict(), save_path)
-        print(f"Model successfully saved! The location of the saved model is: {save_path}\n")
+        Returns:
+            Tuple of (average_loss, average_learning_rate)
+        """
+        model.train()
+        total_loss = 0.0
+        total_lr = 0.0
+        num_batches = 0
+        
+        for file_idx in range(len(data_loaders)):
+            # Load and augment first batch
+            image, label = next(iter(data_loaders[file_idx]))
+            image_batch, label_batch = augmentation(image, label)
+            
+            # Accumulate additional batches if batch_multiplier > 1
+            for _ in range(1, self.batch_multiplier):
+                image, label = next(iter(data_loaders[file_idx]))
+                image_aug, label_aug = augmentation(image, label)
+                image_batch = torch.cat((image_batch, image_aug), dim=0)
+                label_batch = torch.cat((label_batch, label_aug), dim=0)
+            
+            # Move to device
+            image_batch = image_batch.to(self.device)
+            label_batch = label_batch.to(self.device)
+            
+            # Forward pass
+            optimizer.zero_grad()
+            output = model(image_batch)
+            loss = loss_function(output, label_batch)
+            
+            # Backward pass
+            loss.backward()
+            optimizer.step()
+            
+            # Update scheduler
+            scheduler.step(loss)
+            
+            # Track metrics
+            total_loss += loss.item()
+            total_lr += optimizer.param_groups[0]['lr']
+            num_batches += 1
+        
+        return total_loss / num_batches, total_lr / num_batches
 
-    def train(self, ps_path, seg_path, out_mo_path):
-        # initialize the data loader
-        step = int(self.epoch_num * self.batch_mul)
-        multi_image_loder = multi_channel_loader(ps_path, seg_path, self.aug_config[0], step, self.test_mode)
-        # initialize the model
-        model = self.model_init()
+    def train_model(
+        self, 
+        data_loaders: Dict[int, Any], 
+        model: torch.nn.Module, 
+        save_path: Union[str, Path]
+    ) -> None:
+        """
+        Execute the complete training loop.
+        
+        Args:
+            data_loaders: Dictionary of data loaders
+            model: Model to train
+            save_path: Path to save the trained model
+        """
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize training components
+        optimizer = choose_optimizer(self.optimizer_name, model.parameters(), self.learning_rate)
+        scheduler = self._initialize_scheduler(optimizer)
+        loss_function = self._initialize_loss()
+        augmentation = self._initialize_augmentation()
+        
+        logger.info(f"Starting training for {self.num_epochs} epochs")
+        
+        # Training loop
+        for epoch in tqdm(range(self.num_epochs), desc="Training"):
+            avg_loss, avg_lr = self._train_epoch(
+                data_loaders, model, optimizer, scheduler, loss_function, augmentation
+            )
+            
+            # Log progress
+            tqdm.write(
+                f'Epoch [{epoch+1}/{self.num_epochs}], '
+                f'Loss: {avg_loss:.4f}, LR: {avg_lr:.8f}'
+            )
+        
+        # Save model
+        torch.save(model.state_dict(), str(save_path))
+        logger.info(f"Model saved to: {save_path}")
 
-        # print(f"\nIn this test, the batch size is {6 * self.batch_mul}\n")
+    def train(
+        self, 
+        processed_path: Union[str, Path], 
+        segmentation_path: Union[str, Path], 
+        output_model_path: Union[str, Path]
+    ) -> None:
+        """
+        Train a model from scratch.
+        
+        Args:
+            processed_path: Path to preprocessed images
+            segmentation_path: Path to segmentation masks
+            output_model_path: Path to save the trained model
+        """
+        # Calculate steps based on training configuration
+        steps = self.num_epochs * self.batch_multiplier
+        
+        # Initialize dataset and loaders
+        dataset = MultiChannelDataset(
+            processed_path, segmentation_path, self.patch_size, steps, self.test_mode, 
+            crop_low_thresh=self.crop_low_thresh
+        )
+        data_loaders = dataset.get_all_loaders()
+        
+        # Initialize model
+        model = self._initialize_model()
+        
+        logger.info(f"Training with effective batch size: {6 * self.batch_multiplier}")
+        
+        # Execute training
+        self.train_model(data_loaders, model, output_model_path)
 
-        # training loop
-        self.training_loop(multi_image_loder, model, out_mo_path)
+    def cross_validation_train(
+        self, 
+        processed_path: Union[str, Path], 
+        segmentation_path: Union[str, Path], 
+        model_output_dir: Union[str, Path]
+    ) -> None:
+        """
+        Perform cross-validation training.
+        
+        Args:
+            processed_path: Path to preprocessed images
+            segmentation_path: Path to segmentation masks
+            model_output_dir: Directory to save CV models
+        """
+        model_output_dir = Path(model_output_dir)
+        model_output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate cross-validation splits
+        cv_helper = CrossValidationHelper(processed_path)
+        cv_splits = cv_helper.generate_cv_splits()
+        
+        logger.info(f"Performing {len(cv_splits)}-fold cross-validation")
+        
+        for fold_idx, (test_file, train_files) in enumerate(cv_splits.items(), 1):
+            logger.info(f"CV Fold {fold_idx}: Test file = {test_file}")
+            
+            # Initialize dataset
+            steps = self.num_epochs * self.batch_multiplier
+            dataset = MultiChannelDataset(
+                processed_path, segmentation_path, self.patch_size, steps, self.test_mode,
+                crop_low_thresh=self.crop_low_thresh
+            )
+            
+            # Get training indices for this fold
+            train_indices = []
+            for i, (raw_path, _) in enumerate(dataset.image_pairs):
+                if raw_path.name in train_files:
+                    train_indices.append(i)
+            
+            data_loaders = dataset.get_cv_loaders(train_indices)
+            
+            # Initialize fresh model for this fold
+            model = self._initialize_model()
+            
+            # Define output path for this fold
+            test_name = Path(test_file).stem
+            output_path = model_output_dir / f"cv_{fold_idx}_{test_name}"
+            
+            # Train model for this fold
+            self.train_model(data_loaders, model, output_path)
 
-    def cross_valid_train(self, ps_path, seg_path, model_path):
-        cv_dict = cv_helper(ps_path)
-        cnt = 0
-        print(f"Total {len(cv_dict)} will be generated!\n")
-        for key, value in cv_dict.items():
-            cnt += 1
-            print(f"Cross validation {cnt} will start shortly!\n Test image is {key}\n")
-            # initialize the data loader
-            step = int(self.epoch_num * self.batch_mul)
-            multi_image_loder = cv_multi_channel_loader(ps_path, seg_path, value, self.aug_config[0], step, self.test_mode)
-            # initialize the model
-            model = self.model_init()
-            # out model path
-            test_name = key.split('.')[0]
-            if os.path.exists(model_path) == False:
-                os.makedirs(model_path)
-                print(f"{model_path}doesn't exists! {model_path} has been created!")
-            out_mo_path = os.path.join(model_path, f"cv_{cnt}_{test_name}")
-            # training loop
-            self.training_loop(multi_image_loder, model, out_mo_path)
+    def test_time_adaptation(
+        self,
+        processed_path: Union[str, Path],
+        proxy_path: Union[str, Path],
+        output_path: Union[str, Path],
+        model_output_dir: Union[str, Path],
+        resource_optimization: int = 0
+    ) -> None:
+        """
+        Perform test-time adaptation on processed images.
+        
+        Args:
+            processed_path: Path to preprocessed images
+            proxy_path: Path to store proxy segmentations
+            output_path: Path for final predictions
+            model_output_dir: Directory for adapted models
+            resource_optimization: 0=keep files, 1=clean up intermediate files
+        """
+        if self.pretrained_model_path is None:
+            raise ValueError("Pretrained model required for test-time adaptation")
+        
+        if self.threshold is None or self.connect_threshold is None:
+            raise ValueError("Threshold values missing!")
+        
+        processed_path = Path(processed_path)
+        proxy_path = Path(proxy_path)
+        output_path = Path(output_path)
+        model_output_dir = Path(model_output_dir)
+        
+        # Create output directories
+        for path in [proxy_path, output_path, model_output_dir]:
+            path.mkdir(parents=True, exist_ok=True)
+        
+        processed_files = [f for f in processed_path.iterdir() if f.is_file()]
+        logger.info(f"Processing {len(processed_files)} images for test-time adaptation")
+        
+        for processed_file in processed_files:
+            file_stem = processed_file.stem
+            logger.info(f"Processing: {processed_file.name}")
+            
+            # Generate proxy if needed
+            proxy_files = list(proxy_path.glob("*"))
+            if len(proxy_files) != len(processed_files):
+                logger.info("Generating proxy segmentations...")
+                predictor = ImagePredictor(
+                    self.model_name, 
+                    self.model_config[0], 
+                    self.model_config[1], 
+                    self.model_config[2], 
+                    processed_path, 
+                    proxy_path
+                )
+                predictor(
+                    self.threshold, self.connect_threshold, 
+                    str(self.pretrained_model_path), processed_file.name, 
+                    save_mip=False
+                )
+            
+            # Find corresponding proxy file
+            proxy_file = self._find_corresponding_proxy(processed_file, proxy_path)
+            if proxy_file is None:
+                logger.error(f"No proxy found for {processed_file.name}")
+                continue
+            
+            logger.info("Found proxy file, starting fine-tuning...")
+            
+            # Initialize single-image data loader for adaptation
+            data_loader = {0: SingleChannelLoader(
+                str(processed_file), str(proxy_file), self.patch_size, self.num_epochs,
+                crop_low_thresh=self.crop_low_thresh
+            )}
+            
+            # Load pretrained model
+            model = self._load_pretrained_model()
+            
+            # Fine-tune model
+            adapted_model_path = model_output_dir / file_stem
+            self.train_model(data_loader, model, adapted_model_path)
+            
+            # Generate final prediction
+            logger.info(f"Generating final prediction for {file_stem}")
+            predictor = ImagePredictor(
+                self.model_name, 
+                self.model_config[0], 
+                self.model_config[1], 
+                self.model_config[2], 
+                processed_path, 
+                output_path
+            )
+            predictor(
+                self.threshold, self.connect_threshold,
+                str(adapted_model_path), processed_file.name,
+                save_mip=True, save_probability=True
+            )
+        
+        logger.info("Test-time adaptation completed")
+        
+        # Handle resource optimization
+        if resource_optimization == 1:
+            logger.info("Cleaning up intermediate files...")
+            shutil.rmtree(proxy_path)
+            shutil.rmtree(model_output_dir)
+            logger.info("Intermediate files cleaned up")
+        else:
+            logger.info(f"Intermediate files preserved:")
+            logger.info(f"  Adapted models: {model_output_dir}")
+            logger.info(f"  Proxy segmentations: {proxy_path}")
 
-    def test_time_adaptation(self, ps_path, px_path, out_path, out_mo_path, resource_opt):
-        # traverse each image
-        processed_data_list = os.listdir(ps_path)
-        for i in range(len(processed_data_list)):
-            # filename
-            file_name = processed_data_list[i].split('.')[0]
-            # if the proxies are not provided, 
-            # then use the pre-trained model to generate the proxies
-            if len(os.listdir(px_path)) != len(os.listdir(ps_path)):
-                print("No proxies are provided, strating generating proxies...")
-                # initialize the inference method for generating the proxies
-                inference_postpo = prediction_and_postprocess(self.model_name, self.model_config[0], self.model_config[1], self.model_config[2], ps_path, px_path)
-                # mip flag set to be False, cuz we don't want mip when generating proxies
-                inference_postpo(self.threshhold_vector[0], self.threshhold_vector[1], self.pretrained_model, processed_data_list[i], mip_flag=False)
-
-            # fintuning (generate all finetuned models)
-            test_img_path = os.path.join(ps_path, processed_data_list[i]) # path of the preprocessed image
-            # find the corresponding proxy
-            bool_list = [bool(re.search(processed_data_list[i].split('.')[0], filename)) for filename in os.listdir(px_path)]
-            assert True in bool_list, "No such proxy file!"
-            print("Proxies are provided!")
-            test_px_path = os.path.join(px_path, os.listdir(px_path)[bool_list.index(True)]) # path of the proxy seg
-
-            #initialize the data loader
-            data_loader = dict()
-            data_loader.__setitem__(0, single_channel_loader(test_img_path, test_px_path, self.aug_config[0], self.epoch_num))
-
-            # initialize model
-            model = self.pretrained_model_loader()
-
-            print("Finetuning procedure starts!")
-            # full path of the intermediate model
-            out_mo_name = os.path.join(out_mo_path, file_name)
-
-            # training loop
-            self.training_loop(data_loader, model, out_mo_name)
-
-            # inference by using the finetuned model
-            print(f"Final thresholding for {file_name} will start shortly!\n")
-            # initialize the inference method for generating the proxies
-            inference_postpo_final = prediction_and_postprocess(self.model_name, self.model_config[0], self.model_config[1], self.model_config[2], ps_path, out_path)
-            # generate mip images at the final stage
-            inference_postpo_final(self.threshhold_vector[0], self.threshhold_vector[1], out_mo_name, processed_data_list[i], mip_flag=True, sig_flag=True)
-    
-        print("The test-time adaptation is finished!\n")
-
-        # checking the resource optimization flag
-        if resource_opt == 0:
-            print("Resource optimization is disabled, all intermediate files are saved locally!\n")
-            print(f"Finetuned model -> {out_mo_path}\n")
-            print(f"Intermediate proxy -> {px_path}\n")
-        elif (resource_opt == 1):
-            shutil.rmtree(px_path) # clear all the proxies
-            shutil.rmtree(out_mo_path) # clear all the finetuned models
-            print("Intermediate files have been cleaned!")
+    def _find_corresponding_proxy(self, processed_file: Path, proxy_path: Path) -> Optional[Path]:
+        """Find the proxy file corresponding to a processed image."""
+        file_stem = processed_file.stem
+        proxy_files = list(proxy_path.iterdir())
+        
+        for proxy_file in proxy_files:
+            if file_stem in proxy_file.name:
+                return proxy_file
+        
+        return None

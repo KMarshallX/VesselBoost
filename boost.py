@@ -9,7 +9,7 @@ Last Edited: 22/10/2023
 import logging
 import config.boost_config as boost_config
 from library import preprocess_procedure, make_prediction
-from library import TTA_Training
+from library import Trainer
 import os
 
 # Set up logging & arguments
@@ -41,12 +41,13 @@ if __name__ == "__main__":
     # preprocess procedure
     preprocess_procedure(ds_path, ps_path, prep_mode)
     # initialize the training process
-    train_process = TTA_Training(args.loss_m, args.mo, 
+    train_process = Trainer(args.loss_m, args.mo, 
                             args.ic, args.oc, args.fil,
                             args.op, args.lr, 
                             args.optim_gamma, args.ep, 
                             args.batch_mul, 
-                            args.osz, args.aug_mode) #NOTE: modified @ 26/05
+                            args.osz, args.aug_mode,
+                            crop_low_thresh=args.crop_low_thresh) #NOTE: modified @ 26/05 
 
     # traning loop (this could be separate out )
     train_process.train(ps_path, seg_path, outmo_path)

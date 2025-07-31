@@ -10,7 +10,7 @@ Last Edited: 22/10/2023
 import os
 import config.adapt_config as adapt_config
 from library import preprocess_procedure
-from library import TTA_Training
+from library import Trainer
 
 
 args = adapt_config.args
@@ -57,14 +57,15 @@ if __name__ == "__main__":
     preprocess_procedure(ds_path, ps_path, prep_mode)
     
     # initialize the tta process
-    tta_process = TTA_Training(args.loss_m, args.mo,
+    tta_process = Trainer(args.loss_m, args.mo,
                                 args.ic, args.oc, args.fil,
                                 args.op, args.lr,
                                 args.optim_gamma, args.ep,
                                 args.batch_mul,
                                 args.osz, args.aug_mode,
                                 args.pretrained,
-                                args.thresh, args.cc)
+                                args.thresh, args.cc,
+                                crop_low_thresh=args.crop_low_thresh)
     # tta procedure
     tta_process.test_time_adaptation(ps_path, px_path, out_path, out_mo_path, resource_opt)
 

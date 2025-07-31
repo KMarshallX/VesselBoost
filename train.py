@@ -9,7 +9,7 @@ Last Edited: 18/10/2023
 
 import config.train_config as train_config
 from library import preprocess_procedure
-from library import TTA_Training
+from library import Trainer
 
 args = train_config.args
 # input images & labels
@@ -33,12 +33,13 @@ if __name__ == "__main__":
     # preprocess procedure
     preprocess_procedure(raw_img, processed_img, prep_mode)
     # initialize the training process
-    train_process = TTA_Training(args.loss_m, args.mo, 
+    train_process = Trainer(args.loss_m, args.mo, 
                             args.ic, args.oc, args.fil,
                             args.op, args.lr, 
                             args.optim_gamma, args.ep, 
                             args.batch_mul, 
-                            args.osz, args.aug_mode)
+                            args.osz, args.aug_mode,
+                            crop_low_thresh=args.crop_low_thresh)
 
     # traning loop (this could be separate out )
     train_process.train(processed_img, seg_img, out_path)

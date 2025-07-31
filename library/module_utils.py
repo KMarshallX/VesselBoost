@@ -1,293 +1,585 @@
 """
-Provides all the utilities used in the three modules
-(train.py, prediction.py, test_time_adaptation.py)
+Image processing utilities for preprocessing, prediction, and postprocessing.
 
-Last edited: 19/10/2023
+This module provides:
+- Image preprocessing with bias field correction and denoising
+- Neural network inference on 3D images
+- Postprocessing with thresholding and connected component analysis
 
+Editor: Marshall Xu
+Last edited: 31/07/2025
 """
 
-import os
 import numpy as np
 import ants
 import torch
-import nibabel as nib
+import nibabel as nib  # type: ignore
 from tqdm import tqdm
 import scipy.ndimage as scind
 import matplotlib.pyplot as plt
 from patchify import patchify, unpatchify
 import cc3d
+from typing import Tuple, Optional, Union, List, Any
+from pathlib import Path
+import logging
 
-from .unet_utils import *
+from .loss_func import choose_DL_model, normaliser, standardiser
 from models import *
 
-class preprocess:
-    """
-    This object takes an input path and an output path to initialize
-    """
+# Set up logging
+logger = logging.getLogger(__name__)
 
-    def __init__(self, input_path, output_path):
-        self.input_path = input_path
-        self.output_path = output_path
+class ImagePreprocessor:
+    """
+    Image preprocessing with bias field correction and denoising.
 
-    def __call__(self, prep_mode):
+    This class handles preprocessing of multiple images using ANTs library
+    for bias field correction and non-local means denoising.
+    
+    Args:
+        input_path: Path to directory containing raw images
+        output_path: Path to directory for saving processed images
         
-        if prep_mode != 4:
-            print("The preprocessing procedure is starting!\n")
+    Raises:
+        FileNotFoundError: If input_path doesn't exist
+        ValueError: If paths are invalid
+    """
+
+    def __init__(self, input_path: Union[str, Path], output_path: Union[str, Path]):
+        self.input_path = Path(input_path)
+        self.output_path = Path(output_path)
+        
+        # Validate input path
+        if not self.input_path.exists():
+            raise FileNotFoundError(f"Input path does not exist: {self.input_path}")
+        
+        # Create output directory if it doesn't exist
+        self.output_path.mkdir(parents=True, exist_ok=True)
+        
+        logger.info(f"Preprocessor initialized: {self.input_path} -> {self.output_path}")
+
+    def _get_image_files(self) -> List[Path]:
+        """Get list of image files from input directory."""
+        # Common medical image extensions
+        extensions = {'.nii', '.nii.gz', '.mgz', '.mgh'}
+        files = [f for f in self.input_path.iterdir() 
+                if f.is_file() and f.suffix in extensions]
+        
+        if not files:
+            logger.warning(f"No medical image files found in {self.input_path}")
+        
+        return sorted(files)
+
+    def _process_single_image(self, image_path: Path, mode: int) -> None:
+        """
+        Process a single image with specified preprocessing mode.
+        
+        Args:
+            image_path: Path to input image
+            mode: Preprocessing mode (1=BFC only, 2=denoising only, 3=both, 4=abort)
+        """
+        try:
+            # Load image
+            test_img = nib.load(str(image_path))  # type: ignore
+            header = test_img.header
+            affine = test_img.affine  # type: ignore
+
+            # Convert to ANTs format
+            ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
+            ant_mask = ants.utils.get_mask(
+                ant_img, 
+                low_thresh=ant_img.min(), 
+                high_thresh=ant_img.max()
+            )  # type: ignore
+
+            # Apply preprocessing based on mode
+            if mode == 1:
+                # Bias field correction only
+                ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_mask)
+            elif mode == 2:
+                # Non-local denoising only
+                ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_mask)  # type: ignore
+            elif mode == 3:
+                # Both bias field correction and denoising
+                ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_mask)
+                ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_mask)  # type: ignore
+            else:
+                raise ValueError(f"Invalid preprocessing mode: {mode}")
+
+            # Convert back to numpy and save
+            processed_array = ant_img.numpy()
+            processed_nifti = nib.Nifti1Image(processed_array, affine, header)  # type: ignore
+
+            output_path = self.output_path / image_path.name
+            nib.save(processed_nifti, str(output_path))  # type: ignore
             
-            # bias field correction and denoising procedure
-            if os.path.exists(self.output_path)==False:
-                os.mkdir(self.output_path)
+        except Exception as e:
+            logger.error(f"Failed to process {image_path.name}: {e}")
+            raise
 
-            raw_file_list = os.listdir(self.input_path)
-            file_num = len(raw_file_list)
-            for i in tqdm(range(file_num)):
+    def process_images(self, mode: int) -> None:
+        """
+        Process all images in the input directory.
+        
+        Args:
+            mode: Preprocessing mode
+                1: Bias field correction only
+                2: Non-local denoising only  
+                3: Bias field correction + denoising
+                4: Abort processing
+                
+        Raises:
+            ValueError: If mode is invalid
+        """
+        if mode == 4:
+            logger.info("Preprocessing aborted by user")
+            return
+        
+        if mode not in [1, 2, 3]:
+            raise ValueError(f"Invalid preprocessing mode: {mode}. Valid modes: 1, 2, 3, 4")
+        
+        logger.info("Starting preprocessing procedure")
+        
+        image_files = self._get_image_files()
+        if not image_files:
+            logger.warning("No image files found to process")
+            return
+        
+        # Process each image with progress bar
+        for image_path in tqdm(image_files, desc="Processing images"):
+            self._process_single_image(image_path, mode)
+        
+        logger.info(f"Successfully processed {len(image_files)} images")
 
-                test_data_path = os.path.join(self.input_path, raw_file_list[i])
+    def __call__(self, mode: int) -> None:
+        """Make the class callable for backward compatibility."""
+        self.process_images(mode)
 
-                test_img = nib.load(test_data_path)
-                header = test_img.header
-                affine = test_img.affine # type: ignore
 
-                ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
-                ant_msk = ants.utils.get_mask(ant_img, low_thresh=ant_img.min(), high_thresh=ant_img.max()) # type: ignore
+class ImagePredictor:
+    """
+    Neural network prediction and postprocessing.
+    
+    This class handles:
+    - Loading and preprocessing of 3D images
+    - Patch-based neural network inference
+    - Postprocessing with thresholding and connected component analysis
+    - Saving results in various formats
+    
+    Args:
+        model_name: Type of neural network model to use
+        input_channel: Number of input channels for the model
+        output_channel: Number of output channels for the model  
+        filter_number: Number of filters in the model
+        input_path: Path to directory containing preprocessed images
+        output_path: Path to directory for saving predictions
+        
+    Raises:
+        FileNotFoundError: If input_path doesn't exist
+        ValueError: If model parameters are invalid
+    """
+    
+    def __init__(
+        self, 
+        model_name: str, 
+        input_channel: int, 
+        output_channel: int, 
+        filter_number: int,
+        input_path: Union[str, Path], 
+        output_path: Union[str, Path]
+    ):
+        # Validate parameters
+        if input_channel <= 0 or output_channel <= 0 or filter_number <= 0:
+            raise ValueError("Channel and filter numbers must be positive")
+        
+        self.model_name = model_name
+        self.input_channel = input_channel
+        self.output_channel = output_channel
+        self.filter_number = filter_number
+        
+        self.input_path = Path(input_path)
+        self.output_path = Path(output_path)
+        
+        # Validate paths
+        if not self.input_path.exists():
+            raise FileNotFoundError(f"Input path does not exist: {self.input_path}")
+        
+        # Create output directory
+        self.output_path.mkdir(parents=True, exist_ok=True)
+        
+        # Device selection
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info(f"Using device: {self.device}")
 
-                if prep_mode == 1:
-                    # bias field correction only
-                    ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
-                elif prep_mode == 2:
-                    # non-local denoising only
-                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk) # type: ignore
-                else:
-                    # bfc + denoising
-                    ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_msk)
-                    ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_msk) # type: ignore
-
-                bfc_denoised_arr = ant_img.numpy()
-                bfc_denoised_nifti = nib.Nifti1Image(bfc_denoised_arr, affine, header)
-
-                file_name = os.path.join(self.output_path, raw_file_list[i])
-                nib.save(bfc_denoised_nifti, filename=file_name)
+    def _calculate_patch_dimensions(self, original_size: Tuple[int, int, int], patch_size: int = 64) -> Tuple[int, int, int]:
+        """
+        Calculate optimal dimensions for patch-based processing.
+        
+        Args:
+            original_size: Original image dimensions (w, h, d)
+            patch_size: Size of each patch (default 64)
             
-            print("All processed images are successfully saved!")
+        Returns:
+            Tuple of new dimensions that are divisible by patch_size
+        """
+        new_dims = []
+        for dim in original_size:
+            if dim > patch_size and dim % patch_size != 0:
+                new_dim = int(np.ceil(dim / patch_size)) * patch_size
+            elif dim < patch_size:
+                new_dim = patch_size
+            else:
+                new_dim = dim
+            new_dims.append(new_dim)
         
-        elif prep_mode == 4:
-            print("Aborting the preprocessing procedure!\n")
+        return tuple(new_dims)
 
-
-class prediction_and_postprocess:
-    """
-    A class that contains methods for standardizing, normalizing, and making predictions on 3D image patches using a given model.
-    It also includes a post-processing pipeline for thresholding and connected component analysis.
-    
-    Attributes:
-    - model_name (str): the type of the model used for prediction
-    - input_channel (int): the number of input channels for the model
-    - output_channel (int): the number of output channels for the model
-    - filter_number (int): the number of filters used in the model
-    - input_path (str): the path to the preprocessed data
-    - output_path (str): the path to save the output proxy/final segmentation
-    
-    Methods:
-    - standardiser(x): standardizes the input numpy array
-    - normaliser(x): normalizes the input numpy array
-    - sigmoid(z): applies the sigmoid function to the input numpy array
-    - make_prediction(test_patches, load_model, ori_size): makes predictions on 3D image patches using the given model
-    - post_processing_pipeline(arr, percent, connect_threshold): applies thresholding and connected component analysis to the input numpy array
-    - one_img_process(img_name, load_model, thresh, connect_thresh, mip_flag): processes a single image using the given model and post-processing pipeline
-    """
-    def __init__(self, model_name, input_channel, output_channel, filter_number, input_path, output_path):
+    def _resize_image(self, image: np.ndarray, target_size: Tuple[int, int, int]) -> np.ndarray:
+        """
+        Resize image to target dimensions using scipy zoom.
         
-        self.mo = model_name
-        self.ic = input_channel
-        self.oc = output_channel
-        self.fil = filter_number
+        Args:
+            image: Input image array
+            target_size: Target dimensions
+            
+        Returns:
+            Resized image array
+        """
+        original_size = image.shape
+        zoom_factors = tuple(target / original for target, original in zip(target_size, original_size))
+        return scind.zoom(image, zoom_factors, order=0, mode='nearest')
 
-        self.input_path = input_path # preprocessed data
-        self.output_path = output_path # output proxy / final seg
-
-    def standardiser(self, x):
-        # only campatible with dtype = numpy array
-        return (x - np.mean(x)) / np.std(x)
-    
-    def normaliser(self, x):
-        # only campatible with dtype = numpy array
-        return (x - np.amin(x)) / (np.amax(x) - np.amin(x))
-    
-    def sigmoid(self, z):
-        return 1/(1+np.exp(-z))
-    
-    def nn_sigmoid(self, z):
+    def _run_inference(self, patches: np.ndarray, model: torch.nn.Module, original_size: Tuple[int, int, int]) -> np.ndarray:
+        """
+        Run neural network inference on image patches.
+        
+        Args:
+            patches: Patchified image array
+            model: Loaded neural network model
+            original_size: Original image dimensions for unpatchifying
+            
+        Returns:
+            Predicted probability map
+        """
+        logger.info("Starting prediction procedure")
+        
+        model.eval()
         sigmoid_fn = torch.nn.Sigmoid()
-        return sigmoid_fn(z)
-    
-    def inference(self, test_patches, load_model, ori_size):
-        print("Prediction procedure starts!")
-        # Predict each 3D patch  
-        for i in tqdm(range(test_patches.shape[0])):
-            for j in range(test_patches.shape[1]):
-                for k in range(test_patches.shape[2]):
+        
+        # Process each patch
+        with torch.no_grad():
+            for i in tqdm(range(patches.shape[0]), desc="Processing patches"):
+                for j in range(patches.shape[1]):
+                    for k in range(patches.shape[2]):
+                        # Extract and prepare single patch
+                        single_patch = patches[i, j, k, :, :, :]
+                        
+                        # Convert to tensor with proper shape: (batch, channel, depth, height, width)
+                        patch_tensor = torch.from_numpy(single_patch).float().unsqueeze(0).unsqueeze(0)
+                        patch_tensor = patch_tensor.to(self.device)
+                        
+                        # Run inference
+                        prediction = model(patch_tensor)
+                        prediction = sigmoid_fn(prediction)
+                        
+                        # Convert back to numpy and store
+                        prediction_np = prediction.cpu().numpy()[0, 0, :, :, :]
+                        patches[i, j, k, :, :, :] = prediction_np
 
-                    single_patch = test_patches[i,j,k, :,:,:]
-                    single_patch_input = single_patch[None, :]
-                    single_patch_input = torch.from_numpy(single_patch_input).type(torch.FloatTensor).unsqueeze(0)
+        # Reconstruct full image
+        prediction_output = unpatchify(patches, original_size)
+        logger.info("Prediction procedure completed")
+        
+        return prediction_output
 
-                    single_patch_prediction = self.nn_sigmoid(load_model(single_patch_input)) 
-
-                    single_patch_prediction_out = single_patch_prediction.detach().numpy()[0,0,:,:,:]
-
-                    test_patches[i,j,k, :,:,:] = single_patch_prediction_out
-
-        test_output = unpatchify(test_patches, (ori_size[0], ori_size[1], ori_size[2]))
-
-        print("Prediction procedure ends! Please wait for the post processing!")
-        return test_output
-    
-    def post_processing_pipeline(self, arr, percent, connect_threshold):
+    def _apply_postprocessing(self, probability_map: np.ndarray, threshold: float, connect_threshold: int) -> np.ndarray:
         """
-        thresh: thresholding value converting the probability to 0 and 1, anything below thresh are 0s, above are 1s.
-        connected_threshold
-        connect_threshold: any component smaller than this value (voxel) will be wiped out.
-        """
-        def thresholding(arr, thresh):
-            arr[arr<thresh] = 0
-            arr[arr>thresh] = 1
-            return arr.astype(int)
-        # thresholding
-        arr = thresholding(arr, percent)
-        # connected components
-        return cc3d.dust(arr, connect_threshold, connectivity=26, in_place=False)
-    
-    def one_img_process(self, img_name, load_model, thresh, connect_thresh, mip_flag, sig_flag):
-        # Load data
-        raw_img_path = os.path.join(self.input_path, img_name) # should be full path
-
-        raw_img = nib.load(raw_img_path)
-        header = raw_img.header
-        affine = raw_img.affine # type: ignore
-        raw_arr = raw_img.get_fdata() # type: ignore # (1080*1280*52), (480, 640, 163)
-
-        ori_size = raw_arr.shape    # record the original size of the input image slab
+        Apply thresholding and connected component analysis.
         
-        # resize the input image, to make sure it can be cropped into small patches with size of (64,64,64)
-        if (ori_size[0] // 64 != 0) and (ori_size[0] > 64):
-            w = int(np.ceil(ori_size[0]/64)) * 64 # new width (x)
-        else:
-            w = ori_size[0]
-        
-        if (ori_size[1] // 64 != 0) and (ori_size[1] > 64):
-            h = int(np.ceil(ori_size[1]/64)) * 64 # new height (y)
-        else:
-            h = ori_size[1]
-        
-        if (ori_size[2] // 64 != 0) and (ori_size[2] > 64):
-            t = int(np.ceil(ori_size[2]/64)) * 64 # new thickness (z)
-        elif ori_size[2] < 64:
-            t = 64
-        else:
-            t = ori_size[2]
-        new_raw = scind.zoom(raw_arr, (w/ori_size[0], h/ori_size[1], t/ori_size[2]), order=0, mode='nearest')
-        
-        # Standardization
-        new_raw = self.standardiser(new_raw)
-        new_size = new_raw.shape       # new size of the reshaped input image
-
-        # pachify
-        test_patches = patchify(new_raw, (64,64,64), 64)
-        test_output_sigmoid = self.inference(test_patches, load_model, new_size)
-
-        # reshape to original shape
-        test_output_sigmoid = scind.zoom(test_output_sigmoid, (ori_size[0]/new_size[0], ori_size[1]/new_size[1], ori_size[2]/new_size[2]), order=0, mode="nearest")
-
-        # save the nifti file for probability map (if sig_flag is true)
-        if sig_flag == True:
-            nifimg_sig = nib.Nifti1Image(test_output_sigmoid, affine, header)
-            save_sigimg_path_post = os.path.join(self.output_path, "SIGMOID_"+img_name) #img_name with extension
-            nib.save(nifimg_sig, save_sigimg_path_post)
-            print(f"Output sigmoid {img_name} is successfully saved!\n")
-
-        # thresholding
-        postprocessed_output = self.post_processing_pipeline(test_output_sigmoid, thresh, connect_thresh)
-        nifimg_post = nib.Nifti1Image(postprocessed_output, affine, header)
-        save_img_path_post = os.path.join(self.output_path, img_name) #img_name with extension
-
-        # save the nifti file
-        nib.save(nifimg_post, save_img_path_post)
-        print(f"Output processed {img_name} is successfully saved!\n")
-
-        # If mip_flag is true, then
-        # save the maximum intensity projection as jpg file
-        if mip_flag == True:
-            mip = np.max(postprocessed_output, axis=2)
-            save_mip_path_post = os.path.join(self.output_path, img_name.split('.')[0]) + ".jpg"
-            # save_mip_path_post = self.output_path + img_name.split('.')[0] + ".jpg"
-            #rotate the mip 90 degrees, counterclockwise
-            mip = np.rot90(mip, axes=(0, 1))
-            plt.imsave(save_mip_path_post, mip, cmap='gray')
-            print(f"Output MIP image {img_name} is successfully saved!\n")
+        Args:
+            probability_map: Model prediction probabilities
+            threshold: Probability threshold for binarization
+            connect_threshold: Minimum component size to keep (in voxels)
             
-    
-    def __call__(self, thresh, connect_thresh, test_model_name, test_img_name, mip_flag, sig_flag=False):
+        Returns:
+            Binary segmentation mask
+        """
+        # Threshold probabilities to binary
+        binary_mask = (probability_map >= threshold).astype(np.int32)
+        
+        # Remove small connected components in-place for memory efficiency
+        cc3d.dust(binary_mask, connect_threshold, connectivity=26, in_place=True)
+        return binary_mask
 
-        # model configuration
-        load_model = model_chosen(self.mo, self.ic, self.oc, self.fil)
-        # load_model = Unet(self.ic, self.oc, self.fil)
-        model_path = test_model_name # this should be the path to the model
-        if torch.cuda.is_available() == True:
-            print("Running with GPU")
-            load_model.load_state_dict(torch.load(model_path)) # type: ignore
+    def _save_results(
+        self, 
+        image_name: str, 
+        probability_map: np.ndarray, 
+        binary_mask: np.ndarray,
+        affine: np.ndarray, 
+        header: Any,
+        save_probability: bool = False,
+        save_mip: bool = False
+    ) -> None:
+        """
+        Save prediction results in various formats.
+        
+        Args:
+            image_name: Name of the processed image
+            probability_map: Continuous probability predictions
+            binary_mask: Binary segmentation mask
+            affine: NIfTI affine transformation matrix
+            header: NIfTI header information
+            save_probability: Whether to save probability map
+            save_mip: Whether to save maximum intensity projection
+        """
+        # Save probability map if requested
+        if save_probability:
+            prob_image = nib.Nifti1Image(probability_map, affine, header)  # type: ignore
+            prob_path = self.output_path / f"SIGMOID_{image_name}"
+            nib.save(prob_image, str(prob_path))  # type: ignore
+            logger.info(f"Saved probability map: {prob_path}")
+
+        # Save binary segmentation
+        binary_image = nib.Nifti1Image(binary_mask, affine, header)  # type: ignore
+        binary_path = self.output_path / image_name
+        nib.save(binary_image, str(binary_path))  # type: ignore
+        logger.info(f"Saved binary segmentation: {binary_path}")
+
+        # Save MIP if requested
+        if save_mip:
+            mip = np.max(binary_mask, axis=2)
+            mip = np.rot90(mip, axes=(0, 1))  # Rotate 90 degrees counterclockwise
+            
+            mip_path = self.output_path / f"{Path(image_name).stem}.jpg"
+            plt.imsave(str(mip_path), mip, cmap='gray')
+            logger.info(f"Saved MIP image: {mip_path}")
+
+    def process_single_image(
+        self, 
+        image_name: str, 
+        model: torch.nn.Module, 
+        threshold: float,
+        connect_threshold: int, 
+        save_mip: bool = False, 
+        save_probability: bool = False
+    ) -> None:
+        """
+        Process a single image through the complete pipeline.
+        
+        Args:
+            image_name: Name of the image file to process
+            model: Loaded neural network model
+            threshold: Probability threshold for binarization
+            connect_threshold: Minimum component size to keep
+            save_mip: Whether to save maximum intensity projection
+            save_probability: Whether to save probability map
+            
+        Raises:
+            FileNotFoundError: If image file doesn't exist
+            RuntimeError: If processing fails
+        """
+        image_path = self.input_path / image_name
+        
+        if not image_path.exists():
+            raise FileNotFoundError(f"Image not found: {image_path}")
+        
+        try:
+            # Load image
+            raw_image = nib.load(str(image_path))  # type: ignore
+            header = raw_image.header
+            affine = raw_image.affine  # type: ignore
+            image_array = raw_image.get_fdata()  # type: ignore
+
+            original_size = image_array.shape
+            
+            # Calculate optimal patch dimensions and resize
+            target_size = self._calculate_patch_dimensions(original_size)
+            resized_image = self._resize_image(image_array, target_size)
+            
+            # Standardize image
+            standardized_image = standardiser(resized_image)
+            
+            # Create patches
+            patches = patchify(standardized_image, (64, 64, 64), 64)
+            
+            # Run inference
+            prediction_map = self._run_inference(patches, model, target_size)
+            
+            # Resize back to original dimensions
+            prediction_map = self._resize_image(prediction_map, original_size)
+            
+            # Apply postprocessing
+            binary_mask = self._apply_postprocessing(prediction_map, threshold, connect_threshold)
+            
+            # Save results
+            self._save_results(
+                image_name, prediction_map, binary_mask, affine, header,
+                save_probability, save_mip
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to process {image_name}: {e}")
+            raise RuntimeError(f"Processing failed for {image_name}: {e}")
+
+    def predict_all_images(
+        self,
+        model_path: Union[str, Path],
+        threshold: float,
+        connect_threshold: int,
+        save_mip: bool = False,
+        save_probability: bool = False
+    ) -> None:
+        """
+        Process all images in the input directory.
+        
+        Args:
+            model_path: Path to the trained model file
+            threshold: Probability threshold for binarization
+            connect_threshold: Minimum component size to keep
+            save_mip: Whether to save maximum intensity projections
+            save_probability: Whether to save probability maps
+        """
+        # Load model
+        model = choose_DL_model(
+            self.model_name, self.input_channel, 
+            self.output_channel, self.filter_number
+        ).to(self.device)
+        
+        # Load model weights
+        model_path = Path(model_path)
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+        
+        if self.device.type == "cuda":
+            model.load_state_dict(torch.load(str(model_path)))  # type: ignore
         else:
-            print("Running with CPU")
-            load_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))) # type: ignore
-        load_model.eval()   # type: ignore
+            model.load_state_dict(torch.load(str(model_path), map_location=self.device))  # type: ignore
+        
+        logger.info(f"Loaded model from: {model_path}")
+        
+        # Get list of images to process
+        image_files = [f for f in self.input_path.iterdir() if f.is_file() and f.suffix in {'.nii', '.nii.gz'}]
+        
+        if not image_files:
+            logger.warning(f"No image files found in {self.input_path}")
+            return
+        
+        # Process each image
+        for image_file in image_files:
+            try:
+                self.process_single_image(
+                    image_file.name, model, threshold, connect_threshold,
+                    save_mip, save_probability
+                )
+            except Exception as e:
+                logger.error(f"Skipping {image_file.name} due to error: {e}")
+                continue
+        
+        logger.info(f"Completed processing {len(image_files)} images")
 
-        self.one_img_process(test_img_name, load_model, thresh, connect_thresh, mip_flag, sig_flag)
-        print("Prediction and thresholding procedure end!\n")
+    def __call__(
+        self, 
+        threshold: float, 
+        connect_threshold: int, 
+        model_path: str, 
+        image_name: str,
+        save_mip: bool, 
+        save_probability: bool = False
+    ) -> None:
+        """Make the class callable for backward compatibility."""
+        # Load model
+        model = choose_DL_model(
+            self.model_name, self.input_channel, 
+            self.output_channel, self.filter_number
+        ).to(self.device)
+        
+        if self.device.type == "cuda":
+            logger.info("Running with GPU")
+            model.load_state_dict(torch.load(model_path))  # type: ignore
+        else:
+            logger.info("Running with CPU")
+            model.load_state_dict(torch.load(model_path, map_location=self.device))  # type: ignore
+        
+        self.process_single_image(
+            image_name, model, threshold, connect_threshold, 
+            save_mip, save_probability
+        )
+        logger.info("Prediction and thresholding procedure completed")
 
-def preprocess_procedure(ds_path, ps_path, prep_mode):
+def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], prep_mode: int) -> None:
     """
-    Preprocesses data
+    Preprocesses medical images with bias field correction and/or denoising.
 
     Args:
-        ds_path (str): The path to the dataset.
-        ps_path (str): The path to the preprocessed data storage location.
-        prep_mode (int): The preprocessing mode to use.
+        ds_path: Path to the input dataset directory
+        ps_path: Path to the preprocessed data storage directory
+        prep_mode: Preprocessing mode (1=BFC, 2=denoising, 3=both, 4=abort)
 
-    Returns:
-        None
+    Raises:
+        FileNotFoundError: If dataset path doesn't exist
+        ValueError: If preprocessing mode is invalid
     """
-    # initialize the preprocessing method with input/output paths
-    preprocessing = preprocess(ds_path, ps_path)
-    # start or abort preprocessing 
-    preprocessing(prep_mode)
+    try:
+        # Initialize preprocessing with input/output paths
+        preprocessor = ImagePreprocessor(ds_path, ps_path)
+        # Start or abort preprocessing
+        preprocessor.process_images(prep_mode)
+    except Exception as e:
+        logger.error(f"Preprocessing failed: {e}")
+        raise
 
-def make_prediction(model_name, input_channel, output_channel, 
-                    filter_number, input_path, output_path, 
-                    thresh, connect_thresh, test_model_name, 
-                    mip_flag):
+
+def make_prediction(
+    model_name: str, 
+    input_channel: int, 
+    output_channel: int,
+    filter_number: int, 
+    input_path: Union[str, Path], 
+    output_path: Union[str, Path],
+    thresh: float, 
+    connect_thresh: int, 
+    test_model_name: Union[str, Path],
+    mip_flag: bool
+) -> None:
     """
-    Makes a prediction
+    Performs neural network prediction on all images in a directory.
 
     Args:
-        model_name (str): The name of the model.
-        input_channel (int): The number of input channels.
-        output_channel (int): The number of output channels.
-        filter_number (int): The number of filters.
-        input_path (str): The path to the input data (normally the path to processed data).
-        output_path (str): The path to the output data.
-        thresh (float): The threshold value.
-        connect_thresh (int): The connected threshold value.
-        test_model_name (str): The path to the pre-trained model.
-        test_img_name (str): The name of the test image.
-        mip_flag (bool): The MIP flag.
+        model_name: Name of the neural network model
+        input_channel: Number of input channels
+        output_channel: Number of output channels
+        filter_number: Number of filters in the model
+        input_path: Path to preprocessed input images
+        output_path: Path for saving predictions
+        thresh: Probability threshold for binarization
+        connect_thresh: Minimum connected component size
+        test_model_name: Path to the trained model file
+        mip_flag: Whether to save maximum intensity projections
 
-    Returns:
-        None
+    Raises:
+        FileNotFoundError: If input path or model file doesn't exist
+        ValueError: If model parameters are invalid
     """
-    # initialize the prediction method with model configuration and input/output paths
-    prediction_postpo = prediction_and_postprocess(model_name, input_channel, output_channel, filter_number, input_path, output_path)
-    # take each processed image for prediction
-    processed_data_list = os.listdir(input_path)
-    for i in range(len(processed_data_list)):
-        # generate inferred segmentation fot the current image
-        prediction_postpo(thresh, connect_thresh, test_model_name, processed_data_list[i], mip_flag)
+    try:
+        # Initialize predictor with model configuration and paths
+        predictor = ImagePredictor(
+            model_name, input_channel, output_channel, 
+            filter_number, input_path, output_path
+        )
+        
+        # Process all images in the input directory
+        predictor.predict_all_images(
+            model_path=test_model_name,
+            threshold=thresh,
+            connect_threshold=connect_thresh,
+            save_mip=mip_flag
+        )
+        
+    except Exception as e:
+        logger.error(f"Prediction failed: {e}")
+        raise
+
+
+
 

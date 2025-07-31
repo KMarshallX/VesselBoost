@@ -9,7 +9,7 @@ Last Edited: 04/10/2024
 
 import config.angiboost_config as angiboost_config
 from library import preprocess_procedure, make_prediction
-from library import TTA_Training
+from library import Trainer
 import os
 
 args = angiboost_config.args
@@ -53,12 +53,13 @@ if __name__ == "__main__":
                     mip_flag=False)
     
     # initialize the training process
-    train_process = TTA_Training(args.loss_m, args.mo, 
+    train_process = Trainer(args.loss_m, args.mo, 
                             args.ic, args.oc, args.fil,
                             args.op, args.lr, 
                             args.optim_gamma, args.ep, 
                             args.batch_mul, 
-                            args.osz, args.aug_mode)
+                            args.osz, args.aug_mode,
+                            crop_low_thresh=args.crop_low_thresh)
 
     # traning loop (this could be separate out )
     train_process.train(ps_path, seg_path, outmo_path)

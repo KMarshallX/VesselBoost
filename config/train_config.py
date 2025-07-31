@@ -2,9 +2,8 @@
 argparse configuration for train.py
 
 Editor: Marshall Xu
-Last Edited: 07/04/2023 MM/DD/YYYY
+Last Edited: 31/07/2025
 """
-#@TODO: remember change the optim_patience
 
 import argparse
 
@@ -50,9 +49,12 @@ train_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argpar
 # train_parser.add_argument('--optim_patience', type=int, default=100, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
-train_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)
+train_parser.add_argument('--aug_mode', type=str, default="on", help=argparse.SUPPRESS)
+train_parser.add_argument('--crop_low_thresh', type=int, default=128, help=argparse.SUPPRESS)
 
 # batch size multiplier
 train_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
+
+# lower threshold for random crop minimum size
 
 args = train_parser.parse_args()

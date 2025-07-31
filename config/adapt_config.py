@@ -2,7 +2,7 @@
 argparse configuration for test_time_adaptation.py
 
 Editor: Marshall Xu
-Last Edited: 07/04/2023 MM/DD/YYYY
+Last Edited: 31/07/2025
 """
 
 import argparse
@@ -56,12 +56,15 @@ adapt_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argpar
 # adapt_parser.add_argument('--optim_patience', type=int, default=10000, help=argparse.SUPPRESS)
 
 # Augmentation mode, available : [on, off, test, mode1]
-adapt_parser.add_argument('--aug_mode', type=str, default="mode1", help=argparse.SUPPRESS)
+adapt_parser.add_argument('--aug_mode', type=str, default="on", help=argparse.SUPPRESS)
+adapt_parser.add_argument('--crop_low_thresh', type=int, default=128, help=argparse.SUPPRESS)
 
 # Resource optimization flag. 0: intermediate files are saved, 1: intermediate files are deleted
 adapt_parser.add_argument('--resource', type=int, default=0, help=argparse.SUPPRESS)
 
 # batch size multiplier
 adapt_parser.add_argument('--batch_mul', type=int, default=4, help=argparse.SUPPRESS)
+
+# lower threshold for random crop minimum size
 
 args = adapt_parser.parse_args()
