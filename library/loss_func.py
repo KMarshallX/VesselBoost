@@ -149,8 +149,8 @@ def choose_optimizer(optim_name: str, model_params: Any, lr: float) -> Any:
         ValueError: If optimizer name is not supported
     """
     optimizer_registry = {
-        'sgd': lambda: torch.optim.sgd.SGD(model_params, lr),
-        'adam': lambda: torch.optim.adam.Adam(model_params, lr)
+        'sgd': lambda: torch.optim.SGD(model_params, lr),
+        'adam': lambda: torch.optim.Adam(model_params, lr)
     }
     
     if optim_name not in optimizer_registry:
