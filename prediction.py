@@ -8,44 +8,57 @@ Editor: Marshall Xu
 Last edited: 18/10/2023
 """
 
+
 import os
+import logging
 import config.pred_config as pred_config
 from library import preprocess_procedure, make_prediction
 
-args = pred_config.pred_parser.parse_args()
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-ds_path = args.ds_path # path to original data
-ps_path = args.ps_path # path to preprocessed data
-out_path = args.out_path # path to infered data
-if os.path.exists(out_path) == False:
-    print(f"{out_path} does not exist.")
-    os.mkdir(out_path)
-    print(f"{out_path} has been created!")
+def run_prediction():
+    config = pred_config.args
 
-prep_mode = args.prep_mode # preprocessing mode
-# when the preprocess is skipped, 
-# directly take the raw data for inference
-if prep_mode == 4:
-    ps_path = ds_path
+    image_path = config.image_path
+    preprocessed_path = config.preprocessed_path
+    output_path = config.output_path
+    prep_mode = config.prep_mode
+    model_type = config.model
+    in_chan = config.input_channel
+    ou_chan = config.output_channel
+    fil_num = config.filters
+    threshold = config.thresh
+    cc = config.cc
+    pretrained_model = config.pretrained
 
-model_type = args.mo # model type
-in_chan = args.ic # input channel
-ou_chan = args.oc # output channel
-fil_num = args.fil # number of filters
+    if not os.path.exists(output_path):
+        logger.info(f"{output_path} does not exist.")
+        os.mkdir(output_path)
+        logger.info(f"{output_path} has been created!")
 
-threshold_vector = [args.thresh, args.cc]
-pretrained_model = args.pretrained # path to pretrained model
+    # when the preprocess is skipped, directly take the raw data for inference
+    if prep_mode == 4:
+        preprocessed_path = image_path
 
-if __name__ == "__main__":
-
-    print("Prediction session will start shortly..")
+    logger.info("Prediction session will start shortly..")
+    logger.info("Parameters Info:")
+    logger.info("*" * 61)
+    logger.info(f"Input image path: {image_path}, Preprocessed path: {preprocessed_path}, Output path: {output_path}, Prep_mode: {prep_mode}")
 
     # preprocess procedure
-    preprocess_procedure(ds_path, ps_path, prep_mode)
+    preprocess_procedure(image_path, preprocessed_path, prep_mode)
 
     # make prediction
-    make_prediction(model_type, in_chan, ou_chan,
-                    fil_num, ps_path, out_path,
-                    threshold_vector[0], threshold_vector[1], pretrained_model,
-                    mip_flag=True)
+    make_prediction(
+        model_type, in_chan, ou_chan,
+        fil_num, preprocessed_path, output_path,
+        threshold, cc, pretrained_model,
+        mip_flag=True
+    )
+
+    logger.info(f"Prediction session has been completed! Resultant segmentation has been saved to {output_path}.")
+
+if __name__ == "__main__":
+    run_prediction()
 

@@ -29,15 +29,13 @@ e.g.:\
 
 Set the necessary parameters, and then run the script:
 - If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images
+
 ```bash
-
-python train.py --ds_path $path_to_images --lb_path $path_to_labels --prep_mode 4 --ep $n_epochs --lr 1e-3 --outmo $path_to_model
-
+python train.py --image_path $path_to_images --label_path $path_to_labels --prep_mode 4 --epochs $n_epochs --learning_rate 1e-3 --output_model $path_to_model
 ```
 
 - If you set prep_mode to 1,2 or 3, which means (1) N4 bias field correction, (2)denosing, or (3) both N4 biasfield correction and denoising, then you have to set a path to store the preprocessed images. In the following example, we set the preprocessing mode to "applying N4 bias field correction only".
+
 ```bash
-
-python train.py --ds_path $path_to_images --lb_path $path_to_labels --prep_mode 1 --ps_path $path_to_preprocessed --ep $n_epochs --lr 1e-3 --outmo $path_to_model
-
+python train.py --image_path $path_to_images --label_path $path_to_labels --prep_mode 1 --preprocessed_path $path_to_preprocessed --epochs $n_epochs --learning_rate 1e-3 --output_model $path_to_model
 ```

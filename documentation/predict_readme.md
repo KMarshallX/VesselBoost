@@ -4,13 +4,13 @@ This is a stand-alone module to produce segmentation of input images by using th
 ## Example test run of this script:
 If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images:
 
+
 ```bash
-python prediction.py --ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4
+python prediction.py --image_path $path_to_images --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4
 ```
 
 If you set prep_mode to 1,2 or 3, which means (1) N4 bias field correction, (2)denosing, or (3) both N4 biasfield correction and denoising will happen, then you have to set a path to store the preprocessed images. In the following example, we set the preprocessing mode to "applying N4 bias field correction only".
 
 ```bash
-python prediction.py --ds_path $path_to_images --ps_path $path_to_preprocessed_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 1
-
+python prediction.py --image_path $path_to_images --preprocessed_path $path_to_preprocessed_images --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 1
 ```

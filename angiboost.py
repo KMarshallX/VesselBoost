@@ -2,73 +2,86 @@
 
 """
 Angio Boost module - train a model on single subject from scratch, then make prediction
+ONLY USE FOR NEUROCONTAINER ON OPEN RECON
 
 Editor: Marshall Xu
 Last Edited: 04/10/2024
 """
 
+from logging import config
+import os
+import logging
 import config.angiboost_config as angiboost_config
 from library import preprocess_procedure, make_prediction
 from library import Trainer
-import os
 
-args = angiboost_config.args
-# input images & labels
-ds_path = args.ds_path # needed as input argument
-ps_path = args.ps_path
-seg_path = args.lb_path # needed as input argument (places to store the initial segmentation)
-prep_mode = args.prep_mode # needed as input argument
-outmo_path = args.outmo # needed as input argument
-out_path = args.out_path # needed as input argument
-pretrained = args.pretrained # needed as input argument
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-if os.path.exists(seg_path) == False:
-    print(f"{seg_path} does not exist.")
-    os.mkdir(seg_path)
-    print(f"{seg_path} has been created!")
+def run_angiboost():
+    config = angiboost_config.args
 
-if os.path.exists(out_path) == False:
-    print(f"{out_path} does not exist.")
-    os.mkdir(out_path)
-    print(f"{out_path} has been created!")
+    image_path = config.image_path
+    preprocessed_path = config.preprocessed_path
+    label_path = config.label_path
+    prep_mode = config.prep_mode
+    output_model = config.output_model
+    output_path = config.output_path
+    pretrained = config.pretrained
 
-# when the preprocess is skipped, 
-# directly take the raw data for prediction
-if prep_mode == 4:
-    ps_path = ds_path
+    if not os.path.exists(label_path):
+        logger.info(f"{label_path} does not exist.")
+        os.mkdir(label_path)
+        logger.info(f"{label_path} has been created!")
 
-if __name__ == "__main__":
-    print("Boosting session will start shortly..")
-    print("Parameters Info:\n*************************************************************\n")
-    print(f"Input image path: {ds_path}, Segmentation path: {seg_path}, Prep_mode: {prep_mode}\n")
-    print(f"Epoch number: {args.ep}, Learning rate: {args.lr} \n")
-    
+    if not os.path.exists(output_path):
+        logger.info(f"{output_path} does not exist.")
+        os.mkdir(output_path)
+        logger.info(f"{output_path} has been created!")
+
+    # when the preprocess is skipped, directly take the raw data for prediction
+    if prep_mode == 4:
+        preprocessed_path = image_path
+
+    logger.info("Boosting session will start shortly..")
+    logger.info("Parameters Info:")
+    logger.info("*" * 61)
+    logger.info(f"Input image path: {image_path}, Segmentation path: {label_path}, Prep_mode: {prep_mode}")
+    logger.info(f"Epoch number: {config.ep}, Learning rate: {config.lr}")
+
     # preprocess procedure
-    preprocess_procedure(ds_path, ps_path, prep_mode)
-    
-    # genereate the initial segmentation
-    make_prediction(args.mo, args.ic, args.oc, 
-                    args.fil, ps_path, seg_path,
-                    args.thresh, args.cc, pretrained,
-                    mip_flag=False)
-    
-    # initialize the training process
-    train_process = Trainer(args.loss_m, args.mo, 
-                            args.ic, args.oc, args.fil,
-                            args.op, args.lr, 
-                            args.optim_gamma, args.ep, 
-                            args.batch_mul, 
-                            args.osz, args.aug_mode,
-                            crop_low_thresh=args.crop_low_thresh)
+    preprocess_procedure(image_path, preprocessed_path, prep_mode)
 
-    # traning loop (this could be separate out )
-    train_process.train(ps_path, seg_path, outmo_path)
+    # generate the initial segmentation
+    make_prediction(
+        config.model, config.input_channel, config.output_channel,
+        config.filters, preprocessed_path, label_path,
+        config.thresh, config.cc, pretrained,
+        mip_flag=False
+    )
+
+    # initialize the training process
+    train_process = Trainer(
+        loss_name=config.loss_metric, model_name=config.model,
+        input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
+        optimizer_name=config.optimizer, learning_rate=config.lr, optimizer_gamma=config.optim_gamma, num_epochs=config.ep,
+        batch_multiplier=config.batch_multiplier, patch_size=tuple(config.osz), augmentation_mode=config.augmentation_mode,
+        crop_low_thresh=config.crop_low_thresh
+    )
+
+    # training loop
+    train_process.train(preprocessed_path, label_path, output_model)
 
     # make prediction
-    make_prediction(args.mo, args.ic, args.oc, 
-                    args.fil, ps_path, out_path,
-                    args.thresh, args.cc, outmo_path,
-                    mip_flag=True)
-    
-    print(f"Boosting session has been completed! Resultant segmentation has been saved to {out_path}.")
+    make_prediction(
+        config.model, config.input_channel, config.output_channel,
+        config.filters, preprocessed_path, output_path,
+        config.thresh, config.cc, output_model,
+        mip_flag=True
+    )
+
+    logger.info(f"Boosting session has been completed! Resultant segmentation has been saved to {output_path}.")
+
+if __name__ == "__main__":
+    run_angiboost()
 

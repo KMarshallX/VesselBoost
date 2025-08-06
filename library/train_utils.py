@@ -290,13 +290,10 @@ class Trainer:
             segmentation_path: Path to segmentation masks
             output_model_path: Path to save the trained model
         """
-        # Calculate steps based on training configuration
-        steps = self.num_epochs * self.batch_multiplier
-        
         # Initialize dataset and loaders
         dataset = MultiChannelLoader(
             processed_path, segmentation_path, 
-            self.patch_size, steps, 
+            self.patch_size, self.num_epochs, 
             crop_low_thresh=self.crop_low_thresh,
             batch_multiplier=self.batch_multiplier
         )
@@ -304,9 +301,9 @@ class Trainer:
         
         # Initialize model
         model = self._initialize_model()
-        
-        logger.info(f"Training with effective batch size: {6 * self.batch_multiplier}")
-        
+
+        logger.info(f"Training with effective batch size: {self.batch_multiplier + 1}")
+
         # Execute training
         self.train_model(data_loaders, model, output_model_path)
 
@@ -337,10 +334,9 @@ class Trainer:
             logger.info(f"CV Fold {fold_idx}: Test file = {test_file}")
             
             # Initialize dataset
-            steps = self.num_epochs * self.batch_multiplier
             dataset = MultiChannelLoader(
                 processed_path, segmentation_path, 
-                self.patch_size, steps,
+                self.patch_size, self.num_epochs,
                 crop_low_thresh=self.crop_low_thresh,
                 batch_multiplier=self.batch_multiplier
             )
@@ -457,7 +453,7 @@ class Trainer:
             predictor(
                 self.threshold, self.connect_threshold,
                 str(adapted_model_path), processed_file.name,
-                save_mip=True, save_probability=True
+                save_mip=True, save_probability=False
             )
         
         logger.info("Test-time adaptation completed")

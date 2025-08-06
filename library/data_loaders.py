@@ -167,7 +167,7 @@ class SingleChannelLoader:
                 large_img_crop, large_seg_crop = self._zooming(large_img_crop, large_seg_crop)
                 img_batch[self.batch_multiplier] = large_img_crop
                 seg_batch[self.batch_multiplier] = large_seg_crop  
-                # Yield the cropped and resized patches as pytorch tensors
+                # Yield the cropped and resized patches as a batch of pytorch tensors
                 yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).long()
 
             except Exception as e:
