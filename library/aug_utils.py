@@ -10,10 +10,11 @@ Last Edited: 30/07/2025
 """
 
 import torch
+import torchio as tio
 import numpy as np
 import scipy.ndimage as scind
-from typing import Tuple
-
+from skimage.filters import threshold_otsu
+from typing import Optional, Tuple, Union
 
 class AugmentationUtils:
     """
@@ -100,14 +101,17 @@ class AugmentationUtils:
         if len(inp.shape) != 3:
             raise ValueError("Only 3D data is accepted")
             
+        if inp.shape == self.size:
+            return inp
+            
         w, h, d = inp.shape
         target_w, target_h, target_d = self.size
-
-        if (target_w, target_h, target_d) == (w, h, d):
-            return inp
         
+        # OPTIMIZED: Use precomputed zoom factors
         zoom_factors = (target_w / w, target_h / h, target_d / d)
-        return scind.zoom(inp, zoom_factors, order=0, mode='nearest')
+        
+        # OPTIMIZED: Use order=0 (nearest neighbor) for speed, preserve memory layout
+        return scind.zoom(inp, zoom_factors, order=0, mode='nearest', prefilter=False)
 
     def filter(self, inp: np.ndarray, sigma: float) -> np.ndarray:
         """
@@ -133,84 +137,86 @@ class AugmentationUtils:
         Returns:
             Tuple of (augmented_input_batch, augmented_seg_batch) as tensors
         """
-        # First resize both images to target size
-        input_img = self.zooming(input_img)
-        seg_img = self.zooming(seg_img)
+        # First resize both images to target size - OPTIMIZE: Only resize if needed
+        if input_img.shape != self.size:
+            input_img = self.zooming(input_img)
+        if seg_img.shape != self.size:
+            seg_img = self.zooming(seg_img)
 
         if self.mode == "on":
-            # Full augmentation: rotation and flipping
-            input_batch = np.stack([
-                input_img,
-                self.rot(input_img, 1),
-                self.rot(input_img, 2), 
-                self.rot(input_img, 3),
-                self.flip_hr(input_img, 1),
-                self.flip_vt(input_img, 1)
-            ], axis=0)
+            # OPTIMIZED: Pre-allocate arrays to avoid repeated memory allocation
+            batch_size = 6
+            input_batch = np.empty((batch_size,) + input_img.shape, dtype=input_img.dtype)
+            seg_batch = np.empty((batch_size,) + seg_img.shape, dtype=seg_img.dtype)
             
-            seg_batch = np.stack([
-                seg_img,
-                self.rot(seg_img, 1),
-                self.rot(seg_img, 2),
-                self.rot(seg_img, 3), 
-                self.flip_hr(seg_img, 1),
-                self.flip_vt(seg_img, 1)
-            ], axis=0)
+            # Original + rotations + flips
+            input_batch[0] = input_img
+            seg_batch[0] = seg_img
+            
+            # Rotations (reuse computation)
+            for i in range(1, 4):
+                input_batch[i] = self.rot(input_img, i)
+                seg_batch[i] = self.rot(seg_img, i)
+            
+            # Flips
+            input_batch[4] = self.flip_hr(input_img, 1)
+            seg_batch[4] = self.flip_hr(seg_img, 1)
+            input_batch[5] = self.flip_vt(input_img, 1)
+            seg_batch[5] = self.flip_vt(seg_img, 1)
             
         elif self.mode == "repeat":
-            # Repeat same patch 6 times
-            input_batch = np.stack([input_img] * 6, axis=0)
-            seg_batch = np.stack([seg_img] * 6, axis=0)
+            # OPTIMIZED: Use np.tile instead of list multiplication
+            input_batch = np.tile(input_img[None, ...], (6, 1, 1, 1))
+            seg_batch = np.tile(seg_img[None, ...], (6, 1, 1, 1))
             
         elif self.mode == "mode1":
-            # Rotation and blurring
-            input_batch = np.stack([
-                input_img,
-                self.rot(input_img, 1),
-                self.rot(input_img, 2),
-                self.rot(input_img, 3),
-                self.filter(input_img, 2),
-                self.filter(input_img, 3)
-            ], axis=0)
+            # Pre-allocate for efficiency
+            input_batch = np.empty((6,) + input_img.shape, dtype=input_img.dtype)
+            seg_batch = np.empty((6,) + seg_img.shape, dtype=seg_img.dtype)
             
-            seg_batch = np.stack([
-                seg_img,
-                self.rot(seg_img, 1), 
-                self.rot(seg_img, 2),
-                self.rot(seg_img, 3),
-                seg_img,  # No filtering for segmentation
-                seg_img
-            ], axis=0)
+            input_batch[0] = input_img
+            seg_batch[0] = seg_img
+            
+            # Rotations
+            for i in range(1, 4):
+                input_batch[i] = self.rot(input_img, i)
+                seg_batch[i] = self.rot(seg_img, i)
+            
+            # Blurring (only for input)
+            input_batch[4] = self.filter(input_img, 2)
+            input_batch[5] = self.filter(input_img, 3)
+            seg_batch[4] = seg_img  # No filtering for segmentation
+            seg_batch[5] = seg_img
             
         elif self.mode == "mode2":
             # Single patch with blurring
-            input_batch = np.expand_dims(self.filter(input_img, 2), axis=0)
-            seg_batch = np.expand_dims(seg_img, axis=0)  # No filtering for segmentation
+            input_batch = self.filter(input_img, 2)[None, ...]
+            seg_batch = seg_img[None, ...]  # No filtering for segmentation
             
         elif self.mode == "mode3":
             # Random rotation or blurring
             if np.random.rand() < 0.5:
                 # Random rotation
                 k = np.random.randint(1, 4)
-                input_batch = np.expand_dims(self.rot(input_img, k), axis=0)
-                seg_batch = np.expand_dims(self.rot(seg_img, k), axis=0)
+                input_batch = self.rot(input_img, k)[None, ...]
+                seg_batch = self.rot(seg_img, k)[None, ...]
             else:
                 # Random blurring
-                input_batch = np.expand_dims(self.filter(input_img, 2), axis=0)
-                seg_batch = np.expand_dims(seg_img, axis=0)
+                input_batch = self.filter(input_img, 2)[None, ...]
+                seg_batch = seg_img[None, ...]
                 
         elif self.mode == "off":
-            # No augmentation
-            input_batch = np.expand_dims(input_img, axis=0)
-            seg_batch = np.expand_dims(seg_img, axis=0)
+            # No augmentation - most efficient
+            input_batch = input_img[None, ...]
+            seg_batch = seg_img[None, ...]
             
-        # Add channel dimension: (batch, channel, depth, height, width)
-        input_batch = input_batch[:, None, :, :, :]
-        seg_batch = seg_batch[:, None, :, :, :]
+        # OPTIMIZED: Add channel dimension more efficiently
+        input_batch = input_batch[:, None, ...]  # (batch, 1, depth, height, width)
+        seg_batch = seg_batch[:, None, ...]
 
-        # Convert to PyTorch tensors
-        input_tensor = torch.from_numpy(input_batch.copy()).to(torch.float32)
-        seg_tensor = torch.from_numpy(seg_batch.copy()).to(torch.float32)
+        # OPTIMIZED: Convert to tensors without unnecessary copy
+        input_tensor = torch.from_numpy(input_batch).to(torch.float32)
+        seg_tensor = torch.from_numpy(seg_batch).to(torch.float32)
 
         return input_tensor, seg_tensor
 
@@ -349,5 +355,251 @@ class RandomCrop3D:
             Cropped array
         """
         return x[slice_h[0]:slice_h[1], slice_w[0]:slice_w[1], slice_d[0]:slice_d[1]]
+
+
+class TorchIOAugmentationUtils:
+
+    def __init__(self, mode: str = 'spatial'):
+        """
+        Initialize TorchIO augmentation utilities.
+        Args:
+            mode: Augmentation mode:
+                - 'all': Apply all augmentations
+                - 'random': Randomly apply a subset of augmentations
+                - 'spatial': Spatial transformations only (flips, elastic deformations)
+                - 'intensity': Intensity transformations only (blurring, bias, noise)
+                - 'off': No augmentation, return original subject
+        Raises:
+            ValueError: For unsupported modes
+        """
+
+        self.mode = mode
+
+    def _blur(self, std: float = 0.85) -> tio.RandomBlur:
+        return tio.RandomBlur(std=std)
+
+    def _bias(self, coefficients: float = 0.15, order: int = 3) -> tio.RandomBiasField:
+        return tio.RandomBiasField(coefficients=coefficients, order=order)
+
+    def _noise(self, mean: float = 0, std: float = 0.008) -> tio.RandomNoise:
+        return tio.RandomNoise(mean=mean, std=std)
+
+    def _flip(self, axes: Union[Tuple[int, ...], int], probability: float = 1.0) -> tio.RandomFlip:
+        return tio.RandomFlip(axes=axes, flip_probability=probability)
+
+    def _elastic_deform(self, num_control_points: int = 9, 
+                        max_displacement: int = 7, 
+                        locked_borders: int = 2) -> tio.RandomElasticDeformation:
+        return tio.RandomElasticDeformation(num_control_points=num_control_points, 
+                                            max_displacement=max_displacement, 
+                                            locked_borders=locked_borders)
+
+    def __call__(self, image_batch: torch.Tensor, seg_batch: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Apply TorchIO augmentations to a batch pair
+        
+        Args:
+            image_batch: Input image batch tensor (shape: [batch_size, depth, height, width])
+            seg_batch: Input segmentation label batch tensor (shape: [batch_size, depth, height, width])
+
+        Returns:
+            Tuple of torch.Tensor (augmented_image_batch, augmented_label_batch)
+        """
+        # Create TorchIO Subject
+        subject_batch = tio.Subject(
+            image=tio.ScalarImage(tensor=image_batch),
+            label=tio.LabelMap(tensor=seg_batch)
+        )
+        # Define augmentation transforms based on mode
+        if self.mode == 'all':
+            transforms = tio.Compose([
+                self._blur(),
+                self._bias(),
+                self._noise(),
+                self._flip(axes=(0, 1)),
+                self._elastic_deform(),
+            ])
+        elif self.mode == 'random':
+            transforms = tio.OneOf([
+                self._blur(),
+                self._bias(),
+                self._noise(),
+                self._flip(axes=(0, 1)),
+                self._elastic_deform()
+            ])
+        elif self.mode == 'spatial':
+            transforms = tio.Compose([
+                self._flip(axes=(0, 1)),
+                self._elastic_deform()
+            ])
+        elif self.mode == 'intensity':
+            transforms = tio.Compose([
+                self._blur(),
+                self._bias(),
+                self._noise()
+            ])
+        elif self.mode == 'off':
+            # No augmentation, return original subject
+            return subject_batch['image'].data, subject_batch['label'].data # type: ignore
+        else:
+            raise ValueError(f"Unsupported mode '{self.mode}' for TorchIO augmentations")
+        
+        # Apply the transform to the subject batch
+        transformed_subject = transforms(subject_batch)
+
+        # Extract image and label tensors
+        image_tensor = transformed_subject['image'].data.unsqueeze(1) # type: ignore
+        label_tensor = transformed_subject['label'].data.unsqueeze(1) # type: ignore
+        
+        return image_tensor, label_tensor
+    
+class Crop3D:
+        
+    def __init__(self, mode: str = 'random', 
+                output_size: Union[Tuple[int, int, int], None] = (64, 64, 64), 
+                resize: bool = False, 
+                rand_crop_low_thresh: int = 128):
+        """
+        Initialize Crop3D cropping configuration.
+        Args:
+            mode: 'random' or 'fixed'.
+            output_size: Output size after cropping/resizing (tuple of ints).
+            resize: If True, resize cropped patch to output_size.
+            rand_crop_low_thresh: Minimum crop size for random cropping.
+        Raises:
+            ValueError: For invalid mode or missing output_size.
+        Example:
+            1. Random cropping with resizing:
+                cropper = Crop3D(mode='random', output_size=(64, 64, 64), resize=True, rand_crop_low_thresh=128)
+            2. Random cropping without resizing:
+                cropper = Crop3D(mode='random', output_size=None, resize=False, rand_crop_low_thresh=128)
+            3. Fixed cropping without resizing:
+                cropper = Crop3D(mode='fixed', output_size=(64, 64, 64), resize=False)
+        """
+        if mode not in ('random', 'fixed'):
+            raise ValueError(f"Invalid mode '{mode}'. Valid modes: ['random', 'fixed']")
+        if mode == 'fixed' and output_size is None:
+            raise ValueError("Output size must be specified for 'fixed' mode")
+        if resize == True and output_size is None:
+            raise ValueError("Output size must be specified when resizing is enabled")
+        
+        self.mode = mode
+        self.output_size = output_size
+        self.resize = resize
+        self.rand_crop_low_thresh = rand_crop_low_thresh
+
+    @staticmethod
+    def _crop_size(mode: str, shape: Tuple[int, int, int], output_size: Union[Tuple[int, int, int], None], rand_crop_low_thresh: int) -> Tuple[int, int, int]:
+        """
+        Compute crop size based on mode and shape.
+        """
+        if mode == 'random':
+            crop_h = int(torch.randint(rand_crop_low_thresh, int(shape[0]) + 1, (1,)).item())
+            crop_w = int(torch.randint(rand_crop_low_thresh, int(shape[1]) + 1, (1,)).item())
+            crop_d = int(torch.randint(rand_crop_low_thresh, int(shape[2]) + 1, (1,)).item())
+        else:
+            if not isinstance(output_size, tuple) or len(output_size) != 3:
+                raise ValueError("Output size must be a tuple of 3 integers for 'fixed' mode")
+            crop_h, crop_w, crop_d = (int(output_size[0]), int(output_size[1]), int(output_size[2]))
+        crop_h = min(crop_h, int(shape[0]) - 1)
+        crop_w = min(crop_w, int(shape[1]) - 1)
+        crop_d = min(crop_d, int(shape[2]) - 1)
+        return int(crop_h), int(crop_w), int(crop_d)
+
+    @staticmethod
+    def _get_slice(sz: int, crop_sz: int) -> Tuple[int, int]:
+        """
+        Get random slice coordinates for cropping.
+        """
+        if sz <= crop_sz:
+            return 0, int(sz)
+        start = int(torch.randint(0, int(sz) - int(crop_sz) + 1, (1,)).item())
+        return int(start), int(start + crop_sz)
+    
+    @staticmethod
+    def _crop(x: np.ndarray, slice_h: Tuple[int, int], slice_w: Tuple[int, int], slice_d: Tuple[int, int]) -> np.ndarray:
+        """Crop array using slice coordinates."""
+        return x[slice_h[0]:slice_h[1], slice_w[0]:slice_w[1], slice_d[0]:slice_d[1]]
+
+    def __call__(self, image_array: np.ndarray, 
+                label_array: np.ndarray, 
+                mask: Union[np.ndarray, str, None] = None) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Crop and optionally resize a 3D image and label.
+
+        Cropping strategies:
+            - If mask is None: random or fixed cropping.
+            - If mask is a np.ndarray: crop center chosen from ROI voxels (nonzero mask).
+            - If mask == 'otsu': Otsu thresholding is applied to image to generate mask, then crop center chosen from ROI.
+            - If mask == 'lazy': crop center randomly chosen within 20%-80% of each dimension.
+
+        Args:
+            image_array: Input image (3D numpy array).
+            label_array: Input label (3D numpy array, same shape as image).
+            mask: np.ndarray (ROI mask), 'otsu', 'lazy', or None.
+        Returns:
+            Cropped (and optionally resized) image and label as numpy arrays.
+        Raises:
+            ValueError: For shape mismatch, invalid mask, or no ROI voxels.
+        """
+        if image_array.shape != label_array.shape:
+            raise ValueError(f"Image shape {image_array.shape} != label shape {label_array.shape}")
+        shape = tuple(int(dim) for dim in image_array.shape[:3])
+        if len(shape) != 3:
+            raise ValueError(f"Input image must be 3D, got shape {image_array.shape}")
+        if self.mode == 'random' and any(dim < self.rand_crop_low_thresh for dim in shape):
+            raise ValueError(f"Image size {shape} must be >= {self.rand_crop_low_thresh} in all dimensions")
+        crop_size = self._crop_size(self.mode, shape, self.output_size, self.rand_crop_low_thresh)
+
+        # If mask is provided, select crop center from ROI or use 'lazy' option
+        if mask is not None:
+            if isinstance(mask, str):
+                if mask == 'otsu':
+                    mask = (image_array > threshold_otsu(image_array)).astype(np.uint8)
+                    # Now treat as np.ndarray mask
+                elif mask == 'lazy':
+                    # 'lazy' option: center falls within 20%-80% of each dimension
+                    crop_half = [s // 2 for s in crop_size]
+                    valid_min = [int(0.2 * shape[i]) for i in range(3)]
+                    valid_max = [int(0.8 * shape[i]) for i in range(3)]
+                    center_idx = [np.random.randint(valid_min[i], valid_max[i]) for i in range(3)]
+                    start = [max(0, int(center_idx[i]) - crop_half[i]) for i in range(3)]
+                    end = [min(shape[i], start[i] + crop_size[i]) for i in range(3)]
+                    for i in range(3):
+                        if end[i] - start[i] < crop_size[i]:
+                            start[i] = max(0, shape[i] - crop_size[i])
+                            end[i] = start[i] + crop_size[i]
+                    slice_coords = [(start[i], end[i]) for i in range(3)]
+                else:
+                    raise ValueError(f"Invalid mask type: {mask}. Expected np.ndarray, 'otsu', or 'lazy'.")
+            if isinstance(mask, np.ndarray):
+                if mask.shape != shape:
+                    raise ValueError(f"Mask shape {mask.shape} must match image shape {shape}")
+                roi_flat_indices = np.flatnonzero(mask)
+                if roi_flat_indices.size == 0:
+                    raise ValueError("Mask contains no ROI voxels.")
+                chosen_flat = np.random.choice(roi_flat_indices)
+                center_idx = np.unravel_index(chosen_flat, mask.shape)
+                crop_half = [s // 2 for s in crop_size]
+                start = [max(0, int(center_idx[i]) - crop_half[i]) for i in range(3)]
+                end = [min(shape[i], start[i] + crop_size[i]) for i in range(3)]
+                for i in range(3):
+                    if end[i] - start[i] < crop_size[i]:
+                        start[i] = max(0, shape[i] - crop_size[i])
+                        end[i] = start[i] + crop_size[i]
+                slice_coords = [(start[i], end[i]) for i in range(3)]
+        else:
+            slice_coords = [self._get_slice(int(orig_dim), int(crop_dim)) for orig_dim, crop_dim in zip(shape, crop_size)]
+
+        cropped_img = self._crop(image_array, *slice_coords)
+        cropped_lab = self._crop(label_array, *slice_coords)
+        if not self.resize:
+            return cropped_img, cropped_lab
+        if self.output_size is None:
+            raise ValueError("output_size must be specified for resizing.")
+        zoom_factors = tuple(float(out_dim) / float(crop_dim) for out_dim, crop_dim in zip(self.output_size, crop_size))
+        resized_img = scind.zoom(cropped_img, zoom_factors, order=3, mode='nearest')
+        resized_lab = scind.zoom(cropped_lab, zoom_factors, order=0, mode='nearest')
+        return resized_img, resized_lab
 
 

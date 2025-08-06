@@ -62,12 +62,12 @@ class ImagePreprocessor:
         """Get list of image files from input directory."""
         # Common medical image extensions
         extensions = {'.nii', '.nii.gz', '.mgz', '.mgh'}
-        files = [f for f in self.input_path.iterdir() 
-                if f.is_file() and f.suffix in extensions]
+        files = [f for f in self.input_path.iterdir()
+                if f.is_file() and f.name.endswith(tuple(extensions))]
         
         if not files:
-            logger.warning(f"No medical image files found in {self.input_path}")
-        
+            logger.warning(f"No image files found in {self.input_path}")
+
         return sorted(files)
 
     def _process_single_image(self, image_path: Path, mode: int) -> None:
@@ -131,11 +131,7 @@ class ImagePreprocessor:
         Raises:
             ValueError: If mode is invalid
         """
-        if mode == 4:
-            logger.info("Preprocessing aborted by user")
-            return
-        
-        if mode not in [1, 2, 3]:
+        if mode not in [1, 2, 3, 4]:
             raise ValueError(f"Invalid preprocessing mode: {mode}. Valid modes: 1, 2, 3, 4")
         
         logger.info("Starting preprocessing procedure")
@@ -459,7 +455,7 @@ class ImagePredictor:
         logger.info(f"Loaded model from: {model_path}")
         
         # Get list of images to process
-        image_files = [f for f in self.input_path.iterdir() if f.is_file() and f.suffix in {'.nii', '.nii.gz'}]
+        image_files = [f for f in self.input_path.iterdir() if f.is_file() and (f.name.endswith('.nii.gz') or f.name.endswith('.nii'))]
         
         if not image_files:
             logger.warning(f"No image files found in {self.input_path}")
@@ -510,6 +506,8 @@ class ImagePredictor:
 def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], prep_mode: int) -> None:
     """
     Preprocesses medical images with bias field correction and/or denoising.
+    
+    This function handles mode validation and delegates actual preprocessing to ImagePreprocessor.
 
     Args:
         ds_path: Path to the input dataset directory
@@ -521,10 +519,17 @@ def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], p
         ValueError: If preprocessing mode is invalid
     """
     try:
-        # Initialize preprocessing with input/output paths
-        preprocessor = ImagePreprocessor(ds_path, ps_path)
-        # Start or abort preprocessing
-        preprocessor.process_images(prep_mode)
+        if prep_mode == 4:
+            # Abort preprocessing
+            logger.info("Preprocessing aborted by user")
+            return
+        elif prep_mode in [1, 2, 3]:
+            # Initialize preprocessing with input/output paths
+            preprocessor = ImagePreprocessor(ds_path, ps_path)
+            # Start preprocessing
+            preprocessor.process_images(prep_mode)
+        else:
+            raise ValueError(f"Invalid preprocessing mode: {prep_mode}. Valid modes: 1, 2, 3, 4")
     except Exception as e:
         logger.error(f"Preprocessing failed: {e}")
         raise

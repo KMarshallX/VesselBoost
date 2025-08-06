@@ -11,8 +11,10 @@ Editor: Marshall Xu
 Last edited: 31/07/2025
 """
 
+import time
 import shutil
 import torch
+import torchio as tio
 import numpy as np
 from tqdm import tqdm
 from typing import Dict, List, Optional, Tuple, Union, Any
@@ -20,15 +22,13 @@ from pathlib import Path
 import logging
 
 from .loss_func import choose_DL_model, choose_optimizer, choose_loss_metric
-from .aug_utils import AugmentationUtils
+from .aug_utils import AugmentationUtils, TorchIOAugmentationUtils
 from .eval_utils import CrossValidationHelper
-from .data_loaders import SingleChannelLoader, MultiChannelDataset
+from .data_loaders import SingleChannelLoader, MultiChannelLoader
 from .module_utils import ImagePredictor
 
 # Set up logging
 logger = logging.getLogger(__name__)
-
-
 
 class Trainer:
     """
@@ -138,7 +138,7 @@ class Trainer:
             self.model_config[2]
         ).to(self.device)
 
-    def _initialize_scheduler(self, optimizer: torch.optim.Optimizer) -> torch.optim.lr_scheduler.ReduceLROnPlateau:
+    def _initialize_scheduler(self, optimizer: torch.optim.Optimizer) -> torch.optim.lr_scheduler.ReduceLROnPlateau: # type: ignore
         """Initialize learning rate scheduler with patience based on epoch count."""
         patience = int(np.ceil(self.num_epochs * 0.2))
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -147,10 +147,9 @@ class Trainer:
             patience=patience
         )
 
-    def _initialize_augmentation(self) -> AugmentationUtils:
+    def _initialize_augmentation(self) -> TorchIOAugmentationUtils:
         """Initialize augmentation utilities based on test mode."""
-        mode = "off" if self.test_mode else "on"
-        return AugmentationUtils(self.patch_size, mode)
+        return TorchIOAugmentationUtils(self.augmentation_mode)
 
     def _load_pretrained_model(self) -> torch.nn.Module:
         """Load and return a pretrained model."""
@@ -181,10 +180,10 @@ class Trainer:
         self, 
         data_loaders: Dict[int, Any], 
         model: torch.nn.Module,
-        optimizer: torch.optim.Optimizer,
+        optimizer: torch.optim.Optimizer, # type: ignore
         scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau,
         loss_function: torch.nn.Module,
-        augmentation: AugmentationUtils
+        augmentation: TorchIOAugmentationUtils
     ) -> Tuple[float, float]:
         """
         Train model for one epoch.
@@ -196,24 +195,26 @@ class Trainer:
         total_loss = 0.0
         total_lr = 0.0
         num_batches = 0
+
+        data_loading_time = 0.0 #TEST
+        model_training_time = 0.0 #TEST
+        
+        iterators = {idx: iter(loader) for idx, loader in data_loaders.items()}
         
         for file_idx in range(len(data_loaders)):
-            # Load and augment first batch
-            image, label = next(iter(data_loaders[file_idx]))
-            image_batch, label_batch = augmentation(image, label)
+            start_data = time.time()  # TEST
             
-            # Accumulate additional batches if batch_multiplier > 1
-            for _ in range(1, self.batch_multiplier):
-                image, label = next(iter(data_loaders[file_idx]))
-                image_aug, label_aug = augmentation(image, label)
-                image_batch = torch.cat((image_batch, image_aug), dim=0)
-                label_batch = torch.cat((label_batch, label_aug), dim=0)
-            
-            # Move to device
-            image_batch = image_batch.to(self.device)
-            label_batch = label_batch.to(self.device)
+            # OPTIMIZED: Use pre-created iterator
+            image_batch, label_batch = next(iterators[file_idx])
+            # Apply augmentations
+            image_batch, label_batch = augmentation(image_batch, label_batch)
+            # Move to device (OPTIMIZED: non_blocking transfer for speed)
+            image_batch = image_batch.to(self.device, non_blocking=True)
+            label_batch = label_batch.to(self.device, non_blocking=True)
+            data_loading_time += time.time() - start_data  # TEST
             
             # Forward pass
+            start_model = time.time()  # TEST
             optimizer.zero_grad()
             output = model(image_batch)
             loss = loss_function(output, label_batch)
@@ -224,12 +225,14 @@ class Trainer:
             
             # Update scheduler
             scheduler.step(loss)
-            
+            model_training_time += time.time() - start_model  # TEST
+
             # Track metrics
             total_loss += loss.item()
             total_lr += optimizer.param_groups[0]['lr']
             num_batches += 1
-        
+
+        logger.info(f"Data loading time: {data_loading_time:.2f}s, Model training time: {model_training_time:.2f}s")  # TEST
         return total_loss / num_batches, total_lr / num_batches
 
     def train_model(
@@ -291,9 +294,11 @@ class Trainer:
         steps = self.num_epochs * self.batch_multiplier
         
         # Initialize dataset and loaders
-        dataset = MultiChannelDataset(
-            processed_path, segmentation_path, self.patch_size, steps, self.test_mode, 
-            crop_low_thresh=self.crop_low_thresh
+        dataset = MultiChannelLoader(
+            processed_path, segmentation_path, 
+            self.patch_size, steps, 
+            crop_low_thresh=self.crop_low_thresh,
+            batch_multiplier=self.batch_multiplier
         )
         data_loaders = dataset.get_all_loaders()
         
@@ -333,9 +338,11 @@ class Trainer:
             
             # Initialize dataset
             steps = self.num_epochs * self.batch_multiplier
-            dataset = MultiChannelDataset(
-                processed_path, segmentation_path, self.patch_size, steps, self.test_mode,
-                crop_low_thresh=self.crop_low_thresh
+            dataset = MultiChannelLoader(
+                processed_path, segmentation_path, 
+                self.patch_size, steps,
+                crop_low_thresh=self.crop_low_thresh,
+                batch_multiplier=self.batch_multiplier
             )
             
             # Get training indices for this fold
@@ -424,8 +431,10 @@ class Trainer:
             
             # Initialize single-image data loader for adaptation
             data_loader = {0: SingleChannelLoader(
-                str(processed_file), str(proxy_file), self.patch_size, self.num_epochs,
-                crop_low_thresh=self.crop_low_thresh
+                str(processed_file), str(proxy_file), 
+                self.patch_size, step=self.num_epochs,
+                crop_low_thresh=self.crop_low_thresh,
+                batch_multiplier=self.batch_multiplier
             )}
             
             # Load pretrained model
