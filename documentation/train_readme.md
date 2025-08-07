@@ -24,7 +24,7 @@ e.g.:\
 │  └─<pre-trained models>
 ├─train
 ├─tta
-└─utils
+└─library
 ```
 
 Set the necessary parameters, and then run the script:

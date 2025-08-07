@@ -66,23 +66,23 @@ n_epochs=5
 echo "Number of epochs: "$n_epochs""
 
 echo "[DEBUG]: testing tta without a proxy and no preprocessing:"
-tta_command1=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
+tta_command1=`cat ./documentation/tta_readme.md | grep '--image_path $path_to_images --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
 echo $tta_command1
 eval $tta_command1
 
 echo "[DEBUG]: testing tta without a proxy and including preprocessing:"
-tta_command2=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --out_path $path_to_output --ps_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
+tta_command2=`cat ./documentation/tta_readme.md | grep '--image_path $path_to_images --output_path $path_to_output --preprocessed_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
 echo $tta_command2
 eval $tta_command2
 
 
 echo "[DEBUG]: testing tta with a proxy and no preprocessing:"
-tta_command3=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --px_path $path_to_proxy_labels --out_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
+tta_command3=`cat ./documentation/tta_readme.md | grep '--image_path $path_to_images --proxy_path $path_to_proxy_labels --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
 echo $tta_command3
 eval $tta_command3
 
 echo "[DEBUG]: testing tta with a proxy and including preprocessing:"
-tta_command4=`cat ./documentation/tta_readme.md | grep 'ds_path $path_to_images --px_path $path_to_proxy_labels --out_path $path_to_output --ps_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
+tta_command4=`cat ./documentation/tta_readme.md | grep '--image_path $path_to_images --proxy_path $path_to_proxy_labels --output_path $path_to_output --preprocessed_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
 echo $tta_command4
 eval $tta_command4
 
