@@ -81,6 +81,7 @@ def run_tta():
     # TTA procedure
     tta_process.test_time_adaptation(preprocessed_path, proxy_path, output_path, output_model_path, resource_opt)
 
-
+if __name__ == "__main__":
+    run_tta()
 
 
