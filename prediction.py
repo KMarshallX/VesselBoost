@@ -51,9 +51,9 @@ def run_prediction():
 
     # make prediction
     make_prediction(
-        model_type, in_chan, ou_chan,
-        fil_num, preprocessed_path, output_path,
-        threshold, cc, pretrained_model,
+        model_name=model_type, input_channel=in_chan, output_channel=ou_chan,
+        filter_number=fil_num, input_path=preprocessed_path, output_path=output_path,
+        thresh=threshold, connect_thresh=cc, test_model_name=pretrained_model,
         mip_flag=True
     )
 

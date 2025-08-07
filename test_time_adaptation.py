@@ -7,7 +7,6 @@ Editor: Marshall Xu
 Last Edited: 06/08/2025
 """
 
-from logging import config
 import os
 import logging
 import config.adapt_config as adapt_config
@@ -24,46 +23,9 @@ def run_tta():
     config = adapt_config.args
 
     # Paths
-    ds_path = config.ds_path  # path to original data
-    ps_path = config.ps_path  # path to preprocessed data
-    out_path = config.out_path  # path to inferred data
-
-    # Ensure output directory exists
-    if not os.path.exists(out_path):
-        logger.info(f"{out_path} does not exist.")
-        os.mkdir(out_path)
-        logger.info(f"{out_path} has been created!")
-
-    prep_mode = config.prep_mode  # preprocessing mode
-    # When the preprocess is skipped, directly take the raw data for prediction
-    if prep_mode == 4:
-        ps_path = ds_path
-
-    # Proxies path
-    px_path = config.px_path  # path to proxies
-    if px_path is None:
-        px_path = os.path.join(out_path, "proxies", "")
-        if not os.path.exists(px_path):
-            logger.info(f"{px_path} does not exist.")
-            os.mkdir(px_path)
-            logger.info(f"{px_path} has been created!")
-        assert os.path.exists(px_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
-
-    # Output finetuned model path
-    out_mo_path = os.path.join(out_path, "finetuned", "")
-    if not os.path.exists(out_mo_path):
-        logger.info(f"{out_mo_path} does not exist.")
-        os.mkdir(out_mo_path)
-        logger.info(f"{out_mo_path} has been created!")
-    assert os.path.exists(out_mo_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
-
-    # Resource optimization flag
-    args = adapt_config.args
-
-    # Paths
-    image_path = args.image_path  # path to original data
-    preprocessed_path = args.preprocessed_path  # path to preprocessed data
-    output_path = args.output_path  # path to inferred data
+    image_path = config.image_path  # path to original data
+    preprocessed_path = config.preprocessed_path  # path to preprocessed data
+    output_path = config.output_path  # path to inferred data
 
     # Ensure output directory exists
     if not os.path.exists(output_path):
@@ -71,13 +33,13 @@ def run_tta():
         os.mkdir(output_path)
         logger.info(f"{output_path} has been created!")
 
-    prep_mode = args.prep_mode  # preprocessing mode
+    prep_mode = config.prep_mode  # preprocessing mode
     # When the preprocess is skipped, directly take the raw data for prediction
     if prep_mode == 4:
         preprocessed_path = image_path
 
     # Proxies path
-    proxy_path = args.proxy_path  # path to proxies
+    proxy_path = config.proxy_path  # path to proxies
     if proxy_path is None:
         proxy_path = os.path.join(output_path, "proxies", "")
         if not os.path.exists(proxy_path):
@@ -87,34 +49,37 @@ def run_tta():
         assert os.path.exists(proxy_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
     # Output finetuned model path
-    out_mo_path = os.path.join(output_path, "finetuned", "")
-    if not os.path.exists(out_mo_path):
-        logger.info(f"{out_mo_path} does not exist.")
-        os.mkdir(out_mo_path)
-        logger.info(f"{out_mo_path} has been created!")
-    assert os.path.exists(out_mo_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
+    output_model_path = os.path.join(output_path, "finetuned", "")
+    if not os.path.exists(output_model_path):
+        logger.info(f"{output_model_path} does not exist.")
+        os.mkdir(output_model_path)
+        logger.info(f"{output_model_path} has been created!")
+    assert os.path.exists(output_model_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
 
     # Resource optimization flag
-    resource_opt = args.resource
+    resource_opt = config.resource
 
     logger.info("TTA session will start shortly..")
     logger.info("Parameters Info:")
     logger.info("*" * 61)
     logger.info(f"Input image path: {image_path}, Preprocessed path: {preprocessed_path}, Output path: {output_path}, Prep_mode: {prep_mode}")
+    logger.info(f"Proxy path: {proxy_path}, Output model path: {output_model_path}")
+    logger.info(f"Epoch number: {config.epochs}, Learning rate: {config.learning_rate}")
 
     # Preprocessing procedure
     preprocess_procedure(image_path, preprocessed_path, prep_mode)
 
     # Initialize the TTA process
     tta_process = Trainer(
-        loss_name=args.loss_metric, model_name=args.model,
-        input_channels=args.input_channel, output_channels=args.output_channel, filter_count=args.filters,
-        optimizer_name=args.optimizer, learning_rate=args.learning_rate, optimizer_gamma=args.optim_gamma, num_epochs=args.epochs,
-        batch_multiplier=args.batch_multiplier, patch_size=tuple(args.osz), augmentation_mode=args.augmentation_mode,
-        crop_low_thresh=args.crop_low_thresh
+        loss_name=config.loss_metric, model_name=config.model,
+        input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
+        optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
+        batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), augmentation_mode=config.augmentation_mode,
+        threshold=config.thresh, connect_threshold=config.cc,
+        crop_low_thresh=config.crop_low_thresh
     )
     # TTA procedure
-    tta_process.test_time_adaptation(preprocessed_path, proxy_path, output_path, out_mo_path, resource_opt)
+    tta_process.test_time_adaptation(preprocessed_path, proxy_path, output_path, output_model_path, resource_opt)
 
 
 
