@@ -243,6 +243,7 @@ class ImagePredictor:
         """
         original_size = image.shape
         zoom_factors = tuple(target / original for target, original in zip(target_size, original_size))
+        logging.info(f"Resizing image from {original_size} to {target_size} with zoom factors {zoom_factors}") # debug message
         return scind.zoom(image, zoom_factors, order=0, mode='nearest')
 
     def _run_inference(self, patches: np.ndarray, model: torch.nn.Module, original_size: Tuple[int, int, int]) -> np.ndarray:
@@ -406,8 +407,10 @@ class ImagePredictor:
             prediction_map = self._resize_image(prediction_map, original_size)
             
             # Apply postprocessing
+            logger.info("Applying postprocessing...")
             binary_mask = self._apply_postprocessing(prediction_map, threshold, connect_threshold)
-            
+            logging.info("Postprocessing completed")
+
             # Save results
             self._save_results(
                 image_name, prediction_map, binary_mask, affine, header,
@@ -491,10 +494,10 @@ class ImagePredictor:
         ).to(self.device)
         
         if self.device.type == "cuda":
-            logger.info("Running with GPU")
+            logger.info("Prediction process running on GPU")
             model.load_state_dict(torch.load(model_path))  # type: ignore
         else:
-            logger.info("Running with CPU")
+            logger.info("Prediction process running on CPU")
             model.load_state_dict(torch.load(model_path, map_location=self.device))  # type: ignore
         
         self.process_single_image(

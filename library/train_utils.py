@@ -396,7 +396,7 @@ class Trainer:
         logger.info(f"Processing {len(processed_files)} images for test-time adaptation")
         
         for processed_file in processed_files:
-            file_stem = processed_file.stem
+            file_stem = processed_file.name.split(".")[0]
             logger.info(f"Processing: {processed_file.name}")
             
             # Generate proxy if needed
@@ -450,10 +450,9 @@ class Trainer:
                 processed_path, 
                 output_path
             )
-            predictor(
-                self.threshold, self.connect_threshold,
-                str(adapted_model_path), processed_file.name,
-                save_mip=True, save_probability=False
+            predictor.predict_all_images(
+                model_path=adapted_model_path, threshold=self.threshold,
+                connect_threshold=self.connect_threshold, save_mip=True
             )
         
         logger.info("Test-time adaptation completed")

@@ -46,7 +46,7 @@ def run_tta():
             logger.info(f"{proxy_path} does not exist.")
             os.mkdir(proxy_path)
             logger.info(f"{proxy_path} has been created!")
-        assert os.path.exists(proxy_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
+        assert os.path.exists(proxy_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/VesselBoost"
 
     # Output finetuned model path
     output_model_path = os.path.join(output_path, "finetuned", "")
@@ -54,7 +54,7 @@ def run_tta():
         logger.info(f"{output_model_path} does not exist.")
         os.mkdir(output_model_path)
         logger.info(f"{output_model_path} has been created!")
-    assert os.path.exists(output_model_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/vessel_code"
+    assert os.path.exists(output_model_path), "Container doesn't initialize properly, contact for maintenance: https://github.com/KMarshallX/VesselBoost"
 
     # Resource optimization flag
     resource_opt = config.resource
@@ -73,8 +73,11 @@ def run_tta():
     tta_process = Trainer(
         loss_name=config.loss_metric, model_name=config.model,
         input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
-        optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
-        batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), augmentation_mode=config.augmentation_mode,
+        pretrained_model_path=config.pretrained,
+        optimizer_name=config.optimizer, learning_rate=config.learning_rate, 
+        optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
+        batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), 
+        augmentation_mode=config.augmentation_mode,
         threshold=config.thresh, connect_threshold=config.cc,
         crop_low_thresh=config.crop_low_thresh
     )
