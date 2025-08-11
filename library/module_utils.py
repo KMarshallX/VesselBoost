@@ -241,10 +241,14 @@ class ImagePredictor:
         Returns:
             Resized image array
         """
-        original_size = image.shape
-        zoom_factors = tuple(target / original for target, original in zip(target_size, original_size))
-        logging.info(f"Resizing image from {original_size} to {target_size} with zoom factors {zoom_factors}") # debug message
-        return scind.zoom(image, zoom_factors, order=0, mode='nearest')
+        try:
+            original_size = image.shape
+            zoom_factors = tuple(target / original for target, original in zip(target_size, original_size))
+            logging.info(f"Resizing image from {original_size} to {target_size} with zoom factors {zoom_factors}") # debug message
+            return scind.zoom(image, zoom_factors, order=0, mode='nearest')
+        except Exception as e:
+            logging.error(f"Error resizing image: {e}")
+            raise
 
     def _run_inference(self, patches: np.ndarray, model: torch.nn.Module, original_size: Tuple[int, int, int]) -> np.ndarray:
         """
@@ -272,7 +276,7 @@ class ImagePredictor:
                         single_patch = patches[i, j, k, :, :, :]
                         
                         # Convert to tensor with proper shape: (batch, channel, depth, height, width)
-                        patch_tensor = torch.from_numpy(single_patch).float().unsqueeze(0).unsqueeze(0)
+                        patch_tensor = torch.from_numpy(single_patch).unsqueeze(0).unsqueeze(0).to(torch.float)
                         patch_tensor = patch_tensor.to(self.device)
                         
                         # Run inference

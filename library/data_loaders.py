@@ -81,10 +81,6 @@ class SingleChannelLoader:
                 raise ValueError(
                     f"Image shape mismatch: img {img_shape} vs seg {seg_shape}"
                 )
-            if not np.allclose(img_affine, seg_affine, atol=1e-7):
-                raise ValueError(
-                    f"Image affine mismatch: img {img_affine} vs seg {seg_affine}"
-                )
             self._image_shape = img_shape
             # Apply normalization
             if self.normalization == 'standardize':

@@ -451,8 +451,10 @@ class Trainer:
                 output_path
             )
             predictor.predict_all_images(
-                model_path=adapted_model_path, threshold=self.threshold,
-                connect_threshold=self.connect_threshold, save_mip=True
+                model_path=adapted_model_path, 
+                threshold=self.threshold,
+                connect_threshold=self.connect_threshold, 
+                save_mip=True
             )
         
         logger.info("Test-time adaptation completed")
