@@ -26,6 +26,7 @@ t2boost.py
 /archive
 /saved_models
 /result_models
+/test_outpath
 readme_img/Snipaste_2023-03-08_09-06-00.jpg
 readme_img/Snipaste_2023-03-15_09-11-34.jpg
 /config/__pycache__
