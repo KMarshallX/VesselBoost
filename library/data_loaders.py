@@ -114,9 +114,9 @@ class SingleChannelLoader:
         """
         if img_crop.shape != self.patch_size:
             zoom_factors = tuple(float(out_dim) / float(crop_dim) for out_dim, crop_dim in zip(self.patch_size, img_crop.shape))
-            img_crop = scind.zoom(img_crop, zoom_factors, order=3, mode='nearest')
+            img_crop = scind.zoom(img_crop, zoom_factors, order=0, mode='nearest')
             seg_crop = scind.zoom(seg_crop, zoom_factors, order=0, mode='nearest')
-        return img_crop, seg_crop
+        return img_crop.astype(np.float32), seg_crop.astype(np.int8)
 
     def __repr__(self) -> str:
         return (f"SingleChannelLoader(\n"
