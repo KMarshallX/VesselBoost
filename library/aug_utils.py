@@ -440,7 +440,7 @@ class TorchIOAugmentationUtils:
             ])
         elif self.mode == 'off':
             # No augmentation, return original subject
-            return subject_batch['image'].data, subject_batch['label'].data # type: ignore
+            return subject_batch['image'].data.unsqueeze(1), subject_batch['label'].data.unsqueeze(1) # type: ignore
         else:
             raise ValueError(f"Unsupported mode '{self.mode}' for TorchIO augmentations")
         
