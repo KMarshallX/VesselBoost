@@ -399,7 +399,7 @@ class ImagePredictor:
             resized_image = self._resize_image(image_array, target_size)
             
             # Standardize image
-            standardized_image = standardiser(resized_image)
+            standardized_image = normaliser(resized_image)
             
             # Create patches
             patches = patchify(standardized_image, (64, 64, 64), 64)
