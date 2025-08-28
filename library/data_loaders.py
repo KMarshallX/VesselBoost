@@ -164,7 +164,7 @@ class SingleChannelLoader:
                 img_batch[self.batch_multiplier] = large_img_crop
                 seg_batch[self.batch_multiplier] = large_seg_crop  
                 # Yield the cropped and resized patches as a batch of pytorch tensors
-                yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).long()
+                yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).ceil().int()
 
             except Exception as e:
                 logger.error(f"Error generating patch {i}: {e}")
