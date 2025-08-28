@@ -400,7 +400,6 @@ class ImagePredictor:
             
             # Standardize image
             standardized_image = normaliser(resized_image)
-            # standardized_image = standardiser(resized_image)
             
             # Create patches
             patches = patchify(standardized_image, (64, 64, 64), 64)
