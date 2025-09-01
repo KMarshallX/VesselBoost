@@ -232,7 +232,7 @@ class Trainer:
             total_lr += optimizer.param_groups[0]['lr']
             num_batches += 1
 
-        logger.info(f"Data loading time: {data_loading_time:.2f}s, Model training time: {model_training_time:.2f}s")  # TEST
+        logger.info(f"\nData loading time: {data_loading_time:.2f}s, Model training time: {model_training_time:.2f}s")  # TEST
         return total_loss / num_batches, total_lr / num_batches
 
     def train_model(
@@ -269,7 +269,7 @@ class Trainer:
             # Log progress
             tqdm.write(
                 f'Epoch [{epoch+1}/{self.num_epochs}], '
-                f'Loss: {avg_loss:.4f}, LR: {avg_lr:.8f}'
+                f'Loss: {avg_loss:.8f}, LR: {avg_lr:.8f}'
             )
         
         # Save model
