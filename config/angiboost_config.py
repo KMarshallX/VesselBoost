@@ -31,7 +31,7 @@ angiboost_parser.add_argument('--ep', type=int, default=1000, help="epoch number
 # expected size of the training patch
 angiboost_parser.add_argument('--osz', nargs=3, type=int, default=(64, 64, 64),
                         help='Expected size of the training patch (x y z)')
-angiboost_parser.add_argument('--optimizer', type=str, default="adam", help="available: [sgd, adam]")
+angiboost_parser.add_argument('--optimizer', type=str, default="adam", help="available: [sgd, adam, adamw]")
 angiboost_parser.add_argument('--loss_metric', type=str, default="tver", help="available: [bce, dice, tver]")
 
 # Optimizer tuning

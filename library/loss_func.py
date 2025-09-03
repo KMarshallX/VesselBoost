@@ -150,7 +150,8 @@ def choose_optimizer(optim_name: str, model_params: Any, lr: float) -> Any:
     """
     optimizer_registry = {
         'sgd': lambda: torch.optim.SGD(model_params, lr),
-        'adam': lambda: torch.optim.Adam(model_params, lr)
+        'adam': lambda: torch.optim.Adam(model_params, lr),
+        'adamw': lambda: torch.optim.AdamW(model_params, lr)
     }
     
     if optim_name not in optimizer_registry:
