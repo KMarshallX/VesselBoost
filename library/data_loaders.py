@@ -114,9 +114,9 @@ class SingleChannelLoader:
         """
         if img_crop.shape != self.patch_size:
             zoom_factors = tuple(float(out_dim) / float(crop_dim) for out_dim, crop_dim in zip(self.patch_size, img_crop.shape))
-            img_crop = scind.zoom(img_crop, zoom_factors, order=3, mode='nearest')
+            img_crop = scind.zoom(img_crop, zoom_factors, order=0, mode='nearest')
             seg_crop = scind.zoom(seg_crop, zoom_factors, order=0, mode='nearest')
-        return img_crop, seg_crop
+        return img_crop.astype(np.float32), seg_crop.astype(np.int8)
 
     def __repr__(self) -> str:
         return (f"SingleChannelLoader(\n"
@@ -164,7 +164,7 @@ class SingleChannelLoader:
                 img_batch[self.batch_multiplier] = large_img_crop
                 seg_batch[self.batch_multiplier] = large_seg_crop  
                 # Yield the cropped and resized patches as a batch of pytorch tensors
-                yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).long()
+                yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).ceil().int()
 
             except Exception as e:
                 logger.error(f"Error generating patch {i}: {e}")

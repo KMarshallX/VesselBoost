@@ -375,24 +375,29 @@ class TorchIOAugmentationUtils:
 
         self.mode = mode
 
-    def _blur(self, std: float = 0.85) -> tio.RandomBlur:
-        return tio.RandomBlur(std=std)
+    def _blur(self, p: float = 1, std: float = 0.85) -> tio.RandomBlur:
+        return tio.RandomBlur(std=std, p=p)
 
-    def _bias(self, coefficients: float = 0.15, order: int = 3) -> tio.RandomBiasField:
-        return tio.RandomBiasField(coefficients=coefficients, order=order)
+    def _bias(self, p: float = 1, coefficients: float = 0.15, order: int = 3) -> tio.RandomBiasField:
+        return tio.RandomBiasField(coefficients=coefficients, order=order, p=p)
 
-    def _noise(self, mean: float = 0, std: float = 0.008) -> tio.RandomNoise:
-        return tio.RandomNoise(mean=mean, std=std)
+    def _noise(self, p: float = 1, mean: float = 0, std: float = 0.008) -> tio.RandomNoise:
+        return tio.RandomNoise(mean=mean, std=std, p=p)
 
-    def _flip(self, axes: Union[Tuple[int, ...], int], probability: float = 1.0) -> tio.RandomFlip:
-        return tio.RandomFlip(axes=axes, flip_probability=probability)
+    def _flip(self, p: float = 1, axes: Union[Tuple[int, ...], int] = (0, 1, 2), probability: float = 1.0) -> tio.RandomFlip:
+        # Randomly choose a single axis from the available axes
+        if isinstance(axes, tuple):
+            random_axis = int(np.random.choice(axes))
+        else:
+            random_axis = axes
+        return tio.RandomFlip(axes=random_axis, flip_probability=probability, p=p)
 
-    def _elastic_deform(self, num_control_points: int = 9, 
+    def _elastic_deform(self, p: float = 1, num_control_points: int = 9, 
                         max_displacement: int = 7, 
                         locked_borders: int = 2) -> tio.RandomElasticDeformation:
         return tio.RandomElasticDeformation(num_control_points=num_control_points, 
                                             max_displacement=max_displacement, 
-                                            locked_borders=locked_borders)
+                                            locked_borders=locked_borders, p=p)
 
     def __call__(self, image_batch: torch.Tensor, seg_batch: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
@@ -416,36 +421,42 @@ class TorchIOAugmentationUtils:
                 self._blur(),
                 self._bias(),
                 self._noise(),
-                self._flip(axes=(0, 1)),
-                self._elastic_deform(),
-            ])
-        elif self.mode == 'random':
-            transforms = tio.OneOf([
-                self._blur(),
-                self._bias(),
-                self._noise(),
-                self._flip(axes=(0, 1)),
+                self._flip(axes=(0, 1, 2)),
                 self._elastic_deform()
             ])
+        elif self.mode == 'random':
+            transforms = tio.OneOf({
+                self._blur() : 0.1,
+                self._bias() : 0.1,
+                self._noise() : 0.1,
+                self._flip(axes=(0, 1, 2)) : 0.35,
+                self._elastic_deform() : 0.35
+            })
         elif self.mode == 'spatial':
             transforms = tio.Compose([
-                self._flip(axes=(0, 1)),
+                self._flip(axes=(0, 1, 2)),
                 self._elastic_deform()
             ])
         elif self.mode == 'intensity':
-            transforms = tio.Compose([
+            transforms = tio.OneOf([
                 self._blur(),
                 self._bias(),
                 self._noise()
             ])
         elif self.mode == 'off':
             # No augmentation, return original subject
-            return subject_batch['image'].data, subject_batch['label'].data # type: ignore
+            return subject_batch['image'].data.unsqueeze(1), subject_batch['label'].data.unsqueeze(1) # type: ignore
         else:
             raise ValueError(f"Unsupported mode '{self.mode}' for TorchIO augmentations")
         
         # Apply the transform to the subject batch
         transformed_subject = transforms(subject_batch)
+        
+        # # Track which transform was applied (for OneOf modes)
+        # # TESTING BLOCK, UNCOMMENT THIS FOR DEBUGGING
+        # if self.mode in ['random', 'intensity']:
+        #     applied_transforms = [str(transform) for transform in transformed_subject.history]
+        #     print(f"Applied transforms in {self.mode} mode: {applied_transforms[-1] if applied_transforms else 'None'}")
 
         # Extract image and label tensors
         image_tensor = transformed_subject['image'].data.unsqueeze(1) # type: ignore

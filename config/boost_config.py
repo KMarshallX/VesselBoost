@@ -30,7 +30,7 @@ boost_parser.add_argument('--epochs', type=int, default=5000, help="epoch number
 # expected size of the training patch
 boost_parser.add_argument('--patch_size', nargs=3, type=int, default=(64, 64, 64),
                         help='Expected size of the training patch (x y z)')
-boost_parser.add_argument('--optimizer', type=str, default="adam", help="available: [sgd, adam]")
+boost_parser.add_argument('--optimizer', type=str, default="adam", help="available: [sgd, adam, adamw]")
 boost_parser.add_argument('--loss_metric', type=str, default="tver", help="available: [bce, dice, tver]")
 
 # Optimizer tuning

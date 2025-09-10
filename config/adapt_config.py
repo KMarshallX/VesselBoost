@@ -36,7 +36,7 @@ adapt_parser.add_argument('--epochs', type=int, default=5000, help="epoch number
 adapt_parser.add_argument('--patch_size', nargs=3, type=int, default=(64, 64, 64),
                         help='Expected size for training (x y z)')
 # optimizer type, available: [sgd, adam]
-adapt_parser.add_argument('--optimizer', type=str, default="adam", help='available: [sgd, adam]')
+adapt_parser.add_argument('--optimizer', type=str, default="adam", help='available: [sgd, adam, adamw]')
 # loss metric type, available: [bce, dice, tver]
 adapt_parser.add_argument('--loss_metric', type=str, default="tver", help="available: [bce, dice, tver]")
 

@@ -29,7 +29,7 @@ train_parser.add_argument('--model', type=str, default="unet3d", help="available
 # expected patch size for training
 train_parser.add_argument('--output_size', nargs=3, type=int, default=(64, 64, 64), help='Expected patch size for training (x y z)')
 # optimizer type, available: [sgd, adam]
-train_parser.add_argument('--optimizer', type=str, default="adam", help='available: [sgd, adam]')
+train_parser.add_argument('--optimizer', type=str, default="adam", help='available: [sgd, adam, adamw]')
 # loss metric type, available: [bce, dice, tver]
 train_parser.add_argument('--loss_metric', type=str, default="tver", help="available: [bce, dice, tver]")
 
