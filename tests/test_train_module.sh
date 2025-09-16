@@ -5,7 +5,7 @@ cp -r . /tmp/VesselBoost
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/VesselBoost/README.md | grep https://github.com/KMarshallX/VesselBoost.git`
+clone_command=`cat /tmp/VesselBoost/README.md | grep "git clone https://github.com/KMarshallX/VesselBoost.git"`
 echo $clone_command
 $clone_command
 
