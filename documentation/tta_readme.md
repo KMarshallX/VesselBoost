@@ -11,7 +11,7 @@ mkdir ./pretrained_models/
 Download the pre-trained model from osf:
 
 ```bash
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_0429 ./pretrained_models/manual_0429
+osf -p abk4p fetch /osfstorage/pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903 ./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903
 ```
 
 

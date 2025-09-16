@@ -41,9 +41,12 @@ mkdir ./pretrained_models/
 pip install osfclient
 osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
 #pretrained model download
-osf -p abk4p fetch /osfstorage/pretrained_models/manual_0429 ./pretrained_models/manual_0429
-osf -p abk4p fetch /osfstorage/pretrained_models/omelette1_0429 ./pretrained_models/omelette1_0429
-osf -p abk4p fetch /osfstorage/pretrained_models/omelette2_0429 ./pretrained_models/omelette2_0429
+osf -p abk4p fetch /osfstorage/pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903 ./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903
+osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_off_ep2k_bat10_0903 ./pretrained_models/VB2_aug_off_ep2k_bat10_0903
+osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_random_ep2k_bat10_0903 ./pretrained_models/VB2_aug_random_ep2k_bat10_0903
+osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_intensity_ep2k_bat10_0903 ./pretrained_models/VB2_aug_intensity_ep2k_bat10_0903
+osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_spatial_ep2k_bat10_0903 ./pretrained_models/VB2_aug_spatial_ep2k_bat10_0903
+
 
 
 path_to_images="./data/images/"
@@ -55,7 +58,7 @@ echo "Path to output: "$path_to_output""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/manual_0429"
+path_to_pretrained_model="./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"

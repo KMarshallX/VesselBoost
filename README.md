@@ -1,7 +1,8 @@
 # **VesselBoost**
-*VesselBoost* is a Python-based software package utilizing deep learning techniques to segment high-resolution time-of-flight MRI angiography data, with high sensitivity towards small vessels. The software suite encompasses three essential functional modules: (1) *predict*, (2) *test-time adaptation* (TTA), and (3) *boost*. By leveraging these modules, users can efficiently segment high-resolution time-of-flight data or conveniently leverage our command line interface to boost segmentations for other vascular MRI image contrasts.
+*VesselBoost* is a Python-based software package utilizing deep learning techniques to segment high-resolution time-of-flight MRI angiography data, with high sensitivity towards small vessels (An experimental pretrained model is available for T2*-weighted imaging). The software suite encompasses three essential functional modules: (1) *predict*, (2) *test-time adaptation* (TTA), and (3) *boost*. By leveraging these modules, users can efficiently segment high-resolution time-of-flight data or conveniently leverage our command line interface to boost segmentations for other vascular MRI image contrasts.
 
 ## **Table of Contents**
+- [Update History](#update-history)
 - [Purpose](#purpose)
 - [Current Version](#current-version)
 - [Requirements](#requirements)
@@ -9,6 +10,10 @@
 - [Installation](#installation)
 - [Citation](#citation)
 - [Contact](#contact)
+
+## **Update History**
+- **1.0.0**: Initial release, for details see [Citation](#citation)
+- **2.0.0 - pre-release**: for details see [Update Log - 16/Sept/2025](documentation/UPDATE.md)
 
 ## **Purpose**
 *VesselBoost* is a Python-based software package leveraging a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
@@ -24,7 +29,7 @@ This repository contains 3 major modules:
 
 
 ## **Current Version**
-VesselBoost 1.0.0
+VesselBoost 2.0.0
 
 ## **Requirements**
 - Docker / Singularity container
@@ -38,7 +43,7 @@ VesselBoost, pre-trained models, and required software are packaged in software 
 The Dockerhub container is available at Dockerhub. To download the container, run the following command:
 
 ```
-docker pull vnmd/vesselboost_1.0.0
+docker pull vnmd/vesselboost_2.0.0
 ```
 
 ### Neurodesk 
@@ -46,8 +51,8 @@ To predict vessel segmentation using your data and the latest version of VesselB
 
 ```bash
 ml vesselboost
-path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_1.0.0_20240815/vesselboost_1.0.0_20240815.simg/opt/VesselBoost/saved_models/
-prediction.py --ds_path /path/ --out_path /path/ --pretrained "$path_to_model"/manual_0429 --prep_mode 4
+path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_2.0.0_20250916/vesselboost_2.0.0_20250916.simg/opt/VesselBoost/saved_models/
+prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_model"/BM_VB2_aug_all_ep2k_bat_10_0903 --prep_mode 4
 ```
 
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).
@@ -56,9 +61,16 @@ For more information, please check our [notebooks](https://github.com/KMarshallX
 This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
 
 1. Clone this repository to your local machine
+    For latest version:
     ```
     git clone https://github.com/KMarshallX/VesselBoost.git
+
     ```
+    To clone the previous version (VesselBoost 1.0.0):
+    ```
+    git clone -b stable_ver_1_0_0_hpc --single-branch https://github.com/KMarshallX/VesselBoost.git
+    ```
+
 2. Install miniconda:
     ```
     cd VesselBoost

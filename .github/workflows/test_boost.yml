@@ -9,6 +9,7 @@ on:
       - config/boost_config.py
       - environment.yml
       - documentation/boost_readme.md
+      - documentation/UPDATE.md
       - library/aug_utils.py
       - library/data_loaders.py
       - library/eval_utils.py
@@ -27,12 +28,14 @@ on:
       - config/boost_config.py
       - environment.yml
       - documentation/boost_readme.md
+      - documentation/UPDATE.md
       - library/aug_utils.py
       - library/data_loaders.py
       - library/eval_utils.py
       - library/loss_func.py
       - library/module_utils.py
       - library/train_utils.py
+      - tests/test_boost_module.sh
       - miniconda-setup.sh
       - .github/workflows/test_boost.yml
 

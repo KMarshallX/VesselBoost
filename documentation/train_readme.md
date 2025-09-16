@@ -1,4 +1,4 @@
-# **Initial Training Module**
+# **Training Module**
 You can use this module to train your own base model.
 ## **Create a base model from scratch**
 ### Prepare the training data
