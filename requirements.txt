@@ -1,0 +1,12 @@
+numpy==1.26.4
+scipy==1.15.2
+torchio==0.20.19
+scikit-learn==1.1.1
+pyYAML==6.0.2
+matplotlib==3.8.4
+nibabel==5.2.1
+patchify==0.2.3
+tqdm==4.64.1
+antspyx==0.4.2
+connected-components-3d==3.13.0
+osfclient==0.0.5
