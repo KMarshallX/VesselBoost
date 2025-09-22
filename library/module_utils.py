@@ -431,7 +431,7 @@ class ImagePredictor:
         threshold: float,
         connect_threshold: int,
         save_mip: bool = False,
-        save_probability: bool = True
+        save_probability: bool = False
     ) -> None:
         """
         Process all images in the input directory.
