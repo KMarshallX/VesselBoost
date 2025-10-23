@@ -23,6 +23,7 @@ t2boost.py
 /utils/__pycache__
 /models/__pycache__
 /saved_image
+/saved_imgs
 /archive
 /saved_models
 /result_models
