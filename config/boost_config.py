@@ -38,7 +38,7 @@ boost_parser.add_argument('--optim_gamma', type=float, default=0.95, help="Decay
 
 # Augmentation configuration
 boost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity]")
-boost_parser.add_argument('--crop_low_thresh', type=int, default=128, help="minimum crop size threshold for random cropping, dtype: int")
+boost_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
 
 # batch size multiplier
 boost_parser.add_argument('--batch_multiplier', type=int, default=5, help=argparse.SUPPRESS)

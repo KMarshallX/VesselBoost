@@ -66,7 +66,7 @@ def run_angiboost():
         input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
         optimizer_name=config.optimizer, learning_rate=config.lr, optimizer_gamma=config.optim_gamma, num_epochs=config.ep,
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.osz), augmentation_mode=config.augmentation_mode,
-        crop_low_thresh=config.crop_low_thresh
+        crop_mean=config.crop_mean
     )
 
     # training loop

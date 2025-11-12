@@ -54,7 +54,7 @@ class Trainer:
         threshold: Probability threshold for binarization (optional)
         connect_threshold: Minimum connected component size (optional)
         test_mode: Whether to run in test mode (disables some augmentations)
-        crop_low_thresh: Minimum crop size for RandomCrop3D (optional)
+        crop_mean: Mean crop size for RandomCrop3D (optional)
         
     Raises:
         ValueError: If required parameters are invalid
@@ -79,7 +79,7 @@ class Trainer:
         threshold: Optional[float] = None,
         connect_threshold: Optional[int] = None,
         test_mode: bool = False,
-        crop_low_thresh: int = 128
+        crop_mean: int = 128
     ):
         # Validate inputs
         if input_channels <= 0 or output_channels <= 0 or filter_count <= 0:
@@ -111,7 +111,7 @@ class Trainer:
         self.connect_threshold = connect_threshold
         
         # RandomCrop3D configuration
-        self.crop_low_thresh = crop_low_thresh
+        self.crop_mean = crop_mean
         
         # Model path validation
         if pretrained_model_path is not None:
@@ -294,7 +294,7 @@ class Trainer:
         dataset = MultiChannelLoader(
             processed_path, segmentation_path, 
             self.patch_size, self.num_epochs, 
-            crop_low_thresh=self.crop_low_thresh,
+            crop_mean=self.crop_mean,
             batch_multiplier=self.batch_multiplier
         )
         data_loaders = dataset.get_all_loaders()
@@ -337,7 +337,7 @@ class Trainer:
             dataset = MultiChannelLoader(
                 processed_path, segmentation_path, 
                 self.patch_size, self.num_epochs,
-                crop_low_thresh=self.crop_low_thresh,
+                crop_mean=self.crop_mean,
                 batch_multiplier=self.batch_multiplier
             )
             
@@ -429,7 +429,7 @@ class Trainer:
             data_loader = {0: SingleChannelLoader(
                 str(processed_file), str(proxy_file), 
                 self.patch_size, step=self.num_epochs,
-                crop_low_thresh=self.crop_low_thresh,
+                crop_mean=self.crop_mean,
                 batch_multiplier=self.batch_multiplier
             )}
             

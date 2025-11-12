@@ -79,7 +79,7 @@ def run_tta():
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), 
         augmentation_mode=config.augmentation_mode,
         threshold=config.thresh, connect_threshold=config.cc,
-        crop_low_thresh=config.crop_low_thresh
+        crop_mean=config.crop_mean
     )
     # TTA procedure
     tta_process.test_time_adaptation(preprocessed_path, proxy_path, output_path, output_model_path, resource_opt)

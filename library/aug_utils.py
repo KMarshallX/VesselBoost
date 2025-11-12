@@ -387,13 +387,24 @@ class TorchIOAugmentationUtils:
     def _flip(self, p: float = 1, axes: Union[Tuple[int, ...], int] = (0, 1, 2), probability: float = 1.0) -> tio.RandomFlip:
         # Randomly choose a single axis from the available axes
         if isinstance(axes, tuple):
-            random_axis = int(np.random.choice(axes))
+            # If fewer than 2 options are provided, fall back to single-axis choice
+            if len(axes) < 2:
+                random_axis = int(np.random.choice(axes))
+            else:
+                # Choose either a single axis or a pair of distinct axes at random
+                if np.random.rand() < 0.2:
+                    random_axis = int(np.random.choice(axes))
+                else:
+                    chosen = np.random.choice(axes, size=2, replace=False)
+                    # ensure returned as a tuple of ints
+                    random_axis = (int(chosen[0]), int(chosen[1]))
         else:
             random_axis = axes
+
         return tio.RandomFlip(axes=random_axis, flip_probability=probability, p=p)
 
     def _elastic_deform(self, p: float = 1, num_control_points: int = 9, 
-                        max_displacement: int = 7, 
+                        max_displacement: int = 2, 
                         locked_borders: int = 2) -> tio.RandomElasticDeformation:
         return tio.RandomElasticDeformation(num_control_points=num_control_points, 
                                             max_displacement=max_displacement, 
@@ -443,6 +454,8 @@ class TorchIOAugmentationUtils:
                 self._bias(),
                 self._noise()
             ])
+        elif self.mode == 'flip': # legacy
+            transforms = self._flip(axes=(0, 1, 2))
         elif self.mode == 'off':
             # No augmentation, return original subject
             return subject_batch['image'].data.unsqueeze(1), subject_batch['label'].data.unsqueeze(1) # type: ignore
@@ -469,21 +482,21 @@ class Crop3D:
     def __init__(self, mode: str = 'random', 
                 output_size: Union[Tuple[int, int, int], None] = (64, 64, 64), 
                 resize: bool = False, 
-                rand_crop_low_thresh: int = 128):
+                mean: int = 128):
         """
         Initialize Crop3D cropping configuration.
         Args:
             mode: 'random' or 'fixed'.
             output_size: Output size after cropping/resizing (tuple of ints).
             resize: If True, resize cropped patch to output_size.
-            rand_crop_low_thresh: Minimum crop size for random cropping.
+            mean: Mean crop size (used as the center of a normal distribution) for random cropping.
         Raises:
             ValueError: For invalid mode or missing output_size.
         Example:
             1. Random cropping with resizing:
-                cropper = Crop3D(mode='random', output_size=(64, 64, 64), resize=True, rand_crop_low_thresh=128)
+                cropper = Crop3D(mode='random', output_size=(64, 64, 64), resize=True, mean=128)
             2. Random cropping without resizing:
-                cropper = Crop3D(mode='random', output_size=None, resize=False, rand_crop_low_thresh=128)
+                cropper = Crop3D(mode='random', output_size=None, resize=False, mean=128)
             3. Fixed cropping without resizing:
                 cropper = Crop3D(mode='fixed', output_size=(64, 64, 64), resize=False)
         """
@@ -497,17 +510,18 @@ class Crop3D:
         self.mode = mode
         self.output_size = output_size
         self.resize = resize
-        self.rand_crop_low_thresh = rand_crop_low_thresh
+        # Backwards-compat: if caller provided the old keyword, prefer it
+        self.mean = int(mean)
 
     @staticmethod
-    def _crop_size(mode: str, shape: Tuple[int, int, int], output_size: Union[Tuple[int, int, int], None], rand_crop_low_thresh: int) -> Tuple[int, int, int]:
+    def _crop_size(mode: str, shape: Tuple[int, int, int], output_size: Union[Tuple[int, int, int], None], mean: int) -> Tuple[int, int, int]:
         """
         Compute crop size based on mode and shape.
         """
         if mode == 'random':
-            crop_h = int(torch.randint(rand_crop_low_thresh, int(shape[0]) + 1, (1,)).item())
-            crop_w = int(torch.randint(rand_crop_low_thresh, int(shape[1]) + 1, (1,)).item())
-            crop_d = int(torch.randint(rand_crop_low_thresh, int(shape[2]) + 1, (1,)).item())
+            crop_h = int(torch.normal(mean, 5, ()).item())
+            crop_w = int(torch.normal(mean, 5, ()).item())
+            crop_d = int(torch.normal(mean, 5, ()).item())
         else:
             if not isinstance(output_size, tuple) or len(output_size) != 3:
                 raise ValueError("Output size must be a tuple of 3 integers for 'fixed' mode")
@@ -558,9 +572,9 @@ class Crop3D:
         shape = tuple(int(dim) for dim in image_array.shape[:3])
         if len(shape) != 3:
             raise ValueError(f"Input image must be 3D, got shape {image_array.shape}")
-        if self.mode == 'random' and any(dim < self.rand_crop_low_thresh for dim in shape):
-            raise ValueError(f"Image size {shape} must be >= {self.rand_crop_low_thresh} in all dimensions")
-        crop_size = self._crop_size(self.mode, shape, self.output_size, self.rand_crop_low_thresh)
+        if self.mode == 'random' and any(dim < self.mean for dim in shape):
+            raise ValueError(f"Image size {shape} must be >= {self.mean} in all dimensions")
+        crop_size = self._crop_size(self.mode, shape, self.output_size, self.mean)
 
         # If mask is provided, select crop center from ROI or use 'lazy' option
         if mask is not None:

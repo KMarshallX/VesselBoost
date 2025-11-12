@@ -42,7 +42,7 @@ train_parser.add_argument('--optimizer_gamma', type=float, default=0.95, help=ar
 
 # Augmentation mode, available : [on, off, test, mode1]
 train_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity]")
-train_parser.add_argument('--crop_low_thresh', type=int, default=128, help=argparse.SUPPRESS)
+train_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
 
 # batch size multiplier
 train_parser.add_argument('--batch_multiplier', type=int, default=5, help=argparse.SUPPRESS)

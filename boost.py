@@ -52,7 +52,7 @@ def run_boost():
         optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), augmentation_mode=config.augmentation_mode,
         threshold=config.thresh, connect_threshold=config.cc,
-        crop_low_thresh=config.crop_low_thresh
+        crop_mean=config.crop_mean
     )
 
     # training loop
