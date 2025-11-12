@@ -45,7 +45,7 @@ adapt_parser.add_argument('--loss_metric', type=str, default="tver", help="avail
 adapt_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argparse.SUPPRESS)
 
 # Augmentation configuration
-adapt_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity]")
+adapt_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity, flip]")
 adapt_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
 
 # Resource optimization flag. 0: intermediate files are saved, 1: intermediate files are deleted

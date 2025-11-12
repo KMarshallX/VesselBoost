@@ -39,7 +39,7 @@ angiboost_parser.add_argument('--loss_metric', type=str, default="tver", help="a
 angiboost_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argparse.SUPPRESS)
 
 # Augmentation configuration
-angiboost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity]")
+angiboost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity, flip]")
 angiboost_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
 
 # batch size multiplier

@@ -37,7 +37,7 @@ boost_parser.add_argument('--loss_metric', type=str, default="tver", help="avail
 boost_parser.add_argument('--optim_gamma', type=float, default=0.95, help="Decays the learning rate of each parameter group by this ratio, dtype: float")
 
 # Augmentation configuration
-boost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity]")
+boost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity, flip]")
 boost_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
 
 # batch size multiplier

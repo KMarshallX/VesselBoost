@@ -368,6 +368,7 @@ class TorchIOAugmentationUtils:
                 - 'random': Randomly apply a subset of augmentations
                 - 'spatial': Spatial transformations only (flips, elastic deformations)
                 - 'intensity': Intensity transformations only (blurring, bias, noise)
+                - 'flip': Legacy flipping only
                 - 'off': No augmentation, return original subject
         Raises:
             ValueError: For unsupported modes
