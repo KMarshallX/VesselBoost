@@ -6,7 +6,7 @@ This module provides:
 - RandomCrop3D: Random 3D cropping for memory efficiency
 
 Editor: Marshall Xu
-Last Edited: 30/07/2025
+Last Edited: 26/11/2025
 """
 
 import torch
@@ -520,9 +520,12 @@ class Crop3D:
         Compute crop size based on mode and shape.
         """
         if mode == 'random':
-            crop_h = int(torch.normal(mean, 5, ()).item())
-            crop_w = int(torch.normal(mean, 5, ()).item())
-            crop_d = int(torch.normal(mean, 5, ()).item())
+            # crop_h = int(torch.normal(mean, 5, ()).item())
+            # crop_w = int(torch.normal(mean, 5, ()).item())
+            # crop_d = int(torch.normal(mean, 5, ()).item())
+            crop_h = int(torch.randint(32, shape[0], ()).item())
+            crop_w = int(torch.randint(32, shape[1], ()).item())
+            crop_d = int(torch.randint(32, shape[2], ()).item())
         else:
             if not isinstance(output_size, tuple) or len(output_size) != 3:
                 raise ValueError("Output size must be a tuple of 3 integers for 'fixed' mode")
@@ -624,7 +627,7 @@ class Crop3D:
         if self.output_size is None:
             raise ValueError("output_size must be specified for resizing.")
         zoom_factors = tuple(float(out_dim) / float(crop_dim) for out_dim, crop_dim in zip(self.output_size, crop_size))
-        resized_img = scind.zoom(cropped_img, zoom_factors, order=3, mode='nearest')
+        resized_img = scind.zoom(cropped_img, zoom_factors, order=0, mode='nearest')
         resized_lab = scind.zoom(cropped_lab, zoom_factors, order=0, mode='nearest')
         return resized_img, resized_lab
 
