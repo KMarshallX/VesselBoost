@@ -17,7 +17,7 @@ import torch.nn.functional as F
 import torch.optim
 import numpy as np
 from typing import Optional, Any
-from models import Unet, ASPPCNN, CustomSegmentationNetwork, MainArchitecture
+from models import Unet, ASPPCNN, CustomSegmentationNetwork, MainArchitecture, nnUNetWrapper
 
 
 def sigmoid(z: np.ndarray) -> np.ndarray:
@@ -108,7 +108,7 @@ def choose_DL_model(model_name: str, in_chan: int, out_chan: int, filter_num: in
     Factory function to create neural network models.
     
     Args:
-        model_name: Name of the model ('unet3d', 'aspp', 'test', 'atrous')
+        model_name: Name of the model ('unet3d', 'aspp', 'test', 'atrous', 'nnunet')
         in_chan: Number of input channels
         out_chan: Number of output channels
         filter_num: Number of filters in the model
@@ -123,7 +123,8 @@ def choose_DL_model(model_name: str, in_chan: int, out_chan: int, filter_num: in
         "unet3d": lambda: Unet(in_chan, out_chan, filter_num),
         "aspp": lambda: ASPPCNN(in_chan, out_chan, [1, 2, 3, 5, 7]),
         "test": lambda: CustomSegmentationNetwork(),
-        "atrous": lambda: MainArchitecture()
+        "atrous": lambda: MainArchitecture(),
+        "nnunet": lambda: nnUNetWrapper(in_chan, out_chan, filter_num),
     }
     
     if model_name not in model_registry:
