@@ -399,7 +399,8 @@ class ImagePredictor:
             resized_image = self._resize_image(image_array, target_size)
             
             # Standardize image
-            standardized_image = normaliser(resized_image)
+            # standardized_image = normaliser(resized_image)
+            standardized_image = standardiser(resized_image)
             
             # Create patches
             patches = patchify(standardized_image, (64, 64, 64), 64)
@@ -430,7 +431,7 @@ class ImagePredictor:
         model_path: Union[str, Path],
         threshold: float,
         connect_threshold: int,
-        save_mip: bool = False,
+        save_mip: bool = True,
         save_probability: bool = False
     ) -> None:
         """
@@ -510,6 +511,265 @@ class ImagePredictor:
         )
         logger.info("Prediction and thresholding procedure completed")
 
+
+class ImagePredictorWithBlending(ImagePredictor):
+    """
+    Enhanced neural network prediction with Gaussian blending for smooth patch transitions.
+    
+    This experimental class extends ImagePredictor with:
+    - Overlapping patches to reduce boundary artifacts
+    - Gaussian blending weights for smooth transitions
+    - Improved handling of corner/edge cases
+    
+    Use this instead of ImagePredictor to eliminate artifacts at patch boundaries.
+    You can switch back to ImagePredictor anytime if needed.
+    
+    Args:
+        model_name: Type of neural network model to use
+        input_channel: Number of input channels for the model
+        output_channel: Number of output channels for the model
+        filter_number: Number of filters in the model
+        input_path: Path to directory containing preprocessed images
+        output_path: Path to directory for saving predictions
+        overlap_ratio: Ratio of overlap between patches (default 0.5 = 50% overlap)
+        
+    Editor: Marshall Xu
+    Last edited: 07/12/2025
+    """
+    
+    def __init__(
+        self,
+        model_name: str,
+        input_channel: int,
+        output_channel: int,
+        filter_number: int,
+        input_path: Union[str, Path],
+        output_path: Union[str, Path],
+        overlap_ratio: float = 0.5
+    ):
+        super().__init__(model_name, input_channel, output_channel, 
+                        filter_number, input_path, output_path)
+        
+        # Validate overlap ratio
+        if not 0 <= overlap_ratio < 1:
+            raise ValueError("overlap_ratio must be between 0 and 1")
+        
+        self.overlap_ratio = overlap_ratio
+        self.patch_size = 64
+        self.step_size = int(self.patch_size * (1 - overlap_ratio))
+        
+        logger.info(f"Initialized ImagePredictorWithBlending (overlap={overlap_ratio*100}%, step={self.step_size})")
+    
+    def _create_gaussian_weight_map(self, patch_shape: Tuple[int, int, int]) -> np.ndarray:
+        """
+        Create 3D Gaussian weight map for blending overlapping patches.
+        
+        The Gaussian weight gives higher confidence to the center of patches
+        and lower confidence at edges, enabling smooth blending.
+        
+        Args:
+            patch_shape: Shape of the patch (depth, height, width)
+            
+        Returns:
+            3D Gaussian weight map normalized to [0, 1]
+        """
+        # Create 1D Gaussian for each dimension
+        def gaussian_1d(size: int, sigma: float = None) -> np.ndarray: # type: ignore
+            if sigma is None:
+                sigma = size / 6.0  # Standard deviation as 1/6 of size
+            
+            center = size / 2.0
+            x = np.arange(size)
+            gaussian = np.exp(-((x - center) ** 2) / (2 * sigma ** 2))
+            return gaussian / gaussian.max()
+        
+        # Create 3D Gaussian by outer product of 1D Gaussians
+        d, h, w = patch_shape
+        gaussian_d = gaussian_1d(d)
+        gaussian_h = gaussian_1d(h)
+        gaussian_w = gaussian_1d(w)
+        
+        # Compute 3D Gaussian weight map
+        weight_map = np.einsum('i,j,k->ijk', gaussian_d, gaussian_h, gaussian_w)
+        
+        return weight_map
+    
+    def _extract_patches_with_overlap(self, image: np.ndarray) -> Tuple[List[Tuple[int, int, int, np.ndarray]], Tuple[int, int, int]]:
+        """
+        Extract overlapping patches from image with their positions.
+        
+        Args:
+            image: Input 3D image array
+            
+        Returns:
+            Tuple of (list of (z, y, x, patch) tuples, image_shape)
+        """
+        d, h, w = image.shape
+        patches_with_positions = []
+        
+        # Calculate number of patches in each dimension
+        z_positions = list(range(0, max(d - self.patch_size + 1, 1), self.step_size))
+        y_positions = list(range(0, max(h - self.patch_size + 1, 1), self.step_size))
+        x_positions = list(range(0, max(w - self.patch_size + 1, 1), self.step_size))
+        
+        # Ensure we cover the entire image by adjusting last positions
+        if z_positions[-1] + self.patch_size < d:
+            z_positions.append(d - self.patch_size)
+        if y_positions[-1] + self.patch_size < h:
+            y_positions.append(h - self.patch_size)
+        if x_positions[-1] + self.patch_size < w:
+            x_positions.append(w - self.patch_size)
+        
+        # Extract patches
+        for z in z_positions:
+            for y in y_positions:
+                for x in x_positions:
+                    patch = image[z:z+self.patch_size, y:y+self.patch_size, x:x+self.patch_size]
+                    
+                    # Pad if patch is smaller than patch_size (edge cases)
+                    if patch.shape != (self.patch_size, self.patch_size, self.patch_size):
+                        padded_patch = np.zeros((self.patch_size, self.patch_size, self.patch_size))
+                        padded_patch[:patch.shape[0], :patch.shape[1], :patch.shape[2]] = patch
+                        patch = padded_patch
+                    
+                    patches_with_positions.append((z, y, x, patch))
+        
+        return patches_with_positions, (d, h, w)
+    
+    def _run_inference_with_blending(
+        self, 
+        patches_with_positions: List[Tuple[int, int, int, np.ndarray]], 
+        model: torch.nn.Module,
+        image_shape: Tuple[int, int, int]
+    ) -> np.ndarray:
+        """
+        Run neural network inference on overlapping patches with Gaussian blending.
+        
+        Args:
+            patches_with_positions: List of (z, y, x, patch) tuples
+            model: Loaded neural network model
+            image_shape: Original image dimensions
+            
+        Returns:
+            Blended prediction probability map
+        """
+        logger.info(f"Starting prediction with Gaussian blending on {len(patches_with_positions)} overlapping patches")
+        
+        model.eval()
+        sigmoid_fn = torch.nn.Sigmoid()
+        
+        # Initialize output arrays
+        prediction_sum = np.zeros(image_shape, dtype=np.float32)
+        weight_sum = np.zeros(image_shape, dtype=np.float32)
+        
+        # Create Gaussian weight map once
+        gaussian_weight = self._create_gaussian_weight_map((self.patch_size, self.patch_size, self.patch_size))
+        
+        # Process each patch
+        with torch.no_grad():
+            for z, y, x, patch in tqdm(patches_with_positions, desc="Processing overlapping patches"):
+                # Convert to tensor
+                patch_tensor = torch.from_numpy(patch).unsqueeze(0).unsqueeze(0).to(torch.float)
+                patch_tensor = patch_tensor.to(self.device)
+                
+                # Run inference
+                prediction = model(patch_tensor)
+                prediction = sigmoid_fn(prediction)
+                
+                # Convert back to numpy
+                prediction_np = prediction.cpu().numpy()[0, 0, :, :, :]
+                
+                # Calculate actual patch bounds (for edge cases)
+                z_end = min(z + self.patch_size, image_shape[0])
+                y_end = min(y + self.patch_size, image_shape[1])
+                x_end = min(x + self.patch_size, image_shape[2])
+                
+                actual_d = z_end - z
+                actual_h = y_end - y
+                actual_w = x_end - x
+                
+                # Apply Gaussian weights and accumulate
+                weighted_prediction = prediction_np[:actual_d, :actual_h, :actual_w] * gaussian_weight[:actual_d, :actual_h, :actual_w]
+                
+                prediction_sum[z:z_end, y:y_end, x:x_end] += weighted_prediction
+                weight_sum[z:z_end, y:y_end, x:x_end] += gaussian_weight[:actual_d, :actual_h, :actual_w]
+        
+        # Normalize by accumulated weights to get final prediction
+        # Avoid division by zero
+        weight_sum[weight_sum == 0] = 1.0
+        final_prediction = prediction_sum / weight_sum
+        
+        logger.info("Gaussian blending prediction completed")
+        return final_prediction
+    
+    def process_single_image(
+        self,
+        image_name: str,
+        model: torch.nn.Module,
+        threshold: float,
+        connect_threshold: int,
+        save_mip: bool = False,
+        save_probability: bool = False
+    ) -> None:
+        """
+        Process a single image with overlapping patches and Gaussian blending.
+        
+        This overrides the parent method to use the enhanced blending pipeline.
+        
+        Args:
+            image_name: Name of the image file to process
+            model: Loaded neural network model
+            threshold: Probability threshold for binarization
+            connect_threshold: Minimum component size to keep
+            save_mip: Whether to save maximum intensity projection
+            save_probability: Whether to save probability map
+        """
+        image_path = self.input_path / image_name
+        
+        if not image_path.exists():
+            raise FileNotFoundError(f"Image not found: {image_path}")
+        
+        try:
+            # Load image
+            raw_image = nib.load(str(image_path))  # type: ignore
+            header = raw_image.header
+            affine = raw_image.affine  # type: ignore
+            image_array = raw_image.get_fdata()  # type: ignore
+
+            original_size = image_array.shape
+            
+            # Calculate optimal patch dimensions and resize
+            target_size = self._calculate_patch_dimensions(original_size, self.patch_size)
+            resized_image = self._resize_image(image_array, target_size)
+            
+            # Standardize image
+            standardized_image = standardiser(resized_image)
+            
+            # Extract overlapping patches with positions
+            patches_with_positions, resized_shape = self._extract_patches_with_overlap(standardized_image)
+            
+            # Run inference with Gaussian blending
+            prediction_map = self._run_inference_with_blending(patches_with_positions, model, resized_shape)
+            
+            # Resize back to original dimensions
+            prediction_map = self._resize_image(prediction_map, original_size)
+            
+            # Apply postprocessing
+            logger.info("Applying postprocessing...")
+            binary_mask = self._apply_postprocessing(prediction_map, threshold, connect_threshold)
+            logger.info("Postprocessing completed")
+
+            # Save results
+            self._save_results(
+                image_name, prediction_map, binary_mask, affine, header,
+                save_probability, save_mip
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to process {image_name}: {e}")
+            raise RuntimeError(f"Processing failed for {image_name}: {e}")
+
+
 def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], prep_mode: int) -> None:
     """
     Preprocesses medical images with bias field correction and/or denoising.
@@ -541,7 +801,7 @@ def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], p
         logger.error(f"Preprocessing failed: {e}")
         raise
 
-
+# External API
 def make_prediction(
     model_name: str, 
     input_channel: int, 
@@ -552,7 +812,10 @@ def make_prediction(
     thresh: float, 
     connect_thresh: int, 
     test_model_name: Union[str, Path],
-    mip_flag: bool
+    mip_flag: bool,
+    probability_flag: bool = True,
+    use_gaussian_blending: bool = False,
+    overlap_ratio: float = 0.5
 ) -> None:
     """
     Performs neural network prediction on all images in a directory.
@@ -568,24 +831,40 @@ def make_prediction(
         connect_thresh: Minimum connected component size
         test_model_name: Path to the trained model file
         mip_flag: Whether to save maximum intensity projections
+        probability_flag: Whether to save probability maps
+        use_gaussian_blending: If True, use ImagePredictorWithBlending (experimental)
+                               to reduce patch boundary artifacts. Set to False for
+                               original behavior. (default: False)
+        overlap_ratio: Overlap ratio for Gaussian blending (only used if 
+                      use_gaussian_blending=True). Range: 0-1 (default: 0.5)
 
     Raises:
         FileNotFoundError: If input path or model file doesn't exist
         ValueError: If model parameters are invalid
     """
     try:
-        # Initialize predictor with model configuration and paths
-        predictor = ImagePredictor(
-            model_name, input_channel, output_channel, 
-            filter_number, input_path, output_path
-        )
+        # Choose predictor based on blending flag
+        if use_gaussian_blending:
+            logger.info("Using experimental ImagePredictorWithBlending (Gaussian blending enabled)")
+            predictor = ImagePredictorWithBlending(
+                model_name, input_channel, output_channel, 
+                filter_number, input_path, output_path,
+                overlap_ratio=overlap_ratio
+            )
+        else:
+            logger.info("Using standard ImagePredictor (original method)")
+            predictor = ImagePredictor(
+                model_name, input_channel, output_channel, 
+                filter_number, input_path, output_path
+            )
         
         # Process all images in the input directory
         predictor.predict_all_images(
             model_path=test_model_name,
             threshold=thresh,
             connect_threshold=connect_thresh,
-            save_mip=mip_flag
+            save_mip=mip_flag,
+            save_probability=probability_flag
         )
         
     except Exception as e:

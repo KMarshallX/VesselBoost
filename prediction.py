@@ -31,6 +31,8 @@ def run_prediction():
     threshold = config.thresh
     cc = config.cc
     pretrained_model = config.pretrained
+    use_blending = config.use_blending
+    overlap_ratio = config.overlap_ratio
 
     if not os.path.exists(output_path):
         logger.info(f"{output_path} does not exist.")
@@ -45,6 +47,8 @@ def run_prediction():
     logger.info("Parameters Info:")
     logger.info("*" * 61)
     logger.info(f"Input image path: {image_path}, Preprocessed path: {preprocessed_path}, Output path: {output_path}, Prep_mode: {prep_mode}")
+    if use_blending:
+        logger.info(f"EXPERIMENTAL MODE: Gaussian blending enabled with {overlap_ratio*100}% overlap")
 
     # preprocess procedure
     preprocess_procedure(image_path, preprocessed_path, prep_mode)
@@ -54,7 +58,7 @@ def run_prediction():
         model_name=model_type, input_channel=in_chan, output_channel=ou_chan,
         filter_number=fil_num, input_path=preprocessed_path, output_path=output_path,
         thresh=threshold, connect_thresh=cc, test_model_name=pretrained_model,
-        mip_flag=True
+        mip_flag=True, use_gaussian_blending=use_blending, overlap_ratio=overlap_ratio
     )
 
     logger.info(f"Prediction session has been completed! Resultant segmentation has been saved to {output_path}.")

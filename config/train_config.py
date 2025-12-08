@@ -24,8 +24,8 @@ train_parser.add_argument('--filters', type=int, default=16, help=argparse.SUPPR
 # Training configurations
 train_parser.add_argument('--learning_rate', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3")
 train_parser.add_argument('--epochs', type=int, default=5000, help="epoch number (times of iteration), dtype: int, default=16")
-# model name, available: [unet3d, aspp, atrous]
-train_parser.add_argument('--model', type=str, default="unet3d", help="available: [unet3d, aspp, atrous]")
+# model name, available: [unet3d, aspp, atrous, nnunet]
+train_parser.add_argument('--model', type=str, default="unet3d", help="available: [unet3d, aspp, atrous, nnunet]")
 # expected patch size for training
 train_parser.add_argument('--output_size', nargs=3, type=int, default=(64, 64, 64), help='Expected patch size for training (x y z)')
 # optimizer type, available: [sgd, adam]

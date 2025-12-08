@@ -18,7 +18,7 @@ boost_parser.add_argument('--prep_mode', type=int, default=4, help="Preprocessin
 boost_parser.add_argument('--output_model', default = "./saved_models/model", help="output model path, e.g. ./saved_models/xxxxx")
 
 # model configuration
-boost_parser.add_argument('--model', type=str, default="unet3d", help="available: [unet3d, aspp, atrous]")
+boost_parser.add_argument('--model', type=str, default="unet3d", help="available: [unet3d, aspp, atrous, nnunet]")
 boost_parser.add_argument('--input_channel', type=int, default=1, help=argparse.SUPPRESS)
 boost_parser.add_argument('--output_channel', type=int, default=1, help=argparse.SUPPRESS)
 boost_parser.add_argument('--filters', type=int, default=16, help=argparse.SUPPRESS)
