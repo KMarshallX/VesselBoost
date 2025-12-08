@@ -2,7 +2,7 @@
 Improved data loader functions
 
 Editor: Marshall Xu
-Last Edited: 05/08/2025
+Last Edited: 26/11/2025
 """
 
 import nibabel as nib  # type: ignore
@@ -61,7 +61,7 @@ class SingleChannelLoader:
         # Load images & check compatibility
         # Cache image shapes
         self.img_arr, self.seg_arr = self._load_and_preprocess_images()
-
+        self.random_cropper = self._initialize_random_cropper()
         logger.info(f"Initialized loader for {self.img_path.name}")
 
     def _load_and_preprocess_images(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -131,7 +131,7 @@ class SingleChannelLoader:
 
     def __len__(self) -> int:
         return self.step
-        
+    
     def __iter__(self):
         """
         What this loader does:
@@ -146,23 +146,13 @@ class SingleChannelLoader:
         for i in range(self.step):
             try:
                 
-                # cropper = RandomCrop3D(self._image_shape, self.patch_size, False, self.crop_low_thresh)
-                random_cropper = self._initialize_random_cropper()
-                # fixed_cropper = self._initialize_fixed_cropper()
-
                 # large_img_crop, large_seg_crop = random_cropper(self.img_arr, self.seg_arr, mask='lazy')
                 img_batch = np.empty((self.batch_multiplier + 1, *self.patch_size), dtype=self.img_arr.dtype)
                 seg_batch = np.empty((self.batch_multiplier + 1, *self.patch_size), dtype=self.seg_arr.dtype)
                 for j in range(self.batch_multiplier + 1):
-                    # Generate fixed-size patches from the large crop
-                    img_crop, seg_crop = random_cropper(self.img_arr, self.seg_arr, mask='lazy')
+                    img_crop, seg_crop = self.random_cropper(self.img_arr, self.seg_arr, mask='lazy')
                     img_batch[j] = img_crop
-                    seg_batch[j] = seg_crop
-                # Resize the large crop to match the patch size
-                # large_img_crop, large_seg_crop = self._zooming(large_img_crop, large_seg_crop)
-                # img_batch[self.batch_multiplier] = large_img_crop
-                # seg_batch[self.batch_multiplier] = large_seg_crop  
-                # Yield the cropped and resized patches as a batch of pytorch tensors
+                    seg_batch[j] = seg_crop  
                 yield torch.from_numpy(img_batch).float(), torch.from_numpy(seg_batch).ceil().int()
 
             except Exception as e:
@@ -184,7 +174,7 @@ class MultiChannelLoader:
     
     def __init__(self, img_dir: Union[str, Path], seg_dir: Union[str, Path], 
                 patch_size: Tuple[int, int, int], step: int, 
-                normalization: str = 'normalize',
+                normalization: str = 'standardize',
                 crop_mean: int = 128,
                 batch_multiplier: int = 5):
         """
