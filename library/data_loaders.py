@@ -25,7 +25,7 @@ class SingleChannelLoader:
     def __init__(self, img_path: Union[str, Path], seg_path: Union[str, Path], 
                 patch_size: Tuple[int, int, int], step: int, 
                 normalization: str = 'standardize',
-                crop_mean: int = 128,
+                crop_low_thresh: int = 64,
                 batch_multiplier: int = 5):
         """
         Initialize the data loader for a single image/segmentation pair.
@@ -36,7 +36,7 @@ class SingleChannelLoader:
             patch_size (Tuple[int, int, int]): Size of patches to extract (height, width, depth)
             step (int): Number of batches (iterations) to generate per epoch
             normalization (str): Type of normalization to apply ('standardize', 'normalize', or 'none')
-            crop_mean (int): Mean crop size for random cropping in each dimension
+            crop_low_thresh (int): Lower threshold crop size for random cropping in each dimension
             batch_multiplier (int): Number of fixed-size patches to generate from each large crop (default: 5)
         
         Raises:
@@ -55,7 +55,7 @@ class SingleChannelLoader:
         self.patch_size = patch_size
         self.step = step
         self.normalization = normalization
-        self.crop_mean = crop_mean
+        self.crop_low_thresh = crop_low_thresh
         self.batch_multiplier = batch_multiplier
 
         # Load images & check compatibility
@@ -94,7 +94,7 @@ class SingleChannelLoader:
 
     def _initialize_random_cropper(self) -> Crop3D:
         """Initialize the random cropper"""
-        return Crop3D('random', resize=True, mean=self.crop_mean)
+        return Crop3D('random', resize=True, lower_threshold=self.crop_low_thresh)
     
     def _initialize_fixed_cropper(self) -> Crop3D:
         """Initialize the fixed cropper"""
@@ -123,7 +123,7 @@ class SingleChannelLoader:
                 f"  seg_img: {self.seg_path.name}\n"
                 f"  patch_size: {self.patch_size}\n"
                 f"  normalization: {self.normalization}\n"
-                f"  crop_mean: {self.crop_mean}\n"
+                f"  crop_low_thresh: {self.crop_low_thresh}\n"
                 f"  number of batches: {self.step}\n"
                 f"  num. of patches per batch: {self.batch_multiplier+1}\n"
                 f"  total num. of patches: {self.step * (self.batch_multiplier + 1)}\n"
@@ -175,7 +175,7 @@ class MultiChannelLoader:
     def __init__(self, img_dir: Union[str, Path], seg_dir: Union[str, Path], 
                 patch_size: Tuple[int, int, int], step: int, 
                 normalization: str = 'standardize',
-                crop_mean: int = 128,
+                crop_low_thresh: int = 64,
                 batch_multiplier: int = 5):
         """
         Initialize the multi-channel loader for a directory of image/segmentation pairs.
@@ -186,7 +186,7 @@ class MultiChannelLoader:
             patch_size (Tuple[int, int, int]): Size of patches to extract (height, width, depth)
             step (int): Number of batches (iterations) to generate per image
             normalization (str): Type of normalization to apply ('standardize', 'normalize', or 'none')
-            crop_mean (int): Mean crop size for random cropping in each dimension
+            crop_low_thresh (int): Lower threshold crop size for random cropping in each dimension
             batch_multiplier (int): Number of fixed-size patches to generate from each large crop (default: 5)
         """
         self.img_dir = Path(img_dir)
@@ -194,7 +194,7 @@ class MultiChannelLoader:
         self.patch_size = patch_size
         self.step = step
         self.normalization = normalization
-        self.crop_mean = crop_mean
+        self.crop_low_thresh = crop_low_thresh
         self.batch_multiplier = batch_multiplier
 
         # Find and match image pairs
@@ -248,7 +248,7 @@ class MultiChannelLoader:
         img_path, seg_path = self.image_pairs[index]
         return SingleChannelLoader(
             img_path, seg_path, self.patch_size, self.step,
-            self.normalization, self.crop_mean, self.batch_multiplier
+            self.normalization, self.crop_low_thresh, self.batch_multiplier
         )
 
     def get_all_loaders(self) -> Dict[int, SingleChannelLoader]:
@@ -290,7 +290,7 @@ class MultiChannelLoader:
                 f"  num_images: {len(self.image_pairs)}\n"
                 f"  patch_size: {self.patch_size}\n"
                 f"  normalization: {self.normalization}\n"
-                f"  crop_mean: {self.crop_mean}\n"
+                f"  crop_low_thresh: {self.crop_low_thresh}\n"
                 f"  total number of batches: {self.step * len(self.image_pairs)}\n"
                 f"  total number of patches: {self.step * len(self.image_pairs) * (self.batch_multiplier + 1)}\n"
                 f")")

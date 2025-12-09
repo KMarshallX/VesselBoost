@@ -52,7 +52,7 @@ def run_boost():
         optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.patch_size), augmentation_mode=config.augmentation_mode,
         threshold=config.thresh, connect_threshold=config.cc,
-        crop_mean=config.crop_mean
+        crop_low_thresh=config.crop_low_thresh
     )
 
     # training loop
@@ -63,7 +63,10 @@ def run_boost():
         config.model, config.input_channel, config.output_channel,
         config.filters, preprocessed_path, output_path,
         config.thresh, config.cc, config.output_model,
-        mip_flag=True
+        mip_flag=True,
+        probability_flag=True,
+        use_gaussian_blending=config.use_blending,
+        overlap_ratio=config.overlap_ratio
     )
 
     logger.info(f"Boosting session has been completed! Resultant segmentation has been saved to {output_path}.")

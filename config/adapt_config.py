@@ -46,7 +46,11 @@ adapt_parser.add_argument('--optim_gamma', type=float, default=0.95, help=argpar
 
 # Augmentation configuration
 adapt_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity, flip]")
-adapt_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
+adapt_parser.add_argument('--crop_low_thresh', type=int, default=64, help="lower threshold for random crop minimum size, used in augmentation")
+
+# experimental features
+adapt_parser.add_argument('--use_blending', action='store_true', help="EXPERIMENTAL: Use Gaussian blending to reduce patch boundary artifacts. Default: False (original method)")
+adapt_parser.add_argument('--overlap_ratio', type=float, default=0.5, help="Overlap ratio for Gaussian blending (0-1). Only used with --use_blending. Default: 0.5 (50%% overlap)")
 
 # Resource optimization flag. 0: intermediate files are saved, 1: intermediate files are deleted
 adapt_parser.add_argument('--resource', type=int, default=0, help=argparse.SUPPRESS)

@@ -38,7 +38,7 @@ boost_parser.add_argument('--optim_gamma', type=float, default=0.95, help="Decay
 
 # Augmentation configuration
 boost_parser.add_argument('--augmentation_mode', type=str, default="spatial", help="available: [all, off, random, spatial, intensity, flip]")
-boost_parser.add_argument('--crop_mean', type=int, default=128, help="mean value for random crop, used in augmentation")
+boost_parser.add_argument('--crop_low_thresh', type=int, default=64, help="lower threshold for random crop minimum size, used in augmentation")
 
 # batch size multiplier
 boost_parser.add_argument('--batch_multiplier', type=int, default=5, help=argparse.SUPPRESS)
@@ -48,6 +48,10 @@ boost_parser.add_argument('--batch_multiplier', type=int, default=5, help=argpar
 boost_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 # connected components analysis threshold value (denoising)
 boost_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
+
+# experimental features
+boost_parser.add_argument('--use_blending', action='store_true', help="EXPERIMENTAL: Use Gaussian blending to reduce patch boundary artifacts. Default: False (original method)")
+boost_parser.add_argument('--overlap_ratio', type=float, default=0.5, help="Overlap ratio for Gaussian blending (0-1). Only used with --use_blending. Default: 0.5 (50%% overlap)")
 # lower threshold for random crop minimum size
 
 args = boost_parser.parse_args()

@@ -483,21 +483,21 @@ class Crop3D:
     def __init__(self, mode: str = 'random', 
                 output_size: Union[Tuple[int, int, int], None] = (64, 64, 64), 
                 resize: bool = False, 
-                mean: int = 128):
+                lower_threshold: int = 32):
         """
         Initialize Crop3D cropping configuration.
         Args:
             mode: 'random' or 'fixed'.
             output_size: Output size after cropping/resizing (tuple of ints).
             resize: If True, resize cropped patch to output_size.
-            mean: Mean crop size (used as the center of a normal distribution) for random cropping.
+            lower_threshold: Minimum crop size for random cropping.
         Raises:
             ValueError: For invalid mode or missing output_size.
         Example:
             1. Random cropping with resizing:
-                cropper = Crop3D(mode='random', output_size=(64, 64, 64), resize=True, mean=128)
+                cropper = Crop3D(mode='random', output_size=(64, 64, 64), resize=True, lower_threshold=32)
             2. Random cropping without resizing:
-                cropper = Crop3D(mode='random', output_size=None, resize=False, mean=128)
+                cropper = Crop3D(mode='random', output_size=None, resize=False, lower_threshold=32)
             3. Fixed cropping without resizing:
                 cropper = Crop3D(mode='fixed', output_size=(64, 64, 64), resize=False)
         """
@@ -512,10 +512,10 @@ class Crop3D:
         self.output_size = output_size
         self.resize = resize
         # Backwards-compat: if caller provided the old keyword, prefer it
-        self.mean = int(mean)
+        self.lower_threshold = int(lower_threshold)
 
     @staticmethod
-    def _crop_size(mode: str, shape: Tuple[int, int, int], output_size: Union[Tuple[int, int, int], None], mean: int) -> Tuple[int, int, int]:
+    def _crop_size(mode: str, shape: Tuple[int, int, int], output_size: Union[Tuple[int, int, int], None], lower_threshold: int) -> Tuple[int, int, int]:
         """
         Compute crop size based on mode and shape.
         """
@@ -523,9 +523,9 @@ class Crop3D:
             # crop_h = int(torch.normal(mean, 5, ()).item())
             # crop_w = int(torch.normal(mean, 5, ()).item())
             # crop_d = int(torch.normal(mean, 5, ()).item())
-            crop_h = int(torch.randint(32, shape[0], ()).item())
-            crop_w = int(torch.randint(32, shape[1], ()).item())
-            crop_d = int(torch.randint(32, shape[2], ()).item())
+            crop_h = int(torch.randint(lower_threshold, shape[0], ()).item())
+            crop_w = int(torch.randint(lower_threshold, shape[1], ()).item())
+            crop_d = int(torch.randint(lower_threshold, shape[2], ()).item())
         else:
             if not isinstance(output_size, tuple) or len(output_size) != 3:
                 raise ValueError("Output size must be a tuple of 3 integers for 'fixed' mode")
@@ -576,9 +576,9 @@ class Crop3D:
         shape = tuple(int(dim) for dim in image_array.shape[:3])
         if len(shape) != 3:
             raise ValueError(f"Input image must be 3D, got shape {image_array.shape}")
-        if self.mode == 'random' and any(dim < self.mean for dim in shape):
-            raise ValueError(f"Image size {shape} must be >= {self.mean} in all dimensions")
-        crop_size = self._crop_size(self.mode, shape, self.output_size, self.mean)
+        if self.mode == 'random' and any(dim < self.lower_threshold for dim in shape):
+            raise ValueError(f"Image size {shape} must be >= {self.lower_threshold} in all dimensions")
+        crop_size = self._crop_size(self.mode, shape, self.output_size, self.lower_threshold)
 
         # If mask is provided, select crop center from ROI or use 'lazy' option
         if mask is not None:

@@ -25,7 +25,7 @@ from .loss_func import choose_DL_model, choose_optimizer, choose_loss_metric
 from .aug_utils import AugmentationUtils, TorchIOAugmentationUtils
 from .eval_utils import CrossValidationHelper
 from .data_loaders import SingleChannelLoader, MultiChannelLoader
-from .module_utils import ImagePredictor
+from .module_utils import ImagePredictor, ImagePredictorWithBlending
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ class Trainer:
         threshold: Optional[float] = None,
         connect_threshold: Optional[int] = None,
         test_mode: bool = False,
-        crop_mean: int = 128
+        crop_low_thresh: int = 64
     ):
         # Validate inputs
         if input_channels <= 0 or output_channels <= 0 or filter_count <= 0:
@@ -111,7 +111,7 @@ class Trainer:
         self.connect_threshold = connect_threshold
         
         # RandomCrop3D configuration
-        self.crop_mean = crop_mean
+        self.crop_low_thresh = crop_low_thresh
         
         # Model path validation
         if pretrained_model_path is not None:
@@ -294,7 +294,7 @@ class Trainer:
         dataset = MultiChannelLoader(
             processed_path, segmentation_path, 
             self.patch_size, self.num_epochs, 
-            crop_mean=self.crop_mean,
+            crop_low_thresh=self.crop_low_thresh,
             batch_multiplier=self.batch_multiplier
         )
         data_loaders = dataset.get_all_loaders()
@@ -337,7 +337,7 @@ class Trainer:
             dataset = MultiChannelLoader(
                 processed_path, segmentation_path, 
                 self.patch_size, self.num_epochs,
-                crop_mean=self.crop_mean,
+                crop_low_thresh=self.crop_low_thresh,
                 batch_multiplier=self.batch_multiplier
             )
             
@@ -365,7 +365,9 @@ class Trainer:
         proxy_path: Union[str, Path],
         output_path: Union[str, Path],
         model_output_dir: Union[str, Path],
-        resource_optimization: int = 0
+        resource_optimization: int = 0,
+        use_gaussian_blending: bool = False,
+        overlap_ratio: float = 0.5
     ) -> None:
         """
         Perform test-time adaptation on processed images.
@@ -376,6 +378,8 @@ class Trainer:
             output_path: Path for final predictions
             model_output_dir: Directory for adapted models
             resource_optimization: 0=keep files, 1=clean up intermediate files
+            use_gaussian_blending: If True, use Gaussian blending for predictions
+            overlap_ratio: Overlap ratio for Gaussian blending (0-1)
         """
         if self.pretrained_model_path is None:
             raise ValueError("Pretrained model required for test-time adaptation")
@@ -403,17 +407,33 @@ class Trainer:
             proxy_files = list(proxy_path.glob("*"))
             if len(proxy_files) != len(processed_files):
                 logger.info("Generating proxy segmentations...")
-                predictor = ImagePredictor(
+                
+                # Choose predictor based on blending flag for proxy generation
+                if use_gaussian_blending:
+                    predictor = ImagePredictorWithBlending(
                     self.model_name, 
                     self.model_config[0], 
                     self.model_config[1], 
                     self.model_config[2], 
                     processed_path, 
-                    proxy_path
-                )
+                    proxy_path,
+                    overlap_ratio=overlap_ratio
+                    )
+                else:
+                    predictor = ImagePredictor(
+                        self.model_name, 
+                        self.model_config[0], 
+                        self.model_config[1], 
+                        self.model_config[2], 
+                        processed_path, 
+                        proxy_path
+                    )
+                
                 predictor(
-                    self.threshold, self.connect_threshold, 
-                    str(self.pretrained_model_path), processed_file.name, 
+                    self.threshold, 
+                    self.connect_threshold, 
+                    str(self.pretrained_model_path), 
+                    processed_file.name, 
                     save_mip=False
                 )
             
@@ -424,12 +444,14 @@ class Trainer:
                 continue
             
             logger.info("Found proxy file, starting fine-tuning...")
+            if use_gaussian_blending:
+                logger.info(f"Gaussian blending enabled (overlap={overlap_ratio*100}%)")
             
             # Initialize single-image data loader for adaptation
             data_loader = {0: SingleChannelLoader(
                 str(processed_file), str(proxy_file), 
                 self.patch_size, step=self.num_epochs,
-                crop_mean=self.crop_mean,
+                crop_low_thresh=self.crop_low_thresh,
                 batch_multiplier=self.batch_multiplier
             )}
             
@@ -442,18 +464,33 @@ class Trainer:
             
             # Generate final prediction
             logger.info(f"Generating final prediction for {file_stem}")
-            predictor = ImagePredictor(
-                self.model_name, 
-                self.model_config[0], 
-                self.model_config[1], 
-                self.model_config[2], 
-                processed_path, 
-                output_path
-            )
-            predictor.predict_all_images(
-                model_path=adapted_model_path, 
-                threshold=self.threshold,
-                connect_threshold=self.connect_threshold, 
+            
+            # Choose predictor based on blending flag
+            if use_gaussian_blending:
+                predictor = ImagePredictorWithBlending(
+                    self.model_name, 
+                    self.model_config[0], 
+                    self.model_config[1], 
+                    self.model_config[2], 
+                    processed_path, 
+                    output_path,
+                    overlap_ratio=overlap_ratio
+                )
+            else:
+                predictor = ImagePredictor(
+                    self.model_name, 
+                    self.model_config[0], 
+                    self.model_config[1], 
+                    self.model_config[2], 
+                    processed_path, 
+                    output_path
+                )
+            
+            predictor(
+                self.threshold, 
+                self.connect_threshold, 
+                str(adapted_model_path), 
+                processed_file.name, 
                 save_mip=True
             )
         

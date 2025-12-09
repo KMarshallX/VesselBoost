@@ -41,7 +41,7 @@ def run_training():
         input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
         optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optimizer_gamma, num_epochs=config.epochs,
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.output_size), augmentation_mode=config.augmentation_mode,
-        crop_mean=config.crop_mean
+        crop_low_thresh=config.crop_low_thresh
     )
 
     # Training loop
