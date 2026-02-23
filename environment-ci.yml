@@ -25,5 +25,5 @@ dependencies:
       - antspyx==0.4.2
       - connected-components-3d==3.13.0
       - osfclient==0.0.5
-      - jupyterlab==5.3.0
+      - jupyterlmod==5.3.0
       - nnunetv2>=2.6.2
