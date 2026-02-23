@@ -1,18 +1,17 @@
 name: vessel_boost_ci
 
 channels:
-  - pytorch
   - defaults
 
 dependencies:
   - python=3.10
   - pip
-  - pytorch=2.5.0
-  - torchvision=0.20.0
-  - torchaudio=2.5.0
-  - cpuonly
   - ipython
   - pip:
+      - torch==2.5.0+cpu
+      - torchvision==0.20.0+cpu
+      - torchaudio==2.5.0+cpu
+      - --extra-index-url https://download.pytorch.org/whl/cpu
       - numpy==1.26.4
       - scipy==1.15.2
       - scikit-learn==1.1.1
