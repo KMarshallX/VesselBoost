@@ -381,6 +381,9 @@ class TorchIOAugmentationUtils:
 
     def _bias(self, p: float = 1, coefficients: float = 0.15, order: int = 3) -> tio.RandomBiasField:
         return tio.RandomBiasField(coefficients=coefficients, order=order, p=p)
+    
+    def _gamma(self, p: float = 1, log_gamma: Tuple[float, float] = (-0.3, 0.3)) -> tio.RandomGamma:
+        return tio.RandomGamma(log_gamma=log_gamma, p=p)
 
     def _noise(self, p: float = 1, mean: float = 0, std: float = 0.008) -> tio.RandomNoise:
         return tio.RandomNoise(mean=mean, std=std, p=p)
@@ -453,6 +456,12 @@ class TorchIOAugmentationUtils:
             transforms = tio.OneOf([
                 self._blur(),
                 self._bias(),
+                self._noise()
+            ])
+        elif self.mode == 'intensity_composed':
+            transforms = tio.Compose([
+                self._bias(coefficients=0.5),
+                self._gamma(log_gamma=(-0.3, 0.3)),
                 self._noise()
             ])
         elif self.mode == 'flip': # legacy
