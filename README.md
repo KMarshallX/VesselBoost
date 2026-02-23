@@ -14,6 +14,7 @@
 ## **Update History**
 - **1.0.0**: Initial release, for details see [Citation](#citation)
 - **2.0.0 - pre-release**: for details see [Update Log - 16/Sept/2025](documentation/UPDATE.md)
+- **2.0.0 - official release**: for details see [Update Log - 18/Feb/2026](documentation/UPDATE.md)
 
 ## **Purpose**
 *VesselBoost* is a Python-based software package leveraging a UNet3D-based segmentation pipeline that utilizes data augmentation and test-time adaptation (TTA) to enhance segmentation quality and is generally applicable to high-resolution magnetic resonance angiograms (MRAs).\
