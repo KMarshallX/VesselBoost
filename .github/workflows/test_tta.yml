@@ -8,6 +8,7 @@ on:
       - test_time_adaptation.py
       - config/adapt_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/UPDATE.md
       - documentation/tta_readme.md
       - library/aug_utils.py
@@ -27,6 +28,7 @@ on:
       - test_time_adaptation.py
       - config/adapt_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/UPDATE.md
       - documentation/tta_readme.md
       - library/aug_utils.py

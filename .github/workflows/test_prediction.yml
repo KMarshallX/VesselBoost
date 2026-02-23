@@ -8,6 +8,7 @@ on:
       - prediction.py
       - config/pred_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/UPDATE.md
       - documentation/predict_readme.md
       - library/aug_utils.py
@@ -27,6 +28,7 @@ on:
       - prediction.py
       - config/pred_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/UPDATE.md
       - documentation/predict_readme.md
       - library/aug_utils.py

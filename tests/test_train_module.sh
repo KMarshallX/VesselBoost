@@ -19,7 +19,7 @@ source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
 cd VesselBoost
-condaenv_command=`cat ./README.md | grep environment.yml`
+condaenv_command=`cat ./README.md | grep environment-ci.yml`
 echo $condaenv_command
 $condaenv_command
 

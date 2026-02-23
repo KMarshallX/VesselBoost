@@ -8,6 +8,7 @@ on:
       - boost.py
       - config/boost_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/boost_readme.md
       - documentation/UPDATE.md
       - library/aug_utils.py
@@ -27,6 +28,7 @@ on:
       - boost.py
       - config/boost_config.py
       - environment.yml
+      - environment-ci.yml
       - documentation/boost_readme.md
       - documentation/UPDATE.md
       - library/aug_utils.py
