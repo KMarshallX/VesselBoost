@@ -1,13 +1,7 @@
 name: vessel_boost
 channels:
-  - nvidia
-  - pytorch
   - defaults
 dependencies:
-  - pytorch=2.5.0
-  - torchvision=0.20.0
-  - torchaudio=2.5.0
-  - pytorch-cuda=12.4
   - python=3.10
   - pip
   - jupyter          
@@ -17,6 +11,10 @@ dependencies:
   - ipykernel        
   - ipywidgets  
   - pip:
+    - torch==2.5.0+cu124
+    - torchvision==0.20.0+cu124
+    - torchaudio==2.5.0+cu124
+    - --extra-index-url https://download.pytorch.org/whl/cu124
     - numpy==1.26.4
     - scipy==1.15.2
     - torchio==0.20.19
