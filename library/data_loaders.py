@@ -227,15 +227,17 @@ class MultiChannelLoader:
             img_stem = img_file.stem.split('.')[0]
 
             # Find matching segmentation file
-            seg_file = None
-            for seg_key, seg_path in seg_lookup.items():
-                if img_stem in seg_key or seg_key in img_stem:
-                    seg_file = seg_path
-                    break
+            seg_file = seg_lookup.get(img_stem)
+
+            if seg_file is None:
+                for seg_key, seg_path in seg_lookup.items():
+                    if img_stem in seg_key or seg_key in img_stem:
+                        seg_file = seg_path
+                        break
             
             if seg_file is None:
                 raise ValueError(f"No matching segmentation found for {img_file.name}")
-
+            logger.info(f"Matched image: {img_file.name} with segmentation: {seg_file.name}")
             image_pairs.append((img_file, seg_file))
 
         return image_pairs
