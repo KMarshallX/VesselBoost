@@ -3,7 +3,6 @@
 *.json
 *.npy
 /*.ipynb
-/*.sh
 
 train_zero.py
 train_test.py
@@ -19,6 +18,7 @@ t2boost.py
 /out
 /__pycache__
 /data
+/run_scripts
 /config/__pycache__
 /utils/__pycache__
 /models/__pycache__
