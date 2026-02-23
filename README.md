@@ -85,7 +85,7 @@ This is a Python-based software package. To successfully run this project on you
 3. (CI or CPU-only) If you run the CI tests or run VesselBoost on a CPU-only machine, please install the CPU version of PyTorch by running the following command:
     ```
     conda env create -f environment-ci.yml
-    conda activate vessel_boost
+    conda activate vessel_boost_ci
     ```
 
 ## **Citation**
