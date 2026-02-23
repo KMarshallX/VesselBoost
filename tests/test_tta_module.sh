@@ -28,7 +28,7 @@ source /home/runner/miniconda3/bin/activate
 conda init bash
 
 echo "[DEBUG]: testing conda activate command from the README:"
-condact_command=`cat ./README.md | grep activate vessel_boost_ci`
+condact_command=`cat ./README.md | grep vessel_boost_ci`
 echo $condact_command
 $condact_command
 
