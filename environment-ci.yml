@@ -11,15 +11,15 @@ dependencies:
   - torchvision=0.20.0
   - torchaudio=2.5.0
   - cpuonly
-  - numpy=1.26.4
-  - scipy=1.15.2
-  - scikit-learn=1.1.1
-  - matplotlib=3.8.4
-  - pyyaml=6.0.2
-  - tqdm=4.64.1
-  - nibabel=5.2.1
   - ipython
   - pip:
+      - numpy=1.26.4
+      - scipy=1.15.2
+      - scikit-learn=1.1.1
+      - matplotlib=3.8.4
+      - pyyaml=6.0.2
+      - tqdm=4.64.1
+      - nibabel=5.2.1
       - torchio==0.20.19
       - patchify==0.2.3
       - antspyx==0.4.2
