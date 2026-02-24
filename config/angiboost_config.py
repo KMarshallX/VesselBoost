@@ -25,8 +25,8 @@ angiboost_parser.add_argument('--output_channel', type=int, default=1, help=argp
 angiboost_parser.add_argument('--filters', type=int, default=16, help=argparse.SUPPRESS)
 
 # Training configurations
-angiboost_parser.add_argument('--lr', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3")
-angiboost_parser.add_argument('--ep', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=16")
+angiboost_parser.add_argument('--learning_rate', type=float, default=1e-3, help="learning rate, dtype: float, default=1e-3")
+angiboost_parser.add_argument('--epochs', type=int, default=1000, help="epoch number (times of iteration), dtype: int, default=16")
 
 # expected size of the training patch
 angiboost_parser.add_argument('--osz', nargs=3, type=int, default=(64, 64, 64),

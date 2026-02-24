@@ -47,7 +47,7 @@ def run_angiboost():
     logger.info("Parameters Info:")
     logger.info("*" * 61)
     logger.info(f"Input image path: {image_path}, Segmentation path: {label_path}, Prep_mode: {prep_mode}")
-    logger.info(f"Epoch number: {config.ep}, Learning rate: {config.lr}")
+    logger.info(f"Epoch number: {config.epochs}, Learning rate: {config.learning_rate}")
 
     # preprocess procedure
     preprocess_procedure(image_path, preprocessed_path, prep_mode)
@@ -56,7 +56,7 @@ def run_angiboost():
     make_prediction(
         config.model, config.input_channel, config.output_channel,
         config.filters, preprocessed_path, label_path,
-        config.thresh, config.cc, pretrained,
+        config.thresh, config.cc, pretrained, probability_flag=False,
         mip_flag=False
     )
 
@@ -64,7 +64,7 @@ def run_angiboost():
     train_process = Trainer(
         loss_name=config.loss_metric, model_name=config.model,
         input_channels=config.input_channel, output_channels=config.output_channel, filter_count=config.filters,
-        optimizer_name=config.optimizer, learning_rate=config.lr, optimizer_gamma=config.optim_gamma, num_epochs=config.ep,
+        optimizer_name=config.optimizer, learning_rate=config.learning_rate, optimizer_gamma=config.optim_gamma, num_epochs=config.epochs,
         batch_multiplier=config.batch_multiplier, patch_size=tuple(config.osz), augmentation_mode=config.augmentation_mode,
         crop_low_thresh=config.crop_low_thresh
     )
