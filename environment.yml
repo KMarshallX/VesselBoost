@@ -11,14 +11,16 @@ dependencies:
   - ipykernel        
   - ipywidgets  
   - pip:
+    - numpy==1.26.4
     - torch==2.5.0+cu124
     - torchvision==0.20.0+cu124
     - torchaudio==2.5.0+cu124
     - --extra-index-url https://download.pytorch.org/whl/cu124
-    - numpy==1.26.4
     - scipy==1.15.2
     - torchio==0.20.19
     - scikit-learn==1.1.1
+    - requests==2.32.5
+    - nitransforms==24.1.4
     - pyYAML==6.0.2  
     - matplotlib==3.8.4
     - nibabel==5.2.1
@@ -28,4 +30,4 @@ dependencies:
     - connected-components-3d==3.13.0
     - osfclient==0.0.5
     - jupyterlmod==5.3.0
-    - nnunetv2>=2.6.2  # For nnU-Net model architecture support
+    - nnunetv2>=2.6.2  

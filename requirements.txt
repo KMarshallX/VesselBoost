@@ -1,10 +1,12 @@
+numpy==1.26.4
 torch==2.5.0+cu124
 torchvision==0.20.0+cu124
 torchaudio==2.5.0+cu124
 --extra-index-url https://download.pytorch.org/whl/cu124
-numpy==1.26.4
 scipy==1.15.2
 torchio==0.20.19
+requests==2.32.5
+nitransforms==24.1.4
 scikit-learn==1.1.1
 pyYAML==6.0.2
 matplotlib==3.8.4
