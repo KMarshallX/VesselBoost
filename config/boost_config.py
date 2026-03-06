@@ -52,6 +52,8 @@ boost_parser.add_argument('--cc', type=int, default=10, help="connected componen
 # experimental features
 boost_parser.add_argument('--use_blending', action='store_true', help="EXPERIMENTAL: Use Gaussian blending to reduce patch boundary artifacts. Default: False (original method)")
 boost_parser.add_argument('--overlap_ratio', type=float, default=0.5, help="Overlap ratio for Gaussian blending (0-1). Only used with --use_blending. Default: 0.5 (50%% overlap)")
+# enable optional brain extraction/skull-stripping
+boost_parser.add_argument('--enable_brain_extraction', action='store_true', help="Enable brain extraction / skull-stripping during preprocessing (default: False)")
 # lower threshold for random crop minimum size
 
 args = boost_parser.parse_args()

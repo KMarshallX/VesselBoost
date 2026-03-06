@@ -25,6 +25,7 @@ import logging
 
 from .loss_func import choose_DL_model, normaliser, standardiser
 from models import *
+from . import synthstrip_utils
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -39,15 +40,17 @@ class ImagePreprocessor:
     Args:
         input_path: Path to directory containing raw images
         output_path: Path to directory for saving processed images
+        enable_brain_extraction: Whether to perform brain extraction / skull-stripping (default: False)
         
     Raises:
         FileNotFoundError: If input_path doesn't exist
         ValueError: If paths are invalid
     """
 
-    def __init__(self, input_path: Union[str, Path], output_path: Union[str, Path]):
+    def __init__(self, input_path: Union[str, Path], output_path: Union[str, Path], enable_brain_extraction: bool = False):
         self.input_path = Path(input_path)
         self.output_path = Path(output_path)
+        self.enable_brain_extraction = enable_brain_extraction
         
         # Validate input path
         if not self.input_path.exists():
@@ -84,25 +87,24 @@ class ImagePreprocessor:
             header = test_img.header
             affine = test_img.affine  # type: ignore
 
-            # Convert to ANTs format
-            ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
-            ant_mask = ants.utils.get_mask(
-                ant_img, 
-                low_thresh=ant_img.min(), 
-                high_thresh=ant_img.max()
-            )  # type: ignore
+            if self.enable_brain_extraction:
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                _, masked_nifti = synthstrip_utils.skull_strip(test_img, device) # type: ignore
+                ant_img = ants.utils.convert_nibabel.from_nibabel(masked_nifti)
+            else:
+                ant_img = ants.utils.convert_nibabel.from_nibabel(test_img)
 
             # Apply preprocessing based on mode
             if mode == 1:
                 # Bias field correction only
-                ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_mask)
+                ant_img = ants.utils.n4_bias_field_correction(image=ant_img)
             elif mode == 2:
                 # Non-local denoising only
-                ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_mask)  # type: ignore
+                ant_img = ants.utils.denoise_image(image=ant_img)
             elif mode == 3:
                 # Both bias field correction and denoising
-                ant_img = ants.utils.n4_bias_field_correction(image=ant_img, mask=ant_mask)
-                ant_img = ants.utils.denoise_image(image=ant_img, mask=ant_mask)  # type: ignore
+                ant_img = ants.utils.n4_bias_field_correction(image=ant_img)
+                ant_img = ants.utils.denoise_image(image=ant_img)
             else:
                 raise ValueError(f"Invalid preprocessing mode: {mode}")
 
@@ -516,7 +518,7 @@ class ImagePredictorWithBlending(ImagePredictor):
     """
     Enhanced neural network prediction with Gaussian blending for smooth patch transitions.
     
-    This experimental class extends ImagePredictor with:
+    This class extends ImagePredictor with:
     - Overlapping patches to reduce boundary artifacts
     - Gaussian blending weights for smooth transitions
     - Improved handling of corner/edge cases
@@ -770,7 +772,7 @@ class ImagePredictorWithBlending(ImagePredictor):
             raise RuntimeError(f"Processing failed for {image_name}: {e}")
 
 
-def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], prep_mode: int) -> None:
+def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], prep_mode: int, enable_brain_extraction: bool = False) -> None:
     """
     Preprocesses medical images with bias field correction and/or denoising.
     
@@ -792,7 +794,7 @@ def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], p
             return
         elif prep_mode in [1, 2, 3]:
             # Initialize preprocessing with input/output paths
-            preprocessor = ImagePreprocessor(ds_path, ps_path)
+            preprocessor = ImagePreprocessor(ds_path, ps_path, enable_brain_extraction=enable_brain_extraction)
             # Start preprocessing
             preprocessor.process_images(prep_mode)
         else:
@@ -832,7 +834,7 @@ def make_prediction(
         test_model_name: Path to the trained model file
         mip_flag: Whether to save maximum intensity projections
         probability_flag: Whether to save probability maps
-        use_gaussian_blending: If True, use ImagePredictorWithBlending (experimental)
+        use_gaussian_blending: If True, use ImagePredictorWithBlending
                                to reduce patch boundary artifacts. Set to False for
                                original behavior. (default: False)
         overlap_ratio: Overlap ratio for Gaussian blending (only used if 
@@ -845,7 +847,7 @@ def make_prediction(
     try:
         # Choose predictor based on blending flag
         if use_gaussian_blending:
-            logger.info("Using experimental ImagePredictorWithBlending (Gaussian blending enabled)")
+            logger.info("Using ImagePredictorWithBlending (Gaussian blending enabled)")
             predictor = ImagePredictorWithBlending(
                 model_name, input_channel, output_channel, 
                 filter_number, input_path, output_path,

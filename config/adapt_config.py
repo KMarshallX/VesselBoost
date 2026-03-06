@@ -58,4 +58,7 @@ adapt_parser.add_argument('--resource', type=int, default=0, help=argparse.SUPPR
 # batch size multiplier
 adapt_parser.add_argument('--batch_multiplier', type=int, default=5, help=argparse.SUPPRESS)
 
+# enable optional brain extraction/skull-stripping
+adapt_parser.add_argument('--enable_brain_extraction', action='store_true', help="Enable brain extraction / skull-stripping during preprocessing (default: False)")
+
 args = adapt_parser.parse_args()

@@ -50,7 +50,7 @@ def run_angiboost():
     logger.info(f"Epoch number: {config.epochs}, Learning rate: {config.learning_rate}")
 
     # preprocess procedure
-    preprocess_procedure(image_path, preprocessed_path, prep_mode)
+    preprocess_procedure(image_path, preprocessed_path, prep_mode, enable_brain_extraction=config.enable_brain_extraction)
 
     # generate the initial segmentation
     make_prediction(

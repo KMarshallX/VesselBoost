@@ -7,3 +7,4 @@ from .data_loaders import MultiChannelLoader, SingleChannelLoader
 from .train_utils import Trainer
 from .loss_func import *
 from .aug_utils import *
+from .synthstrip_utils import skull_strip

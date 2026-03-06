@@ -48,10 +48,10 @@ def run_prediction():
     logger.info("*" * 61)
     logger.info(f"Input image path: {image_path}, Preprocessed path: {preprocessed_path}, Output path: {output_path}, Prep_mode: {prep_mode}")
     if use_blending:
-        logger.info(f"EXPERIMENTAL MODE: Gaussian blending enabled with {overlap_ratio*100}% overlap")
+        logger.info(f"Gaussian blending enabled with {overlap_ratio*100}% overlap")
 
     # preprocess procedure
-    preprocess_procedure(image_path, preprocessed_path, prep_mode)
+    preprocess_procedure(image_path, preprocessed_path, prep_mode, enable_brain_extraction=config.enable_brain_extraction)
 
     # make prediction
     make_prediction(

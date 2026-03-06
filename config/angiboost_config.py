@@ -49,4 +49,7 @@ angiboost_parser.add_argument('--batch_multiplier', type=int, default=5, help=ar
 angiboost_parser.add_argument('--thresh', type=float, default=0.1, help="binary threshold for the probability map after prediction, default=0.1")
 angiboost_parser.add_argument('--cc', type=int, default=10, help="connected components analysis threshold value (denoising), default=10")
 
+# enable optional brain extraction/skull-stripping
+angiboost_parser.add_argument('--enable_brain_extraction', action='store_true', help="Enable brain extraction / skull-stripping during preprocessing (default: False)")
+
 args = angiboost_parser.parse_args()

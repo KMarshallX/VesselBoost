@@ -31,6 +31,9 @@ pred_parser.add_argument('--cc', type=int, default=10, help="connected component
 pred_parser.add_argument('--use_blending', action='store_true', help="EXPERIMENTAL: Use Gaussian blending to reduce patch boundary artifacts. Default: False (original method)")
 pred_parser.add_argument('--overlap_ratio', type=float, default=0.5, help="Overlap ratio for Gaussian blending (0-1). Only used with --use_blending. Default: 0.5 (50%% overlap)")
 
+# enable optional brain extraction/skull-stripping
+pred_parser.add_argument('--enable_brain_extraction', action='store_true', help="Enable brain extraction / skull-stripping during preprocessing (default: False)")
+
 pred_parser.add_argument('--pretrained', type=str, default = "/pretrained_model_path/", help="path of the pretrained model")
 
 args = pred_parser.parse_args()

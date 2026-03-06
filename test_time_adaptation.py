@@ -67,7 +67,7 @@ def run_tta():
     logger.info(f"Epoch number: {config.epochs}, Learning rate: {config.learning_rate}")
 
     # Preprocessing procedure
-    preprocess_procedure(image_path, preprocessed_path, prep_mode)
+    preprocess_procedure(image_path, preprocessed_path, prep_mode, enable_brain_extraction=config.enable_brain_extraction)
 
     # Initialize the TTA process
     tta_process = Trainer(
