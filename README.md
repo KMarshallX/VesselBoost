@@ -48,7 +48,7 @@ The Dockerhub container is available at Dockerhub. To download the container, ru
 docker pull vnmd/vesselboost_2.0.0
 ```
 
-### Neurodesk 
+### **Neurodesk**
 To predict vessel segmentation using your data and the latest version of VesselBoost on Neurodesk, you can run the following code snippet:
 
 ```bash
@@ -58,6 +58,9 @@ prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_mo
 ```
 
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).
+
+### **OpenRecon**
+VesselBoost is also available on OpenRecon. To run VesselBoost on OpenRecon, please refer to the [usage example](https://openrecon.github.io/).
 
 ## **Installation**
 This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
