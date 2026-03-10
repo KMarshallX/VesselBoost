@@ -45,7 +45,7 @@ VesselBoost, pre-trained models, and required software are packaged in software 
 The Dockerhub container is available at Dockerhub. To download the container, run the following command:
 
 ```
-docker pull vnmd/vesselboost_2.0.0
+docker pull vnmd/vesselboost_2.0.1
 ```
 
 ### **Neurodesk**
@@ -60,7 +60,7 @@ prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_mo
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).
 
 ### **OpenRecon**
-VesselBoost is also available on OpenRecon. To run VesselBoost on OpenRecon, please refer to the [usage example](https://openrecon.github.io/).
+VesselBoost is also available on OpenRecon. To run VesselBoost on OpenRecon, please refer to the [usage example](https://github.com/KMarshallX/VesselBoost/blob/master/documentation/openrecon_example.md).
 
 ## **Installation**
 This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
