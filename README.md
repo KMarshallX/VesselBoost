@@ -36,9 +36,7 @@ VesselBoost 2.0.1
 ## **Requirements**
 - Docker / Singularity container
 
-## **Software container**
-
-VesselBoost, pre-trained models, and required software are packaged in software containers available through Dockerhub and [Neurodesk](https://www.neurodesk.org/).
+## **Availability**
 
 ### **Docker**
 
@@ -49,7 +47,7 @@ docker pull vnmd/vesselboost_2.0.1
 ```
 
 ### **Neurodesk**
-To predict vessel segmentation using your data and the latest version of VesselBoost on Neurodesk, you can run the following code snippet:
+To predict vessel segmentation using your data and the latest version of VesselBoost on [Neurodesk](https://www.neurodesk.org/), you can run the following code snippet:
 
 ```bash
 ml vesselboost
@@ -58,6 +56,13 @@ prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_mo
 ```
 
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).
+
+### **VesselBoost Webapp**
+VesselBoost is also available as a web application. To access the webapp, please visit the [VesselBoost Webapp](https://vesselboost.neurodesk.org/).
+
+<p align="center">
+<img src="./figures/vesselboost-webapp.png">
+</p>
 
 ### **OpenRecon**
 VesselBoost is also available on OpenRecon. To run VesselBoost on OpenRecon, please refer to the [usage example](https://github.com/KMarshallX/VesselBoost/blob/master/documentation/openrecon_example.md).
