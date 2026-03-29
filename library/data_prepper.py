@@ -27,7 +27,6 @@ import numpy as np
 import scipy.ndimage as scind
 from skimage.filters import frangi
 
-from .proxy_fusion import ProxyFusionConfig, ProxyFusionResult, fuse_proxy_labels
 
 logger = logging.getLogger(__name__)
 
@@ -328,7 +327,7 @@ class ThreeChanDataPrepper:
         if is_mask:
             array = (array > 0).astype(np.float32)
 
-        return array, affine, header
+        return array, affine, header # type: ignore
 
     def _validate_inputs(
         self,
@@ -476,43 +475,3 @@ class ThreeChanDataPrepper:
         return tuple(expanded)  # type: ignore[return-value]
 
 
-def fuse_proxy_from_prepared_channels(
-    pretrained_probability: np.ndarray,
-    prepared_volume: np.ndarray,
-    image: np.ndarray,
-    mask: np.ndarray,
-    config: Optional[Union[ProxyFusionConfig, Mapping[str, Any]]] = None,
-) -> ProxyFusionResult:
-    """Fuse proxy labels using channel-2/3 maps from a prepared 3-channel volume.
-
-    This utility is a minimal integration point for T2* multichannel workflows:
-    callers can prepare channels with :class:`ThreeChanDataPrepper`, run a
-    pretrained model to get ``pretrained_probability`` (E1), then fuse:
-
-    Example:
-        >>> prepared = prepper(image=t2_img, mask=mask)
-        >>> result = fuse_proxy_from_prepared_channels(
-        ...     pretrained_probability=pred_prob,
-        ...     prepared_volume=prepared,
-        ...     image=t2_img,
-        ...     mask=mask,
-        ... )
-    """
-    prepared = np.asarray(prepared_volume)
-    if prepared.ndim != 4:
-        raise ValueError(
-            f"Expected prepared_volume shape [3, D, H, W], got {prepared.shape}."
-        )
-    if prepared.shape[0] < 3:
-        raise ValueError(
-            f"Expected at least 3 channels in prepared_volume, got {prepared.shape[0]}."
-        )
-
-    return fuse_proxy_labels(
-        E1=np.asarray(pretrained_probability, dtype=np.float32),
-        E2=np.asarray(prepared[1], dtype=np.float32),
-        E3=np.asarray(prepared[2], dtype=np.float32),
-        image=np.asarray(image, dtype=np.float32),
-        mask=np.asarray(mask),
-        config=config,
-    )

@@ -36,3 +36,4 @@ config/__pycache__/train_config.cpython-39.pyc
 TEST_dataloader.py
 TEST_dataloader.py.lprof
 nnUnet_integration.md
+LOG.md
