@@ -10,6 +10,7 @@ Editor: Marshall Xu
 Last edited: 31/07/2025
 """
 
+import gc
 import numpy as np
 import ants
 import torch
@@ -276,21 +277,29 @@ class ImagePredictor:
                     for k in range(patches.shape[2]):
                         # Extract and prepare single patch
                         single_patch = patches[i, j, k, :, :, :]
-                        
+
                         # Convert to tensor with proper shape: (batch, channel, depth, height, width)
                         patch_tensor = torch.from_numpy(single_patch).unsqueeze(0).unsqueeze(0).to(torch.float)
                         patch_tensor = patch_tensor.to(self.device)
-                        
+
                         # Run inference
                         prediction = model(patch_tensor)
                         prediction = sigmoid_fn(prediction)
-                        
+
                         # Convert back to numpy and store
                         prediction_np = prediction.cpu().numpy()[0, 0, :, :, :]
                         patches[i, j, k, :, :, :] = prediction_np
 
+                        # Free GPU tensors immediately
+                        del patch_tensor, prediction, prediction_np
+
+        # Free GPU memory after inference loop
+        if self.device.type == "cuda":
+            torch.cuda.empty_cache()
+
         # Reconstruct full image
         prediction_output = unpatchify(patches, original_size)
+        del patches
         logger.info("Prediction procedure completed")
         
         return prediction_output
@@ -395,21 +404,25 @@ class ImagePredictor:
             image_array = raw_image.get_fdata()  # type: ignore
 
             original_size = image_array.shape
-            
+
             # Calculate optimal patch dimensions and resize
             target_size = self._calculate_patch_dimensions(original_size)
             resized_image = self._resize_image(image_array, target_size)
-            
+            del image_array
+
             # Standardize image
             # standardized_image = normaliser(resized_image)
             standardized_image = standardiser(resized_image)
-            
+            del resized_image
+
             # Create patches
             patches = patchify(standardized_image, (64, 64, 64), 64)
-            
+            del standardized_image
+
             # Run inference
             prediction_map = self._run_inference(patches, model, target_size)
-            
+            gc.collect()
+
             # Resize back to original dimensions
             prediction_map = self._resize_image(prediction_map, original_size)
             
@@ -481,6 +494,11 @@ class ImagePredictor:
             except Exception as e:
                 logger.error(f"Skipping {image_file.name} due to error: {e}")
                 continue
+            finally:
+                # Free memory between images
+                gc.collect()
+                if self.device.type == "cuda":
+                    torch.cuda.empty_cache()
         
         logger.info(f"Completed processing {len(image_files)} images")
 
@@ -673,29 +691,37 @@ class ImagePredictorWithBlending(ImagePredictor):
                 # Convert to tensor
                 patch_tensor = torch.from_numpy(patch).unsqueeze(0).unsqueeze(0).to(torch.float)
                 patch_tensor = patch_tensor.to(self.device)
-                
+
                 # Run inference
                 prediction = model(patch_tensor)
                 prediction = sigmoid_fn(prediction)
-                
+
                 # Convert back to numpy
                 prediction_np = prediction.cpu().numpy()[0, 0, :, :, :]
-                
+
+                # Free GPU tensors immediately
+                del patch_tensor, prediction
+
                 # Calculate actual patch bounds (for edge cases)
                 z_end = min(z + self.patch_size, image_shape[0])
                 y_end = min(y + self.patch_size, image_shape[1])
                 x_end = min(x + self.patch_size, image_shape[2])
-                
+
                 actual_d = z_end - z
                 actual_h = y_end - y
                 actual_w = x_end - x
-                
+
                 # Apply Gaussian weights and accumulate
                 weighted_prediction = prediction_np[:actual_d, :actual_h, :actual_w] * gaussian_weight[:actual_d, :actual_h, :actual_w]
-                
+
                 prediction_sum[z:z_end, y:y_end, x:x_end] += weighted_prediction
                 weight_sum[z:z_end, y:y_end, x:x_end] += gaussian_weight[:actual_d, :actual_h, :actual_w]
-        
+                del prediction_np, weighted_prediction
+
+        # Free GPU memory after inference loop
+        if self.device.type == "cuda":
+            torch.cuda.empty_cache()
+
         # Normalize by accumulated weights to get final prediction
         # Avoid division by zero
         weight_sum[weight_sum == 0] = 1.0
@@ -739,20 +765,25 @@ class ImagePredictorWithBlending(ImagePredictor):
             image_array = raw_image.get_fdata()  # type: ignore
 
             original_size = image_array.shape
-            
+
             # Calculate optimal patch dimensions and resize
             target_size = self._calculate_patch_dimensions(original_size, self.patch_size)
             resized_image = self._resize_image(image_array, target_size)
-            
+            del image_array
+
             # Standardize image
             standardized_image = standardiser(resized_image)
-            
+            del resized_image
+
             # Extract overlapping patches with positions
             patches_with_positions, resized_shape = self._extract_patches_with_overlap(standardized_image)
-            
+            del standardized_image
+
             # Run inference with Gaussian blending
             prediction_map = self._run_inference_with_blending(patches_with_positions, model, resized_shape)
-            
+            del patches_with_positions
+            gc.collect()
+
             # Resize back to original dimensions
             prediction_map = self._resize_image(prediction_map, original_size)
             
