@@ -78,23 +78,27 @@ def resolve_weights_path(weights_path: Optional[os.PathLike[str] | str] = None) 
     searched = "\n  - ".join(str(candidate) for candidate in candidates)
     raise FileNotFoundError(
         "SynthStrip brain extraction requires local model weights, but "
-        f"{SYNTHSTRIP_WEIGHTS_FILENAME} was not found. VesselBoost will not "
-        "download SynthStrip weights at runtime, so airgapped runs do not attempt "
-        "to contact the FreeSurfer server.\n"
+        f"{SYNTHSTRIP_WEIGHTS_FILENAME} was not found.\n"
         f"Place {SYNTHSTRIP_WEIGHTS_FILENAME} in ./saved_models, or set "
         f"{SYNTHSTRIP_WEIGHTS_ENV} to the weights file or containing directory.\n"
-        f"Download source for connected build/preparation steps: {SYNTHSTRIP_WEIGHTS_URL}\n"
         f"Searched:\n  - {searched}"
     )
 
 
-def download_weights(destination: Optional[os.PathLike[str] | str] = None) -> Path:
-    """
-    Download SynthStrip weights explicitly for connected setup/build steps.
+def _download_destination(weights_path: Optional[os.PathLike[str] | str] = None) -> Optional[Path]:
+    if weights_path:
+        return Path(weights_path).expanduser()
 
-    Runtime model loading intentionally does not call this function. Airgapped
-    deployments should stage the returned file path into a saved_models directory
-    or point VESSELBOOST_SYNTHSTRIP_WEIGHTS at it.
+    env_path = os.environ.get(SYNTHSTRIP_WEIGHTS_ENV)
+    if env_path:
+        return Path(env_path).expanduser()
+
+    return None
+
+
+def download_weights(destination: Optional[os.PathLike[str] | str] = None, timeout: int = 60) -> Path:
+    """
+    Download SynthStrip weights into the requested destination.
     """
     import requests
 
@@ -108,11 +112,36 @@ def download_weights(destination: Optional[os.PathLike[str] | str] = None) -> Pa
         return destination_path.resolve()
 
     print(f"Downloading SynthStrip weights from {SYNTHSTRIP_WEIGHTS_URL}...")
-    response = requests.get(SYNTHSTRIP_WEIGHTS_URL, timeout=60)
-    response.raise_for_status()
+    try:
+        response = requests.get(SYNTHSTRIP_WEIGHTS_URL, timeout=timeout)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            "Failed to download SynthStrip weights. Check the internet connection, "
+            f"or place {SYNTHSTRIP_WEIGHTS_FILENAME} in ./saved_models or set "
+            f"{SYNTHSTRIP_WEIGHTS_ENV} to a local weights path."
+        ) from exc
+
     destination_path.write_bytes(response.content)
     print(f"Download complete: {destination_path}")
     return destination_path.resolve()
+
+
+def get_or_download_weights(weights_path: Optional[os.PathLike[str] | str] = None) -> Path:
+    """
+    Resolve local SynthStrip weights, downloading them if they are missing.
+    """
+    try:
+        return resolve_weights_path(weights_path)
+    except FileNotFoundError:
+        try:
+            return download_weights(_download_destination(weights_path))
+        except RuntimeError as download_error:
+            raise RuntimeError(
+                "SynthStrip weights were not found locally and could not be downloaded. "
+                "An internet connection is required for the automatic download; "
+                f"offline deployments must provide {SYNTHSTRIP_WEIGHTS_FILENAME} locally."
+            ) from download_error
 
 
 def load_strip_model(device: torch.device, weights_path: Optional[os.PathLike[str] | str] = None):
@@ -120,7 +149,7 @@ def load_strip_model(device: torch.device, weights_path: Optional[os.PathLike[st
     Load the `StripModel` weights from a checkpoint file.
     """
 
-    modelfile = resolve_weights_path(weights_path)
+    modelfile = get_or_download_weights(weights_path)
 
     model = StripModel()
     model.to(device)

@@ -96,7 +96,7 @@ This is a Python-based software package. To successfully run this project on you
     ```
 
 ### **Brain extraction in offline environments**
-Brain extraction uses SynthStrip and requires the `synthstrip.1.pt` weights file. VesselBoost does not download this file during runtime.
+Brain extraction uses SynthStrip and requires the `synthstrip.1.pt` weights file. If the file is not available locally, VesselBoost tries to download it from the FreeSurfer server at runtime. When there is no internet connection and no local weights file, brain extraction fails with an error.
 
 On a connected machine, download the weights into the standard VesselBoost location:
 
