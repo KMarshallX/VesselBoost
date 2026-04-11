@@ -12,7 +12,7 @@ Refactored from:
 from __future__ import annotations
 
 import os
-import requests
+from pathlib import Path
 from typing import Optional, Tuple
 from nitransforms.linear import Affine
 from torch import nn
@@ -22,38 +22,111 @@ import numpy as np
 import torch
 import scipy
 
-def download_weights():
-    url = "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt"
-    if not os.path.exists("../saved_models/"):
-        os.mkdir("../saved_models/")
-    if os.path.exists("../saved_models/synthstrip.1.pt"):
-        print("\nSynthStrip weights already exist. Skipping download.")
-        return
-    print(f"Downloading SynthStrip weights from {url}...")
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open("../saved_models/synthstrip.1.pt", "wb") as f:
-            f.write(response.content)
-        print("Download complete!")
-    else:
-        print(f"Failed to download weights. Status code: {response.status_code}")
+SYNTHSTRIP_WEIGHTS_FILENAME = "synthstrip.1.pt"
+SYNTHSTRIP_WEIGHTS_ENV = "VESSELBOOST_SYNTHSTRIP_WEIGHTS"
+SYNTHSTRIP_WEIGHTS_URL = "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt"
 
 
-def load_strip_model(device: torch.device):
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def _candidate_weight_paths(weights_path: Optional[os.PathLike[str] | str] = None) -> list[Path]:
+    """Return local SynthStrip weight paths in lookup order."""
+    candidates: list[Path] = []
+
+    def add_candidate(path_like: os.PathLike[str] | str) -> None:
+        path = Path(path_like).expanduser()
+        candidates.append(path)
+        if path.name != SYNTHSTRIP_WEIGHTS_FILENAME:
+            candidates.append(path / SYNTHSTRIP_WEIGHTS_FILENAME)
+
+    if weights_path:
+        add_candidate(weights_path)
+
+    env_path = os.environ.get(SYNTHSTRIP_WEIGHTS_ENV)
+    if env_path:
+        add_candidate(env_path)
+
+    candidates.extend(
+        [
+            _repo_root() / "saved_models" / SYNTHSTRIP_WEIGHTS_FILENAME,
+            Path.cwd() / "saved_models" / SYNTHSTRIP_WEIGHTS_FILENAME,
+            Path.cwd().parent / "saved_models" / SYNTHSTRIP_WEIGHTS_FILENAME,
+        ]
+    )
+
+    deduped: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key not in seen:
+            deduped.append(candidate)
+            seen.add(key)
+    return deduped
+
+
+def resolve_weights_path(weights_path: Optional[os.PathLike[str] | str] = None) -> Path:
+    """
+    Resolve the local SynthStrip weights path without attempting network access.
+    """
+    candidates = _candidate_weight_paths(weights_path)
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+
+    searched = "\n  - ".join(str(candidate) for candidate in candidates)
+    raise FileNotFoundError(
+        "SynthStrip brain extraction requires local model weights, but "
+        f"{SYNTHSTRIP_WEIGHTS_FILENAME} was not found. VesselBoost will not "
+        "download SynthStrip weights at runtime, so airgapped runs do not attempt "
+        "to contact the FreeSurfer server.\n"
+        f"Place {SYNTHSTRIP_WEIGHTS_FILENAME} in ./saved_models, or set "
+        f"{SYNTHSTRIP_WEIGHTS_ENV} to the weights file or containing directory.\n"
+        f"Download source for connected build/preparation steps: {SYNTHSTRIP_WEIGHTS_URL}\n"
+        f"Searched:\n  - {searched}"
+    )
+
+
+def download_weights(destination: Optional[os.PathLike[str] | str] = None) -> Path:
+    """
+    Download SynthStrip weights explicitly for connected setup/build steps.
+
+    Runtime model loading intentionally does not call this function. Airgapped
+    deployments should stage the returned file path into a saved_models directory
+    or point VESSELBOOST_SYNTHSTRIP_WEIGHTS at it.
+    """
+    import requests
+
+    destination_path = Path(destination).expanduser() if destination else _repo_root() / "saved_models"
+    if destination_path.name != SYNTHSTRIP_WEIGHTS_FILENAME:
+        destination_path = destination_path / SYNTHSTRIP_WEIGHTS_FILENAME
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if destination_path.exists():
+        print(f"\nSynthStrip weights already exist at {destination_path}. Skipping download.")
+        return destination_path.resolve()
+
+    print(f"Downloading SynthStrip weights from {SYNTHSTRIP_WEIGHTS_URL}...")
+    response = requests.get(SYNTHSTRIP_WEIGHTS_URL, timeout=60)
+    response.raise_for_status()
+    destination_path.write_bytes(response.content)
+    print(f"Download complete: {destination_path}")
+    return destination_path.resolve()
+
+
+def load_strip_model(device: torch.device, weights_path: Optional[os.PathLike[str] | str] = None):
     """
     Load the `StripModel` weights from a checkpoint file.
     """
 
-    download_weights()
-    modelfile = "../saved_models/synthstrip.1.pt"
-    if not os.path.exists(modelfile):
-        raise FileNotFoundError(modelfile)
+    modelfile = resolve_weights_path(weights_path)
 
     model = StripModel()
     model.to(device)
     model.eval()
 
-    checkpoint = torch.load(modelfile, map_location=device)
+    checkpoint = torch.load(str(modelfile), map_location=device)
     if 'model_state_dict' in checkpoint:
         state = checkpoint['model_state_dict']
     else:
@@ -114,6 +187,7 @@ def skull_strip(
     image: nb.nifti1.Nifti1Image,
     device: torch.device,
     border: int = 1,
+    weights_path: Optional[os.PathLike[str] | str] = None,
 ) -> Tuple[np.ndarray, nb.nifti1.Nifti1Image]:
     """Run the synthstrip pipeline on an input image and return the mask.
 
@@ -121,12 +195,13 @@ def skull_strip(
     - image: input image as a Nifti1Image object
     - device: torch device to use. If omitted, it's configured from `gpu`.
     - border: border threshold in mm used to generate final mask
+    - weights_path: optional local path to SynthStrip weights
 
     Returns
     - mask: boolean numpy array of the brain mask in native image grid
     """
 
-    model = load_strip_model(device)
+    model = load_strip_model(device, weights_path)
 
     # load input volume
     conformed = conform(image)
@@ -286,5 +361,3 @@ class ConvBlock(nn.Module):
         if self.activation is not None:
             out = self.activation(out)
         return out
-
-
