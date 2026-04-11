@@ -64,6 +64,9 @@ VesselBoost is also available as a web application. To access the webapp, please
 <img src="./figures/vesselboost-webapp.png">
 </p>
 
+### **OpenRecon**
+VesselBoost is also available on Siemens OpenRecon. To run VesselBoost on OpenRecon enabled scanners (>XA60), please refer to the [open recon container](https://github.com/neurodesk/neurocontainers/tree/main/recipes/vesselboost).
+
 ## **Installation**
 This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
 
