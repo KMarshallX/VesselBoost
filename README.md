@@ -65,7 +65,7 @@ VesselBoost is also available as a web application. To access the webapp, please
 </p>
 
 ### **OpenRecon**
-VesselBoost is also available on OpenRecon. To run VesselBoost on OpenRecon, please refer to the [usage example](https://github.com/KMarshallX/VesselBoost/blob/master/documentation/openrecon_example.md).
+VesselBoost is also available on Siemens OpenRecon. To run VesselBoost on OpenRecon enabled scanners (>XA60), please refer to the [open recon container](https://github.com/neurodesk/neurocontainers/tree/main/recipes/vesselboost).
 
 ## **Installation**
 This is a Python-based software package. To successfully run this project on your local machine, please follow the following steps to set up the necessary software environment.
@@ -98,6 +98,28 @@ This is a Python-based software package. To successfully run this project on you
     conda activate vessel_boost_ci
     ```
 
+### **Brain extraction in offline environments**
+Brain extraction uses SynthStrip and requires the `synthstrip.1.pt` weights file. If the file is not available locally, VesselBoost tries to download it from the FreeSurfer server at runtime. When there is no internet connection and no local weights file, brain extraction fails with an error.
+
+On a connected machine, download the weights into the standard VesselBoost location:
+
+```
+mkdir -p saved_models
+curl -L \
+  -o saved_models/synthstrip.1.pt \
+  https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt
+```
+
+If `curl` is unavailable, use `wget`:
+
+```
+wget \
+  -O saved_models/synthstrip.1.pt \
+  https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt
+```
+
+For airgapped or offline deployments, copy `saved_models/synthstrip.1.pt` into the deployment image or runtime directory before running VesselBoost. Alternatively, set `VESSELBOOST_SYNTHSTRIP_WEIGHTS` to the weights file path or to the directory containing it.
+
 ## **Citation**
 VesselBoost paper is now published! Please cite us if you use VesselBoost in your research:
 
@@ -125,4 +147,3 @@ Marshall Xu <[marshall.xu@uq.edu.au](marshall.xu@uq.edu.au)>
 Saskia Bollmann <[saskia.bollmann@uq.edu.au](saskia.bollmann@uq.edu.au)>
 
 Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>
-
