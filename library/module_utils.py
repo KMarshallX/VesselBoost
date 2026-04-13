@@ -106,6 +106,9 @@ class ImagePreprocessor:
                 # Both bias field correction and denoising
                 ant_img = ants.utils.n4_bias_field_correction(image=ant_img)
                 ant_img = ants.utils.denoise_image(image=ant_img)
+            elif mode == 4:
+                # Skip bias field correction and denoising
+                pass
             else:
                 raise ValueError(f"Invalid preprocessing mode: {mode}")
 
@@ -129,7 +132,7 @@ class ImagePreprocessor:
                 1: Bias field correction only
                 2: Non-local denoising only  
                 3: Bias field correction + denoising
-                4: Abort processing
+                4: Skip bias field correction and denoising
                 
         Raises:
             ValueError: If mode is invalid
@@ -812,18 +815,17 @@ def preprocess_procedure(ds_path: Union[str, Path], ps_path: Union[str, Path], p
     Args:
         ds_path: Path to the input dataset directory
         ps_path: Path to the preprocessed data storage directory
-        prep_mode: Preprocessing mode (1=BFC, 2=denoising, 3=both, 4=abort)
+        prep_mode: Preprocessing mode (1=BFC, 2=denoising, 3=both, 4=skip BFC/denoising)
 
     Raises:
         FileNotFoundError: If dataset path doesn't exist
         ValueError: If preprocessing mode is invalid
     """
     try:
-        if prep_mode == 4:
-            # Abort preprocessing
+        if prep_mode == 4 and not enable_brain_extraction:
             logger.info("Preprocessing aborted by user")
             return
-        elif prep_mode in [1, 2, 3]:
+        elif prep_mode in [1, 2, 3, 4]:
             # Initialize preprocessing with input/output paths
             preprocessor = ImagePreprocessor(ds_path, ps_path, enable_brain_extraction=enable_brain_extraction)
             # Start preprocessing
@@ -903,7 +905,6 @@ def make_prediction(
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         raise
-
 
 
 

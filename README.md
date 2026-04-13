@@ -12,6 +12,7 @@
 - [Contact](#contact)
 
 ## **Update History**
+- **2.0.2 - patch release**: for details see [Update Log - 13/Apr/2026](documentation/UPDATE.md)
 - **2.0.1 - patch release**: for details see [Update Log - 06/Mar/2026](documentation/UPDATE.md)
 - **2.0.0 - official release**: for details see [Update Log - 18/Feb/2026](documentation/UPDATE.md)
 - **2.0.0 - pre-release**: for details see [Update Log - 16/Sept/2025](documentation/UPDATE.md)
@@ -31,7 +32,7 @@ This repository contains 3 major modules:
 
 
 ## **Current Version**
-VesselBoost 2.0.1
+VesselBoost 2.0.2
 
 ## **Requirements**
 - Docker / Singularity container

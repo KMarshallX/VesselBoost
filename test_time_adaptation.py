@@ -34,8 +34,8 @@ def run_tta():
         logger.info(f"{output_path} has been created!")
 
     prep_mode = config.prep_mode  # preprocessing mode
-    # When the preprocess is skipped, directly take the raw data for prediction
-    if prep_mode == 4:
+    # When preprocessing and brain extraction are both skipped, directly take the raw data for prediction
+    if prep_mode == 4 and not config.enable_brain_extraction:
         preprocessed_path = image_path
 
     # Proxies path
@@ -91,5 +91,4 @@ def run_tta():
 
 if __name__ == "__main__":
     run_tta()
-
 

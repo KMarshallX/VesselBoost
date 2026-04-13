@@ -32,8 +32,8 @@ def run_boost():
         os.mkdir(output_path)
         logger.info(f"{output_path} has been created!")
 
-    # when the preprocess is skipped, directly take the raw data for prediction
-    if prep_mode == 4:
+    # when preprocessing and brain extraction are both skipped, directly take the raw data for prediction
+    if prep_mode == 4 and not config.enable_brain_extraction:
         preprocessed_path = image_path
 
     logger.info("Boosting session will start shortly..")
@@ -73,4 +73,3 @@ def run_boost():
 
 if __name__ == "__main__":
     run_boost()
-

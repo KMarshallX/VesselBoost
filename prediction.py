@@ -39,8 +39,8 @@ def run_prediction():
         os.mkdir(output_path)
         logger.info(f"{output_path} has been created!")
 
-    # when the preprocess is skipped, directly take the raw data for inference
-    if prep_mode == 4:
+    # when preprocessing and brain extraction are both skipped, directly take the raw data for inference
+    if prep_mode == 4 and not config.enable_brain_extraction:
         preprocessed_path = image_path
 
     logger.info("Prediction session will start shortly..")
@@ -65,4 +65,3 @@ def run_prediction():
 
 if __name__ == "__main__":
     run_prediction()
-
