@@ -2,6 +2,39 @@
 - Version: VesselBoost 2.0.2
 - Decoupled brain extraction from `prep_mode` selection so `--enable_brain_extraction` can be used with any preprocessing mode, including `prep_mode=4`.
 - Existing preprocessing behaviour for bias field correction and denoising is unchanged.
+- When `--enable_brain_extraction` is used, the --preprocessed_path will be needed to save the brain extracted image, which will be used for subsequent steps (prediction, TTA and boost). Usage example:
+```python
+    python prediction.py \
+    --image_path "./data/img/" \
+    --preprocessed_path "./data/preprocessed/" \
+    --output_path "./data/pred_seg" \
+    --pretrained "./saved_models/manual_0429" \
+    --prep_mode 4 \
+    --enable_brain_extraction
+```
+```python
+    python test_time_adaptation.py \
+    --image_path "./data/img/" \
+    --preprocessed_path "./data/preprocessed/" \
+    --output_path "./data/pred_seg" \
+    --pretrained "./saved_models/manual_0429" \
+    --prep_mode 4 \
+    --enable_brain_extraction \
+    --epochs 100 \
+    --learning_rate 1e-3
+```
+```python
+    python boost.py \
+    --image_path "./data/img/" \
+    --preprocessed_path "./data/preprocessed/" \
+    --label_path "./data/seg/" \
+    --output_path "./data/boost_seg/" \
+    --output_model "./data/boost_seg/boost_model" \
+    --prep_mode 4 \
+    --enable_brain_extraction \
+    --epochs 100 \
+    --learning_rate 1e-2
+```
 
 ### Update Log - 06/Mar/2026
 - Version: VesselBoost 2.0.1
