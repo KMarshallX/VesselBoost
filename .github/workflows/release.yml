@@ -1,0 +1,110 @@
+name: Release merged dev branch
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-master
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create GitHub release
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'dev' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the merged commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Validate the Current Version update
+        id: version
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          extract_version() {
+            awk '
+              /^## \*\*Current Version\*\*[[:space:]]*$/ {
+                in_current_version = 1
+                next
+              }
+              in_current_version && /^## / { exit }
+              in_current_version && /^VesselBoost[[:space:]]+/ {
+                sub(/^VesselBoost[[:space:]]+/, "")
+                print
+                exit
+              }
+            '
+          }
+
+          current_version="$(extract_version < README.md)"
+          base_version="$(git show "${BASE_SHA}:README.md" | extract_version)"
+
+          if [[ ! "${current_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "README.md Current Version must use the format: VesselBoost X.Y.Z" >&2
+            exit 1
+          fi
+
+          if [[ ! "${base_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Could not read a valid Current Version from the pre-merge README.md." >&2
+            exit 1
+          fi
+
+          if [[ "${current_version}" == "${base_version}" ]]; then
+            echo "README.md Current Version was not updated (${current_version})." >&2
+            exit 1
+          fi
+
+          echo "version=${current_version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${current_version}" >> "${GITHUB_OUTPUT}"
+          echo "Validated version update: ${base_version} -> ${current_version}"
+
+      - name: Ensure the tag and release do not already exist
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists." >&2
+            exit 1
+          fi
+
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "GitHub Release ${TAG} already exists." >&2
+            exit 1
+          fi
+
+      - name: Create tag and normal GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          gh release create "${TAG}" \
+            --target "${MERGE_SHA}" \
+            --title "VesselBoost ${VERSION}" \
+            --generate-notes

@@ -1,3 +1,22 @@
+### Update Log - 13/Aug/2026
+
+- Version: VesselBoost 2.0.3
+- Prepared the pretrained checkpoints in `saved_models/` for distribution through the [VesselBoost Hugging Face repository](https://huggingface.co/BrainVascuLab/VesselBoost):
+  - Preserved all checkpoint filenames and extensions.
+  - Added SHA-256 checksums in `MANIFEST.sha256` for integrity verification.
+  - Added a Hugging Face model card with checkpoint descriptions, architecture and preprocessing details, supported MRI contrasts, known limitations, research-use-only notice, licensing, and citation links.
+  - Added MIT licensing and Hugging Face metadata for PyTorch image segmentation and medical MRI.
+  - Added a machine-readable `config.json` describing the 3D U-Net architecture, channels, filters, patch size, preprocessing, postprocessing defaults, and compatible VesselBoost source release.
+- Updated and cleaned the Python dependencies:
+  - Added `huggingface_hub` to `environment.yml`, `environment-ci.yml`, and `requirements.txt`.
+  - Updated the GPU environment to PyTorch 2.10.0 with CUDA 12.6 and the CPU environments to PyTorch 2.10.0 CPU wheels.
+  - Replaced the full `nnunetv2` dependency with the directly used `dynamic-network-architectures` package.
+  - Added the directly used `scikit-image` package and removed unused direct dependencies.
+- Updated the installation documentation with separate GPU, Conda CPU/CI, and pip CPU workflows.
+- Updated checkpoint loading to use PyTorch's `weights_only=True` mode for VesselBoost and SynthStrip state dictionaries.
+- Validated all three dependency specifications in clean sandbox environments with package-consistency checks, imports, strict checkpoint loading, CPU smoke tests, and GPU smoke tests.
+- Added GitHub release automation that runs only after an internal `dev` to `master` pull request is merged. The workflow validates that the README `Current Version` was updated, creates the corresponding `vX.Y.Z` tag, and publishes a normal GitHub Release with automatically generated release notes. Model weights are not attached to GitHub Releases.
+
 ### Update Log - 13/Apr/2026
 - Version: VesselBoost 2.0.2
 - Decoupled brain extraction from `prep_mode` selection so `--enable_brain_extraction` can be used with any preprocessing mode, including `prep_mode=4`.
