@@ -474,9 +474,9 @@ class ImagePredictor:
             raise FileNotFoundError(f"Model file not found: {model_path}")
         
         if self.device.type == "cuda":
-            model.load_state_dict(torch.load(str(model_path)))  # type: ignore
+            model.load_state_dict(torch.load(str(model_path), weights_only=True))  # type: ignore
         else:
-            model.load_state_dict(torch.load(str(model_path), map_location=self.device))  # type: ignore
+            model.load_state_dict(torch.load(str(model_path), map_location=self.device, weights_only=True))  # type: ignore
         
         logger.info(f"Loaded model from: {model_path}")
         
@@ -523,10 +523,10 @@ class ImagePredictor:
         
         if self.device.type == "cuda":
             logger.info("Prediction process running on GPU")
-            model.load_state_dict(torch.load(model_path))  # type: ignore
+            model.load_state_dict(torch.load(model_path, weights_only=True))  # type: ignore
         else:
             logger.info("Prediction process running on CPU")
-            model.load_state_dict(torch.load(model_path, map_location=self.device))  # type: ignore
+            model.load_state_dict(torch.load(model_path, map_location=self.device, weights_only=True))  # type: ignore
         
         self.process_single_image(
             image_name, model, threshold, connect_threshold, 
@@ -905,6 +905,5 @@ def make_prediction(
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         raise
-
 
 

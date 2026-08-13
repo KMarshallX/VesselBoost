@@ -155,7 +155,7 @@ def load_strip_model(device: torch.device, weights_path: Optional[os.PathLike[st
     model.to(device)
     model.eval()
 
-    checkpoint = torch.load(str(modelfile), map_location=device)
+    checkpoint = torch.load(str(modelfile), map_location=device, weights_only=True)
     if 'model_state_dict' in checkpoint:
         state = checkpoint['model_state_dict']
     else:

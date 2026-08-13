@@ -82,22 +82,38 @@ This is a Python-based software package. To successfully run this project on you
     git clone -b stable_ver_1_0_0_hpc --single-branch https://github.com/KMarshallX/VesselBoost.git
     ```
 
-2. Install miniconda:
+2. Install Miniconda:
     ```
     cd VesselBoost
     bash miniconda-setup.sh
     ```
-3. Then set your current working directory as the cloned repository, and install the remaining required packages
+
+3. For a CUDA 12.6-capable NVIDIA GPU environment, create the GPU-focused Conda environment. This environment also includes the Jupyter notebook tools used by the examples:
+
     ```
     conda env create -f environment.yml
     conda activate vessel_boost
     ```
 
-3. (CI or CPU-only) If you run the CI tests or run VesselBoost on a CPU-only machine, please install the CPU version of PyTorch by running the following command:
+   The NVIDIA driver must support the CUDA 12.6 runtime bundled with the PyTorch wheel. Verify GPU access after installation with `python -c "import torch; print(torch.cuda.is_available())"`.
+
+4. For CI or a CPU-only machine, create the CPU-focused Conda environment instead:
+
     ```
     conda env create -f environment-ci.yml
     conda activate vessel_boost_ci
     ```
+
+5. Alternatively, `requirements.txt` provides the same CPU-focused runtime dependencies for an existing Python 3.10 virtual environment:
+
+    ```
+    python3.10 -m venv .venv
+    source .venv/bin/activate
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
+    ```
+
+The environments include `huggingface_hub` and its `hf` command-line client for downloading or publishing model files. The optional VesselBoost nnU-Net wrapper uses `dynamic-network-architectures` directly; the full `nnunetv2` package is not required.
 
 ### **Brain extraction in offline environments**
 Brain extraction uses [FreeSurfer's SynthStrip](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthstrip) and requires the `synthstrip.1.pt` weights file. If the file is not available locally, VesselBoost tries to download it from the FreeSurfer server at runtime. When there is no internet connection and no local weights file, brain extraction fails with an error.

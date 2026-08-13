@@ -4,30 +4,26 @@ channels:
 dependencies:
   - python=3.10
   - pip
-  - jupyter          
-  - notebook         
-  - jupyterlab       
-  - ipython          
-  - ipykernel        
-  - ipywidgets  
+  - jupyter
+  - notebook
+  - jupyterlab
+  - ipython
+  - ipykernel
+  - ipywidgets
   - pip:
+    - --extra-index-url https://download.pytorch.org/whl/cu126
     - numpy==1.26.4
-    - torch==2.5.0+cu124
-    - torchvision==0.20.0+cu124
-    - torchaudio==2.5.0+cu124
-    - --extra-index-url https://download.pytorch.org/whl/cu124
+    - torch==2.10.0+cu126
     - scipy==1.15.2
     - torchio==0.20.19
-    - scikit-learn==1.1.1
+    - scikit-image==0.25.2
     - requests==2.32.5
     - nitransforms==24.1.4
-    - pyYAML==6.0.2  
     - matplotlib==3.8.4
     - nibabel==5.2.1
     - patchify==0.2.3
     - tqdm==4.64.1
     - antspyx==0.4.2
     - connected-components-3d==3.13.0
-    - osfclient==0.0.5
-    - jupyterlmod==5.3.0
-    - nnunetv2>=2.6.2  
+    - dynamic-network-architectures==0.4.3
+    - huggingface_hub==1.27.0

@@ -161,11 +161,17 @@ class Trainer:
         try:
             if self.device.type == "cuda":
                 logger.info("Loading pretrained model on GPU")
-                model.load_state_dict(torch.load(str(self.pretrained_model_path)))
+                model.load_state_dict(
+                    torch.load(str(self.pretrained_model_path), weights_only=True)
+                )
             else:
                 logger.info("Loading pretrained model on CPU")
                 model.load_state_dict(
-                    torch.load(str(self.pretrained_model_path), map_location=self.device)
+                    torch.load(
+                        str(self.pretrained_model_path),
+                        map_location=self.device,
+                        weights_only=True,
+                    )
                 )
             
             model.eval()

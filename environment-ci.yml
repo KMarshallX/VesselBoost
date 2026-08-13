@@ -6,25 +6,20 @@ channels:
 dependencies:
   - python=3.10
   - pip
-  - ipython
   - pip:
-      - numpy==1.26.4
-      - torch==2.5.0+cpu
-      - torchvision==0.20.0+cpu
-      - torchaudio==2.5.0+cpu
       - --extra-index-url https://download.pytorch.org/whl/cpu
+      - numpy==1.26.4
+      - torch==2.10.0+cpu
       - scipy==1.15.2
-      - scikit-learn==1.1.1
+      - scikit-image==0.25.2
       - requests==2.32.5
       - nitransforms==24.1.4
       - matplotlib==3.8.4
-      - pyyaml==6.0.2
       - tqdm==4.64.1
       - nibabel==5.2.1
       - torchio==0.20.19
       - patchify==0.2.3
       - antspyx==0.4.2
       - connected-components-3d==3.13.0
-      - osfclient==0.0.5
-      - jupyterlmod==5.3.0
-      - nnunetv2>=2.6.2
+      - dynamic-network-architectures==0.4.3
+      - huggingface_hub==1.27.0
