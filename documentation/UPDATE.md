@@ -1,3 +1,17 @@
+### Update Log - 14/Aug/2026
+
+- Version: VesselBoost 2.0.4
+- Completed the migration of pretrained model distribution and CI-generated outputs to Hugging Face:
+  - Organized all pretrained checkpoints under `weights/` in the public [VesselBoost model repository](https://huggingface.co/BrainVascuLab/VesselBoost).
+  - Added version-controlled model metadata, licensing, configuration, and SHA-256 manifests under `saved_models/` while keeping checkpoint binaries out of Git.
+  - Updated the README, module documentation, and prediction/TTA notebooks to use the new Hugging Face checkpoint paths.
+- Replaced OSF uploads from the boost, prediction, training, TTA, and Docker test workflows with uploads to the public [VesselBoost CI bucket](https://huggingface.co/buckets/BrainVascuLab/vesselboost-ci).
+  - CI outputs are published only for pushes to `master`; pull-request runs do not receive the bucket write token or publish artifacts.
+  - Added a Hugging Face integration workflow that uploads a temporary object, downloads it anonymously, verifies its checksum, and removes it afterward.
+- Retained the existing public OSF test image and label as on-demand CI inputs. Tests download them only during a run and verify their SHA-256 checksums.
+- Pinned CI checkpoint downloads to Hugging Face revision `2dfcb64056110d819b073ff82934cc54fe3dd773` and verify the primary checkpoint checksum before inference.
+- Removed the obsolete OSF upload integration workflow and its credential usage from GitHub Actions.
+
 ### Update Log - 13/Aug/2026
 
 - Version: VesselBoost 2.0.3

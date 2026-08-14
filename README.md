@@ -15,6 +15,7 @@
 
 ## **Update History**
 
+- **2.0.4 - patch release**: for details see [Update Log - 14/Aug/2026](documentation/UPDATE.md)
 - **2.0.3 - patch release**: for details see [Update Log - 13/Aug/2026](documentation/UPDATE.md)
 - **2.0.2 - patch release**: for details see [Update Log - 13/Apr/2026](documentation/UPDATE.md)
 - **2.0.1 - patch release**: for details see [Update Log - 06/Mar/2026](documentation/UPDATE.md)
@@ -36,7 +37,7 @@
 
 ## **Current Version**
 
-VesselBoost 2.0.3
+VesselBoost 2.0.4
 
 ## **Requirements**
 
@@ -123,6 +124,20 @@ This is a Python-based software package. To successfully run this project on you
    ```
 
 The environments include `huggingface_hub` and its `hf` command-line client for downloading or publishing model files. The optional VesselBoost nnU-Net wrapper uses `dynamic-network-architectures` directly; the full `nnunetv2` package is not required.
+
+### **Pretrained model weights**
+
+Pretrained checkpoints are published in the [VesselBoost Hugging Face repository](https://huggingface.co/BrainVascuLab/VesselBoost). Download the primary TOF-MRA checkpoint with:
+
+```bash
+mkdir -p pretrained_models
+hf download BrainVascuLab/VesselBoost \
+  weights/BM_VB2_aug_all_ep2k_bat_10_0903 \
+  --revision 2dfcb64056110d819b073ff82934cc54fe3dd773 \
+  --local-dir pretrained_models
+```
+
+Use `pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903` as the `--pretrained` path. The revision pin identifies the exact checkpoint set used by the automated tests.
 
 ### **Brain extraction in offline environments**
 
