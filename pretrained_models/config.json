@@ -1,0 +1,56 @@
+{
+  "model_type": "vesselboost-unet3d",
+  "framework": "pytorch",
+  "task": "image-segmentation",
+  "architecture": {
+    "class_name": "models.unet_3d.Unet",
+    "spatial_dimensions": 3,
+    "input_channels": 1,
+    "output_channels": 1,
+    "base_filters": 16,
+    "encoder_stages": 4,
+    "decoder_stages": 4,
+    "convolution_kernel_size": [3, 3, 3],
+    "output_kernel_size": [1, 1, 1],
+    "normalization": "batch_norm_3d",
+    "activation": "relu",
+    "output_activation": "sigmoid_at_inference"
+  },
+  "input": {
+    "format": "NIfTI",
+    "contrasts": [
+      "TOF-MRA",
+      "T2*-weighted MRI (experimental checkpoint only)"
+    ],
+    "patch_size": [64, 64, 64],
+    "default_patch_stride": [64, 64, 64]
+  },
+  "preprocessing": {
+    "resize_target": "each spatial dimension is at least 64 and a multiple of 64",
+    "resize_interpolation": "nearest_neighbor",
+    "intensity_transform": {
+      "name": "z_score_standardization",
+      "scope": "whole_volume",
+      "formula": "(x - mean(x)) / std(x)",
+      "constant_volume_result": "zeros"
+    },
+    "optional_operations": [
+      "N4 bias-field correction",
+      "denoising",
+      "brain extraction with separately distributed SynthStrip weights"
+    ]
+  },
+  "postprocessing": {
+    "probability_threshold": 0.1,
+    "connected_component_minimum_voxels": 10,
+    "connected_component_connectivity": 26,
+    "prediction_resize_interpolation": "nearest_neighbor"
+  },
+  "checkpoint_format": "PyTorch state_dict ZIP serialization",
+  "compatible_vesselboost": {
+    "version": "2.0.2",
+    "git_tag": "v2.0.2",
+    "git_commit": "1504b00c91777d5e2c271c1cab7f500078f08c69",
+    "source_url": "https://github.com/KMarshallX/VesselBoost/tree/v2.0.2"
+  }
+}
