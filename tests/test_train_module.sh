@@ -1,45 +1,43 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
-cp -r . /tmp/VesselBoost
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${repo_root}/tests/ci_helpers.sh"
+cd "$repo_root"
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/VesselBoost/README.md | grep "git clone https://github.com/KMarshallX/VesselBoost.git"`
-echo $clone_command
-$clone_command
+ci_verify_readme_clone_command "$repo_root"
 
 echo "[DEBUG]: testing the miniconda installation from the README:"
-get_command=`cat /tmp/VesselBoost/README.md | grep miniconda-setup.sh`
-echo $get_command
-$get_command 
+get_command="$(grep -m1 'miniconda-setup.sh' README.md)"
+echo "$get_command"
+eval "$get_command"
 
 export PATH="/home/runner/miniconda3/bin:$PATH"
 source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
-cd VesselBoost
-condaenv_command=`cat ./README.md | grep environment-ci.yml`
-echo $condaenv_command
-$condaenv_command
+condaenv_command="$(grep -m1 'conda env create -f environment-ci.yml' README.md)"
+echo "$condaenv_command"
+eval "$condaenv_command"
 
 # conda activate in a bash script
 source /home/runner/miniconda3/bin/activate
 conda init bash
 
 echo "[DEBUG]: testing conda activate command from the README:"
-condact_command=`cat ./README.md | grep vessel_boost_ci`
-echo $condact_command
-$condact_command
+condact_command="$(grep -m1 'conda activate vessel_boost_ci' README.md)"
+echo "$condact_command"
+eval "$condact_command"
 
 # settings for data download
 mkdir -p data/images/
 mkdir -p data/labels/
 mkdir -p data/preprocessed/
-mkdir saved_models
-pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/seg/seg_GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32_biasCor_H75_L55_C10.nii ./data/labels/sub-001.nii
+mkdir -p data/saved_models/
+ci_download_test_image ./data/images/sub-001.nii
+ci_download_test_label ./data/labels/sub-001.nii
 
 path_to_images="data/images/"
 echo "Path to images: "$path_to_images""
@@ -47,7 +45,7 @@ echo "Path to images: "$path_to_images""
 path_to_labels="data/labels/"
 echo "Path to labels: "$path_to_labels""
 
-path_to_model="saved_models/model_test"
+path_to_model="data/saved_models/model_test"
 echo "Path to model: "$path_to_model""
 
 path_to_preprocessed="data/preprocessed/"
@@ -67,19 +65,9 @@ train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
 
-echo "[DEBUG]: osf setup"
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
-export OSF_PROJECT_ID=$OSF_PROJECT_ID_
-mkdir -p ~/.osfcli
-echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-cd saved_models
-for file in ./*; do
-    echo $file
-    osf -p abk4p remove /osfstorage/github_actions/train/saved_model/$file
-done
-
-echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload -r ./ /osfstorage/github_actions/train/saved_model/
+echo "[DEBUG]: publishing current training outputs to Hugging Face"
+ci_publish_directory \
+    "./data/saved_models" \
+    "github_actions/train/saved_model"
 
 echo "Testing done!"

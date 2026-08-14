@@ -1,51 +1,44 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
-cp -r . /tmp/VesselBoost
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${repo_root}/tests/ci_helpers.sh"
+cd "$repo_root"
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/VesselBoost/README.md | grep "git clone https://github.com/KMarshallX/VesselBoost.git"`
-echo $clone_command
-$clone_command
+ci_verify_readme_clone_command "$repo_root"
 
 echo "[DEBUG]: testing the miniconda installation from the README:"
-get_command=`cat /tmp/VesselBoost/README.md | grep miniconda-setup.sh`
-echo $get_command
-$get_command 
+get_command="$(grep -m1 'miniconda-setup.sh' README.md)"
+echo "$get_command"
+eval "$get_command"
 
 export PATH="/home/runner/miniconda3/bin:$PATH"
 source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
-cd VesselBoost
-condaenv_command=`cat ./README.md | grep environment-ci.yml`
-echo $condaenv_command
-$condaenv_command
+condaenv_command="$(grep -m1 'conda env create -f environment-ci.yml' README.md)"
+echo "$condaenv_command"
+eval "$condaenv_command"
 
 # conda activate in a bash script
 source /home/runner/miniconda3/bin/activate
 conda init bash
 
 echo "[DEBUG]: testing conda activate command from the README:"
-condact_command=`cat ./README.md | grep vessel_boost_ci`
-echo $condact_command
-$condact_command
+condact_command="$(grep -m1 'conda activate vessel_boost_ci' README.md)"
+echo "$condact_command"
+eval "$condact_command"
 
 # settings for data download
 mkdir -p ./data/images/
 mkdir -p ./data/predicted_labels/
 mkdir -p ./data/preprocessed_imgs/
-mkdir ./pretrained_models/
+mkdir -p ./pretrained_models/
 
-pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
-#pretrained model download
-osf -p abk4p fetch /osfstorage/pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903 ./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903
-osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_off_ep2k_bat10_0903 ./pretrained_models/VB2_aug_off_ep2k_bat10_0903
-osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_random_ep2k_bat10_0903 ./pretrained_models/VB2_aug_random_ep2k_bat10_0903
-osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_intensity_ep2k_bat10_0903 ./pretrained_models/VB2_aug_intensity_ep2k_bat10_0903
-osf -p abk4p fetch /osfstorage/pretrained_models/VB2_aug_spatial_ep2k_bat10_0903 ./pretrained_models/VB2_aug_spatial_ep2k_bat10_0903
+ci_download_test_image ./data/images/sub-001.nii
+ci_download_primary_checkpoint ./pretrained_models
 
 
 
@@ -58,7 +51,7 @@ echo "Path to output: "$path_to_output""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903"
+path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"
@@ -71,19 +64,9 @@ train_command2=`cat ./documentation/predict_readme.md | grep 'prep_mode 1'`
 echo $train_command2
 eval $train_command2
 
-echo "[DEBUG]: osf setup"
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
-export OSF_PROJECT_ID=$OSF_PROJECT_ID_
-mkdir -p ~/.osfcli
-echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-cd $path_to_output
-for file in ./*; do
-    echo $file
-    osf -p abk4p remove /osfstorage/github_actions/prediction/predicted_labels/$file
-done
-
-echo "[DEBUG]: saving data to osf"
-osf -p abk4p upload -r ./ /osfstorage/github_actions/prediction/predicted_labels/
+echo "[DEBUG]: publishing current prediction outputs to Hugging Face"
+ci_publish_directory \
+    "$path_to_output" \
+    "github_actions/prediction/predicted_labels"
 
 echo "Testing done!"

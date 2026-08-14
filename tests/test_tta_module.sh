@@ -1,51 +1,47 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
-cp -r . /tmp/VesselBoost
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${repo_root}/tests/ci_helpers.sh"
+cd "$repo_root"
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/VesselBoost/README.md | grep "git clone https://github.com/KMarshallX/VesselBoost.git"`
-echo $clone_command
-$clone_command
+ci_verify_readme_clone_command "$repo_root"
 
 echo "[DEBUG]: testing the miniconda installation from the README:"
-get_command=`cat /tmp/VesselBoost/README.md | grep miniconda-setup.sh`
-echo $get_command
-$get_command 
+get_command="$(grep -m1 'miniconda-setup.sh' README.md)"
+echo "$get_command"
+eval "$get_command"
 
 export PATH="/home/runner/miniconda3/bin:$PATH"
 source ~/.bashrc
 
 echo "[DEBUG]: testing the conda env build from the README:"
-cd VesselBoost
-condaenv_command=`cat ./README.md | grep environment-ci.yml`
-echo $condaenv_command
-$condaenv_command
+condaenv_command="$(grep -m1 'conda env create -f environment-ci.yml' README.md)"
+echo "$condaenv_command"
+eval "$condaenv_command"
 
 # conda activate in a bash script
 source /home/runner/miniconda3/bin/activate
 conda init bash
 
 echo "[DEBUG]: testing conda activate command from the README:"
-condact_command=`cat ./README.md | grep vessel_boost_ci`
-echo $condact_command
-$condact_command
+condact_command="$(grep -m1 'conda activate vessel_boost_ci' README.md)"
+echo "$condact_command"
+eval "$condact_command"
 
 # settings for data download
 mkdir -p ./data/images/
 mkdir -p ./data/predicted_labels/
 mkdir -p ./data/proxy_labels/
 mkdir -p ./data/preprocessed_imgs/
-mkdir ./pretrained_models/
+mkdir -p ./pretrained_models/
 
-pip install osfclient
-osf -p nr6gc fetch /osfstorage/twoEchoTOF/raw/GRE_3D_400um_TR20_FA18_TE7p5_14_sli52_FCY_GMP_BW200_32.nii ./data/images/sub-001.nii
-#pretrained model download
+ci_download_test_image ./data/images/sub-001.nii
 echo "[DEBUG]: testing model's weights download:"
-download_command=`cat ./documentation/tta_readme.md | grep 'osf -p abk4p'`
-echo $download_command
-$download_command
+grep -F 'hf download BrainVascuLab/VesselBoost' ./documentation/tta_readme.md
+ci_download_primary_checkpoint ./pretrained_models
 
 path_to_images="./data/images/"
 echo "Path to images: "$path_to_images""
@@ -59,7 +55,7 @@ echo "Path to proxy labels: "$path_to_proxy_labels""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903"
+path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 n_epochs=5
@@ -86,29 +82,9 @@ tta_command4=`cat ./documentation/tta_readme.md | grep 'image_path $path_to_imag
 echo $tta_command4
 eval $tta_command4
 
-echo "[DEBUG]: osf setup"
-export OSF_TOKEN=$OSF_TOKEN_
-export OSF_USERNAME=$OSF_USERNAME_
-export OSF_PROJECT_ID=$OSF_PROJECT_ID_
-mkdir -p ~/.osfcli
-echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-cd $path_to_output
-for dir in *; do 
-    if [ -d "$dir" ]; then 
-        echo $dir
-        cd $dir
-        for file in *; do
-            echo $file
-            osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$dir/$file
-        done
-        osf -p abk4p upload -r ./ /osfstorage/github_actions/tta/predicted_labels/$dir/
-        cd .. 
-    fi;
-    if [ -f "$dir" ]; then 
-        echo $dir
-        osf -p abk4p remove /osfstorage/github_actions/tta/predicted_labels/$dir
-        osf -p abk4p upload $dir /osfstorage/github_actions/tta/predicted_labels/$dir
-    fi;
-done
+echo "[DEBUG]: publishing current TTA outputs to Hugging Face"
+ci_publish_directory \
+    "$path_to_output" \
+    "github_actions/tta/predicted_labels"
 
 echo "Testing done!"
