@@ -2,18 +2,19 @@
 Test-time adaptation module, using a pretrained model or provided segmentations as a basis and finetune on your image data. 
 ## **prediction with pre-trained model**
 ### **Prepare prerequisite model**
-We currently provide 3 pre-trained models, you can download them to make prediction on your images. The models are ... 
+Pretrained VesselBoost models are published in the [VesselBoost Hugging Face repository](https://huggingface.co/BrainVascuLab/VesselBoost).
 
 To access them, make a directory for the pre-trained models within the vessel_code folder:
 ```bash
 mkdir ./pretrained_models/
 ```
-Download the pre-trained model from osf:
+Download the primary TOF-MRA model from Hugging Face. Pinning the repository revision makes the download reproducible:
 
 ```bash
-osf -p abk4p fetch /osfstorage/pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903 ./pretrained_models/BM_VB2_aug_all_ep2k_bat_10_0903
+hf download BrainVascuLab/VesselBoost weights/BM_VB2_aug_all_ep2k_bat_10_0903 --revision 2dfcb64056110d819b073ff82934cc54fe3dd773 --local-dir ./pretrained_models
 ```
 
+The downloaded checkpoint is available at `./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903`.
 
 ### **Test-time adpatation without providing proxy segmentation**
 You could apply this module directly on your on data without providing the proxy segmentation. This module will automatically generate proxies and finetune the model.

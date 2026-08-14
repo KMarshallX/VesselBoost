@@ -8,6 +8,7 @@ on:
       - README.md
       - .github/workflows/test_docker.yml
       - tests/test_docker.sh
+      - tests/ci_helpers.sh
 
   pull_request:
     branches: [ master ]
@@ -15,6 +16,10 @@ on:
       - README.md
       - .github/workflows/test_docker.yml
       - tests/test_docker.sh
+      - tests/ci_helpers.sh
+
+permissions:
+  contents: read
 
 jobs:
   test_docker_pipeline:
@@ -27,9 +32,8 @@ jobs:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       # ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node16
       # ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
-      OSF_TOKEN_: ${{ secrets.OSF_KEY }}
-      OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
-      OSF_PROJECT_ID_: "abk4p" 
+      HF_TOKEN: ${{ github.event_name == 'push' && secrets.HF_TOKEN || '' }}
+      PUBLISH_CI_RESULTS: ${{ github.event_name == 'push' }}
     steps:
     - uses: actions/checkout@v3
     - name: test docker container
