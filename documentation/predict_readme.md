@@ -1,6 +1,16 @@
 # **prediction Module**
 This is a stand-alone module to produce segmentation of input images by using the assigned model.
 
+## Pretrained model
+
+Download the primary TOF-MRA checkpoint from the [VesselBoost Hugging Face repository](https://huggingface.co/BrainVascuLab/VesselBoost):
+
+```bash
+mkdir -p ./pretrained_models
+hf download BrainVascuLab/VesselBoost weights/BM_VB2_aug_all_ep2k_bat_10_0903 --revision 2dfcb64056110d819b073ff82934cc54fe3dd773 --local-dir ./pretrained_models
+path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903"
+```
+
 ## Example test run of this script:
 If you set prep_mode to 4, which means no preprocessing will happen, then you don't have to set a path to store the preprocessed images:
 
