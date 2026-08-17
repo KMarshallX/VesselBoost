@@ -3,10 +3,10 @@
 # Shared constants and helpers for GitHub Actions integration tests.
 
 CI_HF_MODEL_REPO="BrainVascuLab/VesselBoost"
-CI_HF_MODEL_REVISION="2dfcb64056110d819b073ff82934cc54fe3dd773"
+CI_HF_MODEL_REVISION="f5cdbee052dde4f2a2a270674fd1c8d64dc8e861"
 CI_HF_BUCKET="BrainVascuLab/vesselboost-ci"
-CI_HF_PRIMARY_CHECKPOINT="weights/BM_VB2_aug_all_ep2k_bat_10_0903"
-CI_HF_PRIMARY_CHECKPOINT_SHA256="ff51c8e6c79947f13bf7c24ac2ae2242eb4b23b7739e62dc3f8344944bde28f1"
+CI_HF_FLAGSHIP_CHECKPOINT="weights/manual_0429"
+CI_HF_FLAGSHIP_CHECKPOINT_SHA256="fb318efe161b0036f2af2585fb282dd92ab45c6f0258422154340f05a2b3ef80"
 
 CI_OSF_TEST_IMAGE_URL="https://osf.io/download/zhqbn/"
 CI_OSF_TEST_IMAGE_SHA256="f027cc9014a82c36366e5cc837ac2753cf25a2b92178f3575c9e763af56b8212"
@@ -60,17 +60,17 @@ ci_download_test_label() {
         "$CI_OSF_TEST_LABEL_SHA256"
 }
 
-ci_download_primary_checkpoint() {
+ci_download_flagship_checkpoint() {
     local local_directory="$1"
-    local checkpoint_path="${local_directory}/${CI_HF_PRIMARY_CHECKPOINT}"
+    local checkpoint_path="${local_directory}/${CI_HF_FLAGSHIP_CHECKPOINT}"
 
     mkdir -p "$local_directory"
     hf download \
         "$CI_HF_MODEL_REPO" \
-        "$CI_HF_PRIMARY_CHECKPOINT" \
+        "$CI_HF_FLAGSHIP_CHECKPOINT" \
         --revision "$CI_HF_MODEL_REVISION" \
         --local-dir "$local_directory"
-    ci_assert_sha256 "$checkpoint_path" "$CI_HF_PRIMARY_CHECKPOINT_SHA256"
+    ci_assert_sha256 "$checkpoint_path" "$CI_HF_FLAGSHIP_CHECKPOINT_SHA256"
 }
 
 ci_verify_readme_clone_command() {

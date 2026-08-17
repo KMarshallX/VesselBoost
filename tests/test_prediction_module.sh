@@ -38,7 +38,7 @@ mkdir -p ./data/preprocessed_imgs/
 mkdir -p ./pretrained_models/
 
 ci_download_test_image ./data/images/sub-001.nii
-ci_download_primary_checkpoint ./pretrained_models
+ci_download_flagship_checkpoint ./pretrained_models
 
 
 
@@ -51,7 +51,7 @@ echo "Path to output: "$path_to_output""
 path_to_preprocessed_images="./data/preprocessed_imgs/"
 echo "Path to preprocessed images: "$path_to_preprocessed_images""
 
-path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903"
+path_to_pretrained_model="./pretrained_models/weights/manual_0429"
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"

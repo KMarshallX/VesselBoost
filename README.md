@@ -55,7 +55,7 @@ To predict vessel segmentation using your data and the latest version of VesselB
 ```bash
 ml vesselboost
 path_to_model=/cvmfs/neurodesk.ardc.edu.au/containers/vesselboost_2.0.0_20250916/vesselboost_2.0.0_20250916.simg/opt/VesselBoost/saved_models/
-prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_model"/BM_VB2_aug_all_ep2k_bat_10_0903 --prep_mode 4
+prediction.py --image_path /path/ --output_path /path/ --pretrained "$path_to_model"/manual_0429 --prep_mode 4
 ```
 
 For more information, please check our [notebooks](https://github.com/KMarshallX/VesselBoost/tree/master/notebooks).
@@ -126,12 +126,12 @@ Pretrained checkpoints are published in the [VesselBoost Hugging Face repository
 ```bash
 mkdir -p pretrained_models
 hf download BrainVascuLab/VesselBoost \
-  weights/BM_VB2_aug_all_ep2k_bat_10_0903 \
-  --revision 2dfcb64056110d819b073ff82934cc54fe3dd773 \
+  weights/manual_0429 \
+  --revision f5cdbee052dde4f2a2a270674fd1c8d64dc8e861 \
   --local-dir pretrained_models
 ```
 
-Use `pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903` as the `--pretrained` path. The revision pin identifies the exact checkpoint set used by the automated tests.
+Use `pretrained_models/weights/manual_0429` as the `--pretrained` path. The revision pin identifies the exact checkpoint set used by the automated tests.
 
 ### **Brain extraction in offline environments**
 

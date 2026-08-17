@@ -20,7 +20,7 @@ tags:
 
 VesselBoost segments small blood vessels in high-resolution human brain MRI. The primary models target time-of-flight magnetic resonance angiography (TOF-MRA). One checkpoint, `t2s_mod_ep1k2_0728`, provides experimental support for T2*-weighted MRI.
 
-These files are PyTorch state dictionaries for use with the VesselBoost inference, test-time adaptation, and boosting workflows. They are not standalone Hugging Face Transformers models or hosted inference endpoints.
+These files are PyTorch state dictionaries for use with the VesselBoost prediction and test-time adaptation workflows. They are not standalone Hugging Face Transformers models or hosted inference endpoints.
 
 **Research use only. Not validated for clinical diagnosis, treatment planning, or other clinical decision-making.**
 
@@ -30,9 +30,9 @@ The checkpoints use the VesselBoost 3D U-Net with one input channel, one output 
 
 The corresponding source release is pinned to:
 
-- VesselBoost version: `2.0.2`
-- Git tag: [`v2.0.2`](https://github.com/KMarshallX/VesselBoost/tree/v2.0.2)
-- Git commit: [`1504b00c91777d5e2c271c1cab7f500078f08c69`](https://github.com/KMarshallX/VesselBoost/commit/1504b00c91777d5e2c271c1cab7f500078f08c69)
+- VesselBoost version: `2.0.5`
+- Git tag: [`v2.0.5`](https://github.com/KMarshallX/VesselBoost/tree/v2.0.5)
+- Git commit: [`3f028bbd6784c8fac82ac872a70aa06de2e162ae`](https://github.com/KMarshallX/VesselBoost/commit/3f028bbd6784c8fac82ac872a70aa06de2e162ae)
 
 See `config.json` for the machine-readable inference configuration.
 
@@ -40,19 +40,14 @@ See `config.json` for the machine-readable inference configuration.
 
 All pretrained checkpoints are stored under `weights/`. Their original filenames and serialization formats are preserved from the original release.
 
-| Checkpoint                            | MRI contrast     | Description                                                                                                                             |
-| ------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [`BM_VB2_aug_all_ep2k_bat_10_0903`](weights/BM_VB2_aug_all_ep2k_bat_10_0903)   | TOF-MRA          | Primary TOF-MRA checkpoint referenced by the VesselBoost documentation and tests; trained with the combined augmentation configuration. |
-| [`VB2_aug_intensity_ep2k_bat10_0903`](weights/VB2_aug_intensity_ep2k_bat10_0903) | TOF-MRA          | Augmentation ablation using the intensity augmentation configuration.                                                                   |
-| [`VB2_aug_off_ep2k_bat10_0903`](weights/VB2_aug_off_ep2k_bat10_0903)       | TOF-MRA          | Augmentation ablation with augmentation disabled.                                                                                       |
-| [`VB2_aug_random_ep2k_bat10_0903`](weights/VB2_aug_random_ep2k_bat10_0903)    | TOF-MRA          | Augmentation ablation using the random augmentation configuration.                                                                      |
-| [`VB2_aug_spatial_ep2k_bat10_0903`](weights/VB2_aug_spatial_ep2k_bat10_0903)   | TOF-MRA          | Augmentation ablation using the spatial augmentation configuration.                                                                     |
-| [`manual_0429`](weights/manual_0429)                       | TOF-MRA          | Legacy checkpoint associated with the manual-label training run and used in VesselBoost v2.0.2 examples.                                |
-| [`omelette1_0429`](weights/omelette1_0429)                    | TOF-MRA          | Legacy TOF-MRA checkpoint identified as Omelette variant 1.                                                                             |
-| [`omelette2_0429`](weights/omelette2_0429)                    | TOF-MRA          | Legacy TOF-MRA checkpoint identified as Omelette variant 2.                                                                            |
-| [`t2s_mod_ep1k2_0728`](weights/t2s_mod_ep1k2_0728)                | T2*-weighted MRI | Experimental T2*-weighted vessel-segmentation checkpoint. It has not received the same validation as the primary TOF-MRA model.         |
+| Checkpoint                                         | MRI contrast     | Description                                                                                                                     |
+| -------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [`manual_0429`](weights/manual_0429)                | TOF-MRA          | Primary TOF-MRA checkpoint referenced by the current VesselBoost documentation and automated tests.                            |
+| [`omelette1_0429`](weights/omelette1_0429)          | TOF-MRA          | Legacy TOF-MRA checkpoint identified as Omelette variant 1.                                                                     |
+| [`omelette2_0429`](weights/omelette2_0429)          | TOF-MRA          | Legacy TOF-MRA checkpoint identified as Omelette variant 2.                                                                     |
+| [`t2s_mod_ep1k2_0728`](weights/t2s_mod_ep1k2_0728) | T2*-weighted MRI | Experimental T2*-weighted vessel-segmentation checkpoint. It has not received the same validation as the flagship TOF-MRA model. |
 
-The augmentation-specific checkpoints are included to preserve the original model set and support comparison or reproduction of augmentation experiments. For the standard TOF-MRA prediction workflow, use `manual_0429` or `BM_VB2_aug_all_ep2k_bat_10_0903` unless reproducing a specific legacy experiment.
+For standard TOF-MRA prediction and test-time adaptation workflows, use the flagship `manual_0429` checkpoint.
 
 ## Downloading checkpoints
 
@@ -66,11 +61,11 @@ Download the primary TOF-MRA checkpoint:
 
 ```bash
 hf download BrainVascuLab/VesselBoost \
-  weights/BM_VB2_aug_all_ep2k_bat_10_0903 \
+  weights/manual_0429 \
   --local-dir saved_models
 ```
 
-The downloaded checkpoint will be available at `saved_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903`.
+The downloaded checkpoint will be available at `saved_models/weights/manual_0429`.
 
 Download every pretrained checkpoint and the checksum manifest:
 
@@ -84,7 +79,7 @@ For reproducible automated workflows, pass `--revision` with a specific Hugging 
 
 ## Preprocessing and inference
 
-VesselBoost v2.0.2 performs the following inference operations:
+VesselBoost v2.0.5 performs the following inference operations:
 
 1. Load a single-channel NIfTI MRI volume.
 2. Resize each spatial dimension to at least 64 voxels and to a multiple of 64, using nearest-neighbor interpolation.
@@ -106,7 +101,7 @@ cd saved_models/weights
 sha256sum --check MANIFEST.sha256
 ```
 
-All nine checkpoints should report `OK`.
+All four checkpoints should report `OK`.
 
 Load the checkpoints with the pinned VesselBoost source and map tensors to the intended device. When supported by the installed PyTorch version, use `weights_only=True` when loading these state dictionaries.
 

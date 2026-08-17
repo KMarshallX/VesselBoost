@@ -8,8 +8,8 @@ Download the primary TOF-MRA checkpoint from the [VesselBoost Hugging Face repos
 
 ```bash
 mkdir -p ./pretrained_models
-hf download BrainVascuLab/VesselBoost weights/BM_VB2_aug_all_ep2k_bat_10_0903 --revision 2dfcb64056110d819b073ff82934cc54fe3dd773 --local-dir ./pretrained_models
-path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10_0903"
+hf download BrainVascuLab/VesselBoost weights/manual_0429 --revision f5cdbee052dde4f2a2a270674fd1c8d64dc8e861 --local-dir ./pretrained_models
+path_to_pretrained_model="./pretrained_models/weights/manual_0429"
 ```
 
 ## Example test run of this script:

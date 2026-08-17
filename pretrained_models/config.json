@@ -48,9 +48,9 @@
   },
   "checkpoint_format": "PyTorch state_dict ZIP serialization",
   "compatible_vesselboost": {
-    "version": "2.0.2",
-    "git_tag": "v2.0.2",
-    "git_commit": "1504b00c91777d5e2c271c1cab7f500078f08c69",
-    "source_url": "https://github.com/KMarshallX/VesselBoost/tree/v2.0.2"
+    "version": "2.0.5",
+    "git_tag": "v2.0.5",
+    "git_commit": "3f028bbd6784c8fac82ac872a70aa06de2e162ae",
+    "source_url": "https://github.com/KMarshallX/VesselBoost/tree/v2.0.5"
   }
 }
