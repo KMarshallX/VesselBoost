@@ -55,14 +55,16 @@ path_to_pretrained_model="./pretrained_models/weights/BM_VB2_aug_all_ep2k_bat_10
 echo "Path to pretrained model: "$path_to_pretrained_model""
 
 echo "[DEBUG]: testing prediction module without preprocessing:"
-train_command1=`cat ./documentation/predict_readme.md | grep 'prep_mode 4'`
-echo $train_command1
-eval $train_command1
+prediction_command1="$(ci_extract_markdown_command ./documentation/predict_readme.md "python prediction.py" 1)"
+ci_assert_gaussian_blending_command "$prediction_command1"
+printf '%s\n' "$prediction_command1"
+eval "$prediction_command1"
 
 echo "[DEBUG]: testing prediction module with preprocessing:"
-train_command2=`cat ./documentation/predict_readme.md | grep 'prep_mode 1'`
-echo $train_command2
-eval $train_command2
+prediction_command2="$(ci_extract_markdown_command ./documentation/predict_readme.md "python prediction.py" 2)"
+ci_assert_gaussian_blending_command "$prediction_command2"
+printf '%s\n' "$prediction_command2"
+eval "$prediction_command2"
 
 echo "[DEBUG]: publishing current prediction outputs to Hugging Face"
 ci_publish_directory \

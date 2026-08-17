@@ -59,13 +59,15 @@ n_epochs=5
 echo "Number of epochs: "$n_epochs""
 
 echo "[DEBUG]: testing boost module:"
-train_command1=`cat ./documentation/boost_readme.md | grep 'prep_mode 4'`
-echo $train_command1
-eval $train_command1
+boost_command1="$(ci_extract_markdown_command ./documentation/boost_readme.md "python boost.py" 1)"
+ci_assert_gaussian_blending_command "$boost_command1"
+printf '%s\n' "$boost_command1"
+eval "$boost_command1"
 
-train_command2=`cat ./documentation/boost_readme.md | grep 'prep_mode 1'`
-echo $train_command2
-eval $train_command2
+boost_command2="$(ci_extract_markdown_command ./documentation/boost_readme.md "python boost.py" 2)"
+ci_assert_gaussian_blending_command "$boost_command2"
+printf '%s\n' "$boost_command2"
+eval "$boost_command2"
 
 echo "[DEBUG]: publishing current boost outputs to Hugging Face"
 ci_publish_directory \

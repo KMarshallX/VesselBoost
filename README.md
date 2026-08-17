@@ -15,12 +15,7 @@
 
 ## **Update History**
 
-- **2.0.4 - patch release**: for details see [Update Log - 14/Aug/2026](documentation/UPDATE.md)
-- **2.0.3 - patch release**: for details see [Update Log - 13/Aug/2026](documentation/UPDATE.md)
-- **2.0.2 - patch release**: for details see [Update Log - 13/Apr/2026](documentation/UPDATE.md)
-- **2.0.1 - patch release**: for details see [Update Log - 06/Mar/2026](documentation/UPDATE.md)
-- **2.0.0 - official release**: for details see [Update Log - 18/Feb/2026](documentation/UPDATE.md)
-- **2.0.0 - pre-release**: for details see [Update Log - 16/Sept/2025](documentation/UPDATE.md)
+- **2.0.5 - patch release**: for details see [Update Log - 17/Aug/2026](documentation/UPDATE.md)
 - **1.0.0**: Initial release, for details see [Citation](#citation)
 
 ## **Purpose**
@@ -37,7 +32,7 @@
 
 ## **Current Version**
 
-VesselBoost 2.0.4
+VesselBoost 2.0.5
 
 ## **Requirements**
 
@@ -86,7 +81,6 @@ This is a Python-based software package. To successfully run this project on you
 
    ```
    git clone https://github.com/KMarshallX/VesselBoost.git
-
    ```
 
    To clone the previous version (VesselBoost 1.0.0):
