@@ -40,3 +40,8 @@ TEST_dataloader.py
 TEST_dataloader.py.lprof
 nnUnet_integration.md
 LOG.md
+
+# Local test folders
+/test_data/*
+/test_output/*
+/test_label/*
