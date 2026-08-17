@@ -62,25 +62,29 @@ n_epochs=5
 echo "Number of epochs: "$n_epochs""
 
 echo "[DEBUG]: testing tta without a proxy and no preprocessing:"
-tta_command1=`cat ./documentation/tta_readme.md | grep 'image_path $path_to_images --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
-echo $tta_command1
-eval $tta_command1
+tta_command1="$(ci_extract_markdown_command ./documentation/tta_readme.md "python test_time_adaptation.py" 1)"
+ci_assert_gaussian_blending_command "$tta_command1"
+printf '%s\n' "$tta_command1"
+eval "$tta_command1"
 
 echo "[DEBUG]: testing tta without a proxy and including preprocessing:"
-tta_command2=`cat ./documentation/tta_readme.md | grep 'image_path $path_to_images --output_path $path_to_output --preprocessed_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
-echo $tta_command2
-eval $tta_command2
+tta_command2="$(ci_extract_markdown_command ./documentation/tta_readme.md "python test_time_adaptation.py" 2)"
+ci_assert_gaussian_blending_command "$tta_command2"
+printf '%s\n' "$tta_command2"
+eval "$tta_command2"
 
 
 echo "[DEBUG]: testing tta with a proxy and no preprocessing:"
-tta_command3=`cat ./documentation/tta_readme.md | grep 'image_path $path_to_images --proxy_path $path_to_proxy_labels --output_path $path_to_output --pretrained $path_to_pretrained_model --prep_mode 4'`
-echo $tta_command3
-eval $tta_command3
+tta_command3="$(ci_extract_markdown_command ./documentation/tta_readme.md "python test_time_adaptation.py" 3)"
+ci_assert_gaussian_blending_command "$tta_command3"
+printf '%s\n' "$tta_command3"
+eval "$tta_command3"
 
 echo "[DEBUG]: testing tta with a proxy and including preprocessing:"
-tta_command4=`cat ./documentation/tta_readme.md | grep 'image_path $path_to_images --proxy_path $path_to_proxy_labels --output_path $path_to_output --preprocessed_path $path_to_preprocessed_images --pretrained $path_to_pretrained_model --prep_mode 1'`
-echo $tta_command4
-eval $tta_command4
+tta_command4="$(ci_extract_markdown_command ./documentation/tta_readme.md "python test_time_adaptation.py" 4)"
+ci_assert_gaussian_blending_command "$tta_command4"
+printf '%s\n' "$tta_command4"
+eval "$tta_command4"
 
 echo "[DEBUG]: publishing current TTA outputs to Hugging Face"
 ci_publish_directory \

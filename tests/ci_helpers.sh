@@ -96,6 +96,52 @@ ci_verify_readme_clone_command() {
     rm -rf -- "$clone_parent"
 }
 
+ci_extract_markdown_command() {
+    local markdown_file="$1"
+    local command_prefix="$2"
+    local occurrence="$3"
+
+    awk -v prefix="$command_prefix" -v target="$occurrence" '
+        /^```(bash|sh|shell)[[:space:]]*$/ {
+            in_fence = 1
+            block = ""
+            next
+        }
+
+        in_fence && /^```[[:space:]]*$/ {
+            if (index(block, prefix) == 1) {
+                count++
+                if (count == target) {
+                    printf "%s", block
+                    found = 1
+                    exit
+                }
+            }
+            in_fence = 0
+            next
+        }
+
+        in_fence {
+            block = block $0 ORS
+        }
+
+        END {
+            if (!found) {
+                exit 1
+            }
+        }
+    ' "$markdown_file"
+}
+
+ci_assert_gaussian_blending_command() {
+    local command="$1"
+
+    if [[ "$command" != *"--use_blending"* ]]; then
+        echo "Documented CI command does not enable Gaussian blending" >&2
+        return 1
+    fi
+}
+
 ci_publish_directory() {
     local source_directory="$1"
     local destination_prefix="$2"

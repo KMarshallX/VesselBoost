@@ -1,3 +1,8 @@
+### Update Log - 17/Aug/2026
+
+- Version: VesselBoost 2.0.5
+- Updated CI tests to enable Gaussian blending during prediction for the `boost`, `prediction`, and `test_time_adaptation` modules.
+
 ### Update Log - 14/Aug/2026
 
 - Version: VesselBoost 2.0.4
@@ -32,10 +37,12 @@
 - Added GitHub release automation that runs only after an internal `dev` to `master` pull request is merged. The workflow validates that the README `Current Version` was updated, creates the corresponding `vX.Y.Z` tag, and publishes a normal GitHub Release with automatically generated release notes. Model weights are not attached to GitHub Releases.
 
 ### Update Log - 13/Apr/2026
+
 - Version: VesselBoost 2.0.2
 - Decoupled brain extraction from `prep_mode` selection so `--enable_brain_extraction` can be used with any preprocessing mode, including `prep_mode=4`.
 - Existing preprocessing behaviour for bias field correction and denoising is unchanged.
 - When `--enable_brain_extraction` is used, the --preprocessed_path will be needed to save the brain extracted image, which will be used for subsequent steps (prediction, TTA and boost). Usage example:
+
 ```python
     python prediction.py \
     --image_path "./data/img/" \
@@ -45,6 +52,7 @@
     --prep_mode 4 \
     --enable_brain_extraction
 ```
+
 ```python
     python test_time_adaptation.py \
     --image_path "./data/img/" \
@@ -56,6 +64,7 @@
     --epochs 100 \
     --learning_rate 1e-3
 ```
+
 ```python
     python boost.py \
     --image_path "./data/img/" \
@@ -70,8 +79,10 @@
 ```
 
 ### Update Log - 06/Mar/2026
+
 - Version: VesselBoost 2.0.1
 - Incorporated Synthstrip (from FreeSurfer) for brain extraction to improve the robustness of the preprocessing step. Usage example:
+
 ```python
     python prediction.py \
     --image_path "./data/img/" \
@@ -83,6 +94,7 @@
     --use_blending \
     --overlap_ratio 0.5
 ```
+
 ```python
     python test_time_adaptation.py \
     --image_path "./data/img/" \
@@ -96,6 +108,7 @@
     --use_blending \
     --overlap_ratio 0.5
 ```
+
 ```python
     python boost.py \
     --image_path "./data/img/" \
@@ -110,6 +123,7 @@
     --use_blending \
     --overlap_ratio 0.5
 ```
+
 - For prep_mode=4, there will be no brain extraction
 
 ### Update Log - 18/Feb/2026
@@ -118,12 +132,12 @@
 - Roll back image preprocessing step to standardization, as it is more robust to outliers in the data and can lead to better performance in some cases. The decision to switch back to standardization was based on empirical results and feedback from users, which indicated that standardization provided more consistent and reliable results across different datasets and imaging modalities.
 - Added Gaussian blending for patch-based prediction to reduce edge artifacts and improve the quality of the final segmentation. Usage example:
 
-```python
+`````````python
     python test_time_adaptation.py \
         --image_path "/data/img/" \
         --output_path "/output_path" \
         --pretrained "/saved_model" \
-        --prep_mode 4 \ 
+        --prep_mode 4 \
         --epochs 10 \
         --augmentation_mode "intensity" \
         --learning_rate 1e-3 \

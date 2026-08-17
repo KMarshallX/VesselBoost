@@ -57,13 +57,13 @@ echo "Number of epochs: "$n_epochs""
 pwd
 
 echo "[DEBUG]: testing train module:"
-train_command1=`cat ./documentation/train_readme.md | grep 'prep_mode 4'`
-echo $train_command1
-eval $train_command1
+train_command1="$(ci_extract_markdown_command ./documentation/train_readme.md "python train.py" 1)"
+printf '%s\n' "$train_command1"
+eval "$train_command1"
 
-train_command2=`cat ./documentation/train_readme.md | grep 'prep_mode 1'`
-echo $train_command2
-eval $train_command2
+train_command2="$(ci_extract_markdown_command ./documentation/train_readme.md "python train.py" 2)"
+printf '%s\n' "$train_command2"
+eval "$train_command2"
 
 echo "[DEBUG]: publishing current training outputs to Hugging Face"
 ci_publish_directory \
