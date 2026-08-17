@@ -68,15 +68,18 @@ jobs:
           fi
 
           if [[ "${current_version}" == "${base_version}" ]]; then
-            echo "README.md Current Version was not updated (${current_version})." >&2
-            exit 1
+            echo "should_release=false" >> "${GITHUB_OUTPUT}"
+            echo "README.md Current Version is unchanged (${current_version}); skipping release."
+            exit 0
           fi
 
+          echo "should_release=true" >> "${GITHUB_OUTPUT}"
           echo "version=${current_version}" >> "${GITHUB_OUTPUT}"
           echo "tag=v${current_version}" >> "${GITHUB_OUTPUT}"
           echo "Validated version update: ${base_version} -> ${current_version}"
 
       - name: Ensure the tag and release do not already exist
+        if: steps.version.outputs.should_release == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,6 +98,7 @@ jobs:
           fi
 
       - name: Create tag and normal GitHub release
+        if: steps.version.outputs.should_release == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
